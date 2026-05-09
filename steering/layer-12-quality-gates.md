@@ -59,6 +59,8 @@ include:
 
 ### Lint Stage (`.gitlab/ci/lint.yml`)
 
+> **⚠️ PENTING:** Pastikan ESLint sudah dikonfigurasi (`.eslintrc.json` atau `eslint.config.mjs` ada di repo) SEBELUM push. Tanpa config file, `next lint` akan menampilkan prompt interaktif yang menyebabkan CI gagal. Lihat `project-structure.md` section "CI-Readiness" untuk detail.
+
 ```yaml
 lint:
   stage: lint
@@ -257,28 +259,28 @@ build:
 
 ### Deploy Stage (`.gitlab/ci/deploy.yml`)
 
+> **Deployment menggunakan Vercel.** Vercel otomatis deploy dari Git push, tapi kita tetap trigger via CLI di pipeline untuk kontrol penuh.
+
 ```yaml
 deploy-preview:
   stage: deploy-preview
   image: $NODE_IMAGE
   environment:
     name: preview/$CI_COMMIT_REF_SLUG
-    url: https://$CI_COMMIT_REF_SLUG.preview.example.com
+    url: $VERCEL_PREVIEW_URL
     on_stop: stop-preview
     auto_stop_in: 1 week
   script:
-    - echo "Deploying preview environment..."
-    # Deploy to preview (adjust based on your infrastructure)
-    - npm ci --prefer-offline
-    - npm run build
-    - echo "Preview deployed to https://$CI_COMMIT_REF_SLUG.preview.example.com"
+    - npm i -g vercel
+    - VERCEL_PREVIEW_URL=$(vercel deploy --token=$VERCEL_TOKEN --yes 2>&1 | grep "https://")
+    - echo "Preview deployed to $VERCEL_PREVIEW_URL"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 stop-preview:
   stage: deploy-preview
   script:
-    - echo "Stopping preview environment..."
+    - echo "Preview will auto-expire via Vercel"
   environment:
     name: preview/$CI_COMMIT_REF_SLUG
     action: stop
@@ -304,28 +306,63 @@ e2e-test:
 
 deploy-staging:
   stage: deploy-staging
-  image: $DOCKER_IMAGE
+  image: $NODE_IMAGE
   environment:
     name: staging
-    url: https://staging.example.com
+    url: https://staging.${VERCEL_PROJECT_NAME}.vercel.app
   script:
-    - echo "Deploying to staging..."
-    # kubectl set image deployment/app app=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - npm i -g vercel
+    - vercel deploy --token=$VERCEL_TOKEN --yes
   rules:
     - if: '$CI_COMMIT_BRANCH == "develop"'
 
 deploy-production:
   stage: deploy-production
-  image: $DOCKER_IMAGE
+  image: $NODE_IMAGE
   environment:
     name: production
-    url: https://example.com
+    url: https://${VERCEL_PROJECT_NAME}.vercel.app
   script:
-    - echo "Deploying to production..."
-    # kubectl set image deployment/app app=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - npm i -g vercel
+    - vercel deploy --prod --token=$VERCEL_TOKEN --yes
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
   when: manual
+```
+
+### Vercel CI/CD Variables (WAJIB di GitLab)
+
+```
+Settings → CI/CD → Variables:
+
+- VERCEL_TOKEN: (protected, masked) — dari https://vercel.com/account/tokens
+- VERCEL_ORG_ID: (protected) — dari .vercel/project.json
+- VERCEL_PROJECT_ID: (protected) — dari .vercel/project.json
+```
+
+### Vercel Setup di Project
+
+```bash
+# Link project ke Vercel (sekali saja, lokal)
+npx vercel link
+
+# File yang dihasilkan (.vercel/project.json) — commit ke repo
+# ATAU set via environment variables di GitLab CI
+```
+
+### vercel.json (opsional, di root project)
+
+```json
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "regions": ["sin1"],
+  "env": {
+    "NEXT_PUBLIC_APP_ENV": "production"
+  }
+}
+```
 ```
 
 ## Quality Gate Thresholds
@@ -344,24 +381,18 @@ deploy-production:
 
 ## GitLab MR Settings
 
-### Merge Request Approval Rules
+> **Untuk detail setup branch protection dan MR approval**, lihat `gitlab-cicd-setup.md` Step 2.
+> **Untuk branch strategy dan naming convention**, lihat `layer-8-issue-driven-dev.md` dan `git-workflow-automation.md`.
 
-```
-Settings → Merge Requests → Approval Rules:
-- Minimum approvals: 1
-- Code owners approval: Required
-- Pipeline must succeed: Yes
-- All discussions resolved: Yes
-- No broken pipelines: Yes
-```
+### Quick Reference
 
-### Branch Protection
-
-```
-Settings → Repository → Protected Branches:
-- main: No push, merge only via MR
-- develop: No force push, merge via MR
-```
+| Setting | Value |
+|---------|-------|
+| Minimum approvals | 1 |
+| Pipeline must succeed | Yes |
+| All discussions resolved | Yes |
+| main branch | No push, merge only via MR |
+| develop branch | No force push, merge via MR |
 
 ## Best Practices
 
@@ -462,35 +493,7 @@ Settings → Repository → Protected Branches:
 
 ---
 
-## Appendix: Release dan CI/CD Standards
-
-### Pipeline Stages (WAJIB)
-
-1. Install
-2. Lint
-3. Type Check
-4. Unit Test
-5. Coverage Check
-6. Build
-7. Security Scan
-8. Deploy
-
-### Quality Gate (STRICT)
-
-Pipeline HARUS gagal jika:
-- Lint error
-- TypeScript error
-- Test gagal
-- Coverage < 80%
-- Build gagal
-
-### Branching Strategy
-
-- `main` - production
-- `develop` - staging
-- `feature/*` - development
-- `hotfix/*` - urgent fix
-- Tidak boleh commit langsung ke `main`
+## Appendix: Release Standards
 
 ### Versioning (SemVer)
 

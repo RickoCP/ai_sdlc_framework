@@ -152,9 +152,9 @@ AI generate tasks berdasarkan acceptance criteria. Setiap AC harus ter-cover ole
 
 ## 4. GitLab Issue Mapping
 
-Setiap issue di GitLab HARUS menyimpan traceability information.
+Setiap issue di GitLab HARUS menyimpan traceability information. Template ini **meng-extend** template standar di `gitlab-cicd-setup.md` dengan fields khusus traceability.
 
-### Issue Template
+### Issue Template (Traceability-Enhanced)
 
 ```markdown
 ## Issue: [Title]

@@ -88,9 +88,11 @@ Setiap layer memiliki steering file tersendiri untuk panduan detail:
 - **layer-13-observability.md** - Monitoring, metrics, dan feedback loop
 - **layer-14-continuous-learning.md** - Continuous improvement dari production
 - **gitlab-cicd-setup.md** - Setup lengkap GitLab CI/CD untuk framework ini
-- **project-structure.md** - Struktur folder project yang direkomendasikan
-- **quickstart.md** - Panduan cepat memulai framework
+- **project-structure.md** - Struktur folder project, naming conventions, dan quickstart guide
+- **git-workflow-automation.md** - Git init, remote setup, commit convention, auto-push, branch strategy, dan MR automation
 - **requirement-traceability.md** - End-to-end flow dari PRD User Story hingga Merge dengan traceability matrix
+- **architecture-standards.md** - Clean Architecture + DDD + Dependency Injection (Awilix) standards WAJIB
+- **presentation-material.md** - Generate materi presentasi project (UI/UX, Design, Construction, Quality, Deployment, Security)
 
 ## Agent Workflow Rules
 
@@ -208,10 +210,13 @@ Power ini sudah mengintegrasikan konten dari 19 engineering steering files:
 | 17 | Incident Management | layer-13-observability.md |
 | 18 | Architecture Evolution | layer-14-continuous-learning.md |
 | 19 | CX API Playbook | layer-6-ai-skills.md |
+| 20 | Commit Convention | git-workflow-automation.md |
+| 21 | Git Workflow Automation | git-workflow-automation.md |
+| 22 | Clean Architecture + DI Pattern | architecture-standards.md |
 
 ## Getting Started
 
-Baca steering file `quickstart.md` untuk panduan cepat memulai framework ini di project Anda.
+Baca steering file `project-structure.md` untuk panduan cepat memulai framework ini di project Anda.
 
 ---
 
@@ -247,35 +252,42 @@ Menyediakan tools untuk:
 
 ## MCP Config Placeholders
 
-**PENTING:** Power ini membaca credentials dari environment variable system Anda. Set variable berikut sebelum menggunakan power:
+**PENTING:** Power ini membaca credentials dari **system environment variable** menggunakan syntax `${VARIABLE_NAME}`.
 
-- **`GITLAB_PERSONAL_ACCESS_TOKEN`**: GitLab Personal Access Token Anda.
-  - **Cara mendapatkan:**
-    1. Buka GitLab - User Settings - Access Tokens
-    2. Buat token baru dengan scope: `api`, `read_repository`, `write_repository`
-    3. Copy token yang dihasilkan
-  - **Cara set:**
-    - **Linux/Mac:** Tambahkan di `~/.bashrc` atau `~/.zshrc`:
-      ```bash
-      export GITLAB_PERSONAL_ACCESS_TOKEN="glpat-xxxxxxxxxxxx"
-      ```
-    - **Windows:** Set di System Environment Variables atau PowerShell profile:
-      ```powershell
-      [Environment]::SetEnvironmentVariable("GITLAB_PERSONAL_ACCESS_TOKEN", "glpat-xxxxxxxxxxxx", "User")
-      ```
+### Setup Cepat
 
-- **`GITLAB_API_URL`**: URL API GitLab instance Anda.
-  - **Untuk gitlab.com:** `https://gitlab.com/api/v4`
-  - **Untuk self-hosted:** `https://your-gitlab-domain.com/api/v4`
-  - **Cara set:**
-    - **Linux/Mac:**
-      ```bash
-      export GITLAB_API_URL="https://gitlab.com/api/v4"
-      ```
-    - **Windows:**
-      ```powershell
-      [Environment]::SetEnvironmentVariable("GITLAB_API_URL", "https://gitlab.com/api/v4", "User")
-      ```
+1. **Set environment variables di OS:**
+
+   - **Windows (permanent):**
+     ```powershell
+     [Environment]::SetEnvironmentVariable("GITLAB_PERSONAL_ACCESS_TOKEN", "glpat-xxx", "User")
+     [Environment]::SetEnvironmentVariable("GITLAB_API_URL", "https://gitlab.com/api/v4", "User")
+     ```
+   - **Linux/Mac:** Tambahkan di `~/.bashrc` atau `~/.zshrc`:
+     ```bash
+     export GITLAB_PERSONAL_ACCESS_TOKEN="glpat-xxxxxxxxxxxx"
+     export GITLAB_API_URL="https://gitlab.com/api/v4"
+     ```
+
+2. **Approve env vars di Kiro:**
+   - Buka Kiro Settings (Ctrl+,)
+   - Cari **"Mcp Approved Env Vars"**
+   - Tambahkan: `GITLAB_PERSONAL_ACCESS_TOKEN`, `GITLAB_API_URL`
+   - Atau approve langsung dari popup security warning saat pertama kali
+
+3. **Restart Kiro** agar environment variables terbaca oleh MCP servers.
+
+4. Opsional: Buat `.env` di root project sebagai dokumentasi (JANGAN commit!)
+
+### Variable yang Dibutuhkan
+
+- **`GITLAB_PERSONAL_ACCESS_TOKEN`**: GitLab Personal Access Token
+  - Scope: `api`, `read_repository`, `write_repository`
+  - Buat di: GitLab → User Settings → Access Tokens
+
+- **`GITLAB_API_URL`**: URL API GitLab instance
+  - gitlab.com: `https://gitlab.com/api/v4`
+  - Self-hosted: `https://your-gitlab-domain.com/api/v4`
 
 **Keuntungan pendekatan ini:**
 - Tidak perlu edit file power
@@ -289,12 +301,29 @@ Saat user konfirmasi membuat project baru, AI Agent akan otomatis:
 
 1. **`git init`** - Inisialisasi Git repository lokal
 2. **`create_project`** (GitLab) - Buat repository di GitLab
-3. **Buat struktur folder** sesuai framework (docs/, .kiro/, src/, tests/, .gitlab/)
-4. **Buat `.gitignore`** sesuai tech stack
-5. **Buat `.gitlab-ci.yml`** dengan pipeline dasar
-6. **Push initial commit** ke GitLab
-7. **Setup branch protection** (main, develop)
-8. **Buat labels** sesuai framework (type::*, status::*, priority::*, team::*)
-9. **Buat issue templates** di repository
+3. **`git remote add origin`** - Hubungkan lokal ke GitLab remote
+4. **Buat struktur folder** sesuai framework (docs/, .kiro/, src/, tests/, .gitlab/)
+5. **Buat `.gitignore`** sesuai tech stack
+6. **Buat `.gitlab-ci.yml`** dengan pipeline dasar
+7. **Initial commit + push** ke GitLab (main branch)
+8. **Buat branch `develop`** + push ke remote
+9. **Setup branch protection** (main, develop)
+10. **Buat labels** sesuai framework (type::*, status::*, priority::*, team::*)
+11. **Buat issue templates** di repository
 
 Semua ini dilakukan otomatis menggunakan Git MCP dan GitLab MCP setelah user menjawab pertanyaan project di awal.
+
+**PENTING:** Jika project sudah ada tapi belum punya git repository, AI Agent WAJIB mendeteksi ini dan menjalankan setup di atas sebelum mulai development. Lihat steering file `git-workflow-automation.md` untuk detail lengkap.
+
+## Auto-Push After Task/Sprint
+
+AI Agent WAJIB melakukan push otomatis pada kondisi berikut:
+
+| Trigger | Action |
+|---------|--------|
+| Task selesai | Commit + Push ke feature branch |
+| Sprint selesai | Push + Create Merge Request |
+| Hotfix selesai | Push + Create MR ke main |
+| Initial setup | Push ke main + develop |
+
+Commit message WAJIB mengikuti Conventional Commits. Lihat steering file `git-workflow-automation.md` untuk format lengkap.

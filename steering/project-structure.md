@@ -1,4 +1,49 @@
-# Project Structure
+# Project Structure & Quickstart
+
+## Quickstart — Memulai Framework
+
+Panduan cepat memulai Enterprise AI-Native SDLC Framework di project baru atau existing.
+
+### Prerequisites
+
+- GitLab account dengan akses CI/CD
+- Git repository (akan di-setup otomatis jika belum ada, lihat `git-workflow-automation.md`)
+- Node.js / Python / bahasa pilihan Anda
+- Docker (untuk CI/CD pipeline)
+
+### 5 Langkah Memulai
+
+```
+1. Inisialisasi struktur folder (lihat section di bawah)
+2. Setup GitLab CI/CD (lihat gitlab-cicd-setup.md)
+3. Definisikan Product Vision (docs/product/vision.md)
+4. Setup AI Governance (docs/governance/ai-policy.md)
+5. Mulai Development Cycle (issue-driven)
+```
+
+### Development Cycle
+
+Workflow development mengikuti pola:
+
+```
+1. Buat GitLab Issue (1 issue = 1 bounded context)
+2. Buat branch dari issue
+3. AI membaca specification terkait
+4. AI generate code berdasarkan spec + skills
+5. AI review code sendiri
+6. Commit + Push ke branch (otomatis via hook)
+7. CI/CD pipeline berjalan
+8. Merge Request review
+9. Merge ke develop/main
+```
+
+### Next Steps
+
+- Baca `layer-0-product-vision.md` untuk detail Layer 0
+- Baca `gitlab-cicd-setup.md` untuk setup CI/CD lengkap
+- Baca `git-workflow-automation.md` untuk git init, push, dan branch strategy
+
+---
 
 ## Struktur Folder yang Direkomendasikan
 
@@ -6,15 +51,24 @@
 project-root/
 │
 ├── .gitlab/
-│   └── ci/
-│       ├── lint.yml              # Linting stage
-│       ├── typecheck.yml         # Type checking stage
-│       ├── test.yml              # Unit & integration test
-│       ├── security.yml          # Security scanning
-│       ├── build.yml             # Build stage
-│       ├── deploy-preview.yml    # Preview deployment
-│       ├── e2e.yml               # End-to-end testing
-│       └── deploy.yml            # Production deployment
+│   ├── ci/
+│   │   ├── lint.yml              # Linting stage
+│   │   ├── typecheck.yml         # Type checking stage
+│   │   ├── test.yml              # Unit & integration test
+│   │   ├── security.yml          # Security scanning
+│   │   ├── build.yml             # Build stage
+│   │   ├── deploy-preview.yml    # Preview deployment
+│   │   ├── e2e.yml               # End-to-end testing
+│   │   └── deploy.yml            # Production deployment
+│   ├── issue_templates/
+│   │   ├── Feature.md
+│   │   ├── Task.md
+│   │   ├── Bug.md
+│   │   └── Spike.md
+│   └── merge_request_templates/
+│       ├── Default.md
+│       ├── Feature.md
+│       └── Hotfix.md
 │
 ├── .gitlab-ci.yml                # Main CI/CD config
 │
@@ -82,6 +136,10 @@ project-root/
 │   │   ├── security-policy.md    # Security policy
 │   │   └── code-review-policy.md # Code review policy
 │   │
+│   ├── traceability/
+│   │   ├── traceability-matrix.md
+│   │   └── coverage-report.md
+│   │
 │   └── adr/                      # Architecture Decision Records
 │       ├── 001-framework-choice.md
 │       └── template.md
@@ -103,10 +161,10 @@ project-root/
 │
 ├── src/
 │   ├── domain/                   # Domain layer (entities, value objects)
-│   ├── application/              # Application layer (use cases)
+│   ├── application/              # Application layer (use cases, ports)
 │   ├── infrastructure/           # Infrastructure layer (DB, API clients)
 │   ├── presentation/             # Presentation layer (controllers, UI)
-│   └── shared/                   # Shared utilities
+│   └── shared/                   # Shared utilities, constants, types
 │
 ├── tests/
 │   ├── unit/
@@ -117,72 +175,77 @@ project-root/
 │   ├── setup.sh
 │   └── seed.sh
 │
+├── .env                          # Environment variables (JANGAN COMMIT!)
+├── .gitignore
 └── README.md
 ```
 
+---
+
 ## Penjelasan Setiap Folder
 
-### `.gitlab/ci/`
-Berisi konfigurasi CI/CD yang di-split per stage. Memudahkan maintenance dan reusability.
+### `.gitlab/`
+Konfigurasi GitLab: CI/CD stages, issue templates, MR templates, CODEOWNERS.
 
 ### `docs/`
-Semua artifact dari setiap layer SDLC disimpan di sini. Ini menjadi **project memory** dan **AI context**.
+Semua artifact dari setiap layer SDLC. Ini menjadi **project memory** dan **AI context**.
 
-### `docs/product/`
-Output dari Layer 0 (Product Vision). Menjadi north star untuk seluruh development.
+| Folder | Layer | Fungsi |
+|--------|-------|--------|
+| `docs/product/` | Layer 0 | Product vision, roadmap, business goals |
+| `docs/requirements/` | Layer 1-2 | Raw input + validated requirements |
+| `docs/specs/` | Layer 3 | BRD, PRD, SRS — specification lengkap |
+| `docs/design/` | Layer 4 | System, technical, UI/UX, security design |
+| `docs/governance/` | Layer 5 | AI policy, coding standards, review policy |
+| `docs/traceability/` | Layer 11 | Requirement → Code → Test mapping |
+| `docs/adr/` | Layer 14 | Architecture Decision Records |
 
-### `docs/requirements/`
-Output dari Layer 1 (Intake) dan Layer 2 (Validation). Raw input dan hasil validasi AI.
-
-### `docs/specs/`
-Output dari Layer 3 (SDD). Specification lengkap yang menjadi basis coding.
-
-### `docs/design/`
-Output dari Layer 4 (Design System). Mencakup system, technical, UI/UX, dan security design.
-
-### `docs/governance/`
-Output dari Layer 5 (AI Governance). Policy dan standards yang harus diikuti AI.
-
-### `docs/adr/`
-Architecture Decision Records. Setiap keputusan arsitektur didokumentasikan di sini.
-
-### `.kiro/steering/`
-Steering files untuk Kiro. Memberikan context dan instruksi ke AI saat development.
-
-### `.kiro/skills/`
-AI Engineering Skills (Layer 6). Reusable workflow yang bisa dipanggil AI.
+### `.kiro/`
+Kiro-specific configuration:
+- `steering/` — Project standards dan AI guidelines
+- `skills/` — Reusable AI engineering workflows (Layer 6)
+- `settings/mcp.json` — MCP server configuration
 
 ### `src/`
-Source code mengikuti Clean Architecture pattern.
+Source code mengikuti **Clean Architecture** pattern:
+- `domain/` — Entities, value objects, domain rules (no dependencies)
+- `application/` — Use cases, ports/interfaces
+- `infrastructure/` — Adapters, repositories, external services
+- `presentation/` — Controllers, UI components, view models
+- `shared/` — Constants, types, utilities
 
 ### `tests/`
-Test files terpisah per level (unit, integration, e2e).
+Test files terpisah per level:
+- `unit/` — Domain logic, use cases, pure functions
+- `integration/` — API endpoints, database operations
+- `e2e/` — Full user flow tests
+
+---
 
 ## Naming Conventions
 
 ### Files
-- Gunakan `kebab-case` untuk semua file: `user-service.ts`, `create-order.md`
+- Gunakan `kebab-case`: `user-service.ts`, `create-order.md`
+- Test files: `{name}.test.ts` atau `{name}.spec.ts`
 - Spec files: `{feature-name}-spec.md`
-- ADR files: `{number}-{title}.md`
+- ADR files: `{number}-{title}.md` (e.g., `001-framework-choice.md`)
 
 ### Folders
 - Gunakan `kebab-case`: `user-management/`, `order-processing/`
 - Domain folders mengikuti bounded context
 
 ### Branches
-- Feature: `feature/{issue-number}-{short-description}`
-- Bugfix: `bugfix/{issue-number}-{short-description}`
-- Hotfix: `hotfix/{issue-number}-{short-description}`
 
-### Commits
-```
-type(scope): description
+> Detail branch strategy lihat `layer-8-issue-driven-dev.md` dan `git-workflow-automation.md`.
 
-feat(auth): implement JWT token refresh
-fix(payment): handle timeout on binding flow
-docs(specs): add payment SRS
-chore(ci): update security scan config
 ```
+feature/issue-{N}-{short-description}
+bugfix/issue-{N}-{short-description}
+hotfix/issue-{N}-{short-description}
+spike/issue-{N}-{short-description}
+```
+
+---
 
 ## Context Accumulation
 
@@ -195,6 +258,190 @@ docs/specs/ → Input untuk design
 docs/design/ → Input untuk coding
 docs/governance/ → Constraint untuk semua layer
 docs/adr/ → Historical context untuk keputusan
+docs/traceability/ → Validation untuk completeness
 ```
 
 Ini adalah implementasi dari Layer 10 (Continuous Context Accumulation).
+
+---
+
+## AI Agent: Scaffold Project
+
+Saat membuat project baru, AI Agent WAJIB membuat minimal struktur berikut:
+
+```
+project-root/
+├── .gitlab/issue_templates/Task.md
+├── .gitlab-ci.yml
+├── docs/product/vision.md
+├── docs/governance/ai-policy.md
+├── src/.gitkeep
+├── tests/.gitkeep
+├── .env (template, user isi sendiri)
+├── .eslintrc.json (atau eslint.config.mjs)
+├── .prettierrc
+├── .gitignore
+├── package.json (dengan scripts: lint, build, typecheck, test)
+├── tsconfig.json
+├── vitest.config.ts (atau jest.config.ts)
+├── vercel.json (deployment config)
+└── README.md
+```
+
+Folder lain dibuat seiring development berjalan (on-demand).
+
+---
+
+## CI-Readiness: Konfigurasi WAJIB Sebelum Push
+
+**KRITIS:** File-file berikut WAJIB ada sebelum push pertama ke GitLab. Tanpa ini, CI/CD pipeline AKAN GAGAL karena tools membutuhkan konfigurasi non-interaktif.
+
+### Masalah Umum
+
+Banyak tools (ESLint, Prettier, dll) menampilkan **prompt interaktif** saat pertama kali dijalankan tanpa config file. Di CI/CD environment (non-interactive), prompt ini menyebabkan pipeline hang atau gagal.
+
+### File Konfigurasi WAJIB per Tech Stack
+
+#### Next.js / React
+
+| File | Fungsi | Tanpa file ini → |
+|------|--------|-----------------|
+| `.eslintrc.json` atau `eslint.config.mjs` | ESLint config | `next lint` tampilkan prompt interaktif → CI gagal |
+| `tsconfig.json` | TypeScript config | `tsc --noEmit` gagal |
+| `.prettierrc` | Prettier config | Format check inconsistent |
+| `next.config.ts` | Next.js config | Build gagal |
+| `vitest.config.ts` / `jest.config.ts` | Test runner config | Test command gagal |
+
+#### ESLint Config (WAJIB untuk Next.js)
+
+**Option A: `.eslintrc.json`** (Next.js < 15 atau compatibility mode)
+```json
+{
+  "extends": ["next/core-web-vitals", "next/typescript"]
+}
+```
+
+**Option B: `eslint.config.mjs`** (Next.js 15+ flat config)
+```javascript
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const compat = new FlatCompat({ baseDirectory: __dirname });
+
+const eslintConfig = [
+  ...compat.extends("next/core-web-vitals", "next/typescript")
+];
+
+export default eslintConfig;
+```
+
+#### TypeScript Config (`tsconfig.json`)
+```json
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}
+```
+
+#### Prettier Config (`.prettierrc`)
+```json
+{
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 100
+}
+```
+
+#### Vitest Config (`vitest.config.ts`)
+```typescript
+import { defineConfig } from 'vitest/config';
+import path from 'path';
+
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'node',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'cobertura'],
+      thresholds: {
+        statements: 80,
+        branches: 80,
+        functions: 80,
+        lines: 80,
+      },
+    },
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+});
+```
+
+### package.json Scripts (WAJIB)
+
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:unit": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  }
+}
+```
+
+### AI Agent Rules: CI-Readiness
+
+1. **WAJIB buat semua config files SEBELUM push pertama**
+2. **JANGAN push tanpa ESLint config** — ini penyebab #1 pipeline gagal
+3. **JANGAN gunakan tools yang membutuhkan interactive prompt di CI**
+4. **SELALU test `npm run lint` dan `npm run build` secara lokal sebelum push**
+5. **Jika menambahkan tool baru**, pastikan config file-nya sudah ada
+6. **Jalankan `npm audit fix`** sebelum push jika ada vulnerability
+
+### Checklist Sebelum Push Pertama
+
+```markdown
+- [ ] .eslintrc.json / eslint.config.mjs ada dan valid
+- [ ] tsconfig.json ada dan valid
+- [ ] .prettierrc ada
+- [ ] vitest.config.ts / jest.config.ts ada (jika ada test)
+- [ ] package.json punya scripts: lint, build, typecheck, test
+- [ ] `npm run lint` berjalan tanpa prompt interaktif
+- [ ] `npm run build` berhasil
+- [ ] `npm run typecheck` berhasil
+- [ ] `npm audit` tidak ada critical vulnerability
+- [ ] Semua dependencies ter-install (`npm ci` berhasil)
+```

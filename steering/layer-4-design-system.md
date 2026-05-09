@@ -332,11 +332,15 @@ design-review:
 
 ---
 
-## Appendix: Clean Architecture Reference (dari Project Standards)
+## Appendix: Clean Architecture & DI Pattern
 
-### Dependency Rule (WAJIB)
+> **Standar lengkap Clean Architecture + Dependency Injection (Awilix)** ada di `architecture-standards.md`.
+>
+> File tersebut mencakup: layer structure, dependency rule, data flow, DI registration pattern, factory function pattern, lifetime rules, naming convention, anti-pattern, dan workflow membuat fitur baru.
+>
+> **WAJIB dibaca dan diikuti oleh semua AI Agent dan Developer.**
 
-Layer dalam TIDAK BOLEH bergantung ke layer luar:
+Quick reference:
 
 ```
 app → presentation → core
@@ -344,57 +348,12 @@ app → presentation → core
         infrastructure
 ```
 
-### Struktur Layer
-
-```
-src/
-├── core/                    # Business Logic (paling dalam)
-│   ├── domains/
-│   │   └── [domain]/
-│   │       ├── entities/
-│   │       ├── repositories/  # Interface ONLY
-│   │       ├── usecases/
-│   │       ├── errors/
-│   │       └── mappers/
-│   ├── protocols/
-│   └── utils/
-├── infrastructure/          # Implementation
-│   ├── di/
-│   ├── networking/
-│   ├── repositories/
-│   ├── storage/
-│   ├── logging/
-│   └── stateManagement/
-├── presentation/            # UI
-│   ├── features/
-│   │   └── [featureName]/
-│   │       ├── screens/
-│   │       ├── components/
-│   │       ├── viewModel/
-│   │       └── validation/
-│   ├── components/          # Atomic Design
-│   │   ├── atoms/
-│   │   ├── molecules/
-│   │   └── organisms/
-│   └── hooks/
-└── app/                     # Routing Layer (thin wrapper)
-```
-
-### Aturan Dependency (STRICT)
-
 | From | Boleh Akses |
 |------|-------------|
 | core | ❌ tidak boleh ke mana pun |
 | infrastructure | core |
 | presentation | core |
 | app | presentation |
-
-### Data Flow
-
-```
-UI (Screen) → ViewModel → UseCase → Repository (interface)
-→ Repository Implementation → API/Storage → DomainResult<T> → UI
-```
 
 ---
 
@@ -507,3 +466,176 @@ Gunakan code yang stabil dan eksplisit:
 - Kirim data ke client seminimal mungkin
 - DILARANG log: token, password, OTP, CVV, PII sensitif
 - Masking wajib: `0812****1234`, `ri***@domain.com`
+
+---
+
+## Appendix: NFC & Offline-First Security (dari Project Sovereign Card)
+
+### Konteks
+
+Untuk project berbasis NFC card dimana data tersimpan langsung di kartu fisik (bukan database pusat), security model berbeda dari web app tradisional. Seluruh data hidup di kartu — sehingga proteksi data pada kartu menjadi kritis.
+
+### Trust Boundaries (NFC-Specific)
+
+```
+User (untrusted) ↔ NFC Card (physical, tamper-possible)
+NFC Card ↔ Web NFC API (browser-mediated)
+Web NFC API ↔ Application Logic (trusted)
+Application Logic ↔ Local Storage (device-bound)
+```
+
+### Threat Model (NFC Card System)
+
+| Threat | Category | Asset | Likelihood | Impact | Mitigation |
+|--------|----------|-------|------------|--------|------------|
+| Card cloning | Tampering | Balance data | Medium | High | HMAC integrity check |
+| Balance manipulation | Tampering | Saldo | High | Critical | HMAC-SHA256 signature |
+| Card data sniffing | Info Disclosure | PII | Low | Medium | XOR obfuscation + binary format |
+| Replay attack | Spoofing | Transaction | Medium | High | writeVersion increment |
+| Unauthorized admin access | Elevation | Admin functions | Medium | High | PIN + PBKDF2 hashing |
+| Card removal during write | DoS | Data integrity | High | Medium | Read-back verification |
+| Offline data tampering | Tampering | Audit trail | Low | Medium | IndexedDB + fire-and-forget audit |
+
+### Data Protection pada NFC Card
+
+#### Silent Shield Pattern
+
+Data kartu dilindungi dengan mekanisme berlapis:
+
+```
+Raw CardData
+    ↓ serialize (binary compact format)
+Binary Data (max 480 bytes)
+    ↓ XOR encode (obfuscation)
+Encoded Data
+    ↓ HMAC-SHA256 sign (integrity)
+[Encoded Data | HMAC 32 bytes]
+    ↓ write to NFC card
+NDEF Record (application/x-sovereign-card)
+```
+
+#### Read Flow (Verify)
+
+```
+NDEF Record
+    ↓ extract bytes
+[Encoded Data | HMAC 32 bytes]
+    ↓ verify HMAC (integrity check)
+    ↓ XOR decode (de-obfuscation)
+Binary Data
+    ↓ deserialize
+CardData (domain entity)
+```
+
+#### Rules
+
+- HMAC key TIDAK BOLEH dalam plain text di source code
+- Gunakan obfuscated key (split constants, assembled at runtime)
+- Setiap write HARUS increment `writeVersion` (anti-replay)
+- Setiap write HARUS diikuti read-back verification
+- Payload TIDAK BOLEH melebihi 480 bytes (NTAG215 limit)
+
+### PIN & Operator Authentication
+
+```
+Algorithm: SHA-256 (PBKDF2)
+Salt: 16 bytes random (crypto.getRandomValues)
+Iterations: 100,000
+Storage format: "salt_hex:hash_hex"
+```
+
+#### Rules
+
+- PIN TIDAK PERNAH disimpan plain text
+- PIN TIDAK PERNAH di-log
+- Salt harus unique per operator
+- Minimum 100,000 iterations untuk PBKDF2
+- Gunakan Web Crypto API (bukan library JS murni)
+
+### Write Operation Security
+
+```
+Write flow yang aman:
+1. Serialize CardData → binary
+2. Validate payload size (max 480 bytes)
+3. Encode + Sign (Silent Shield)
+4. Write to NFC card
+5. Read-back verification (WAJIB)
+6. Compare writeVersion (anti-corruption check)
+7. Audit log (fire-and-forget)
+```
+
+#### Rules
+
+- JANGAN lepaskan kartu selama write (abort = card removed error)
+- Timeout 3 detik per operasi NFC
+- Jika read-back verification gagal → return error, JANGAN anggap berhasil
+- writeVersion mismatch = data corruption → return error
+
+### Offline-First Security Considerations
+
+| Concern | Mitigation |
+|---------|-----------|
+| No server validation | HMAC integrity pada kartu itu sendiri |
+| No central audit | IndexedDB audit log di device |
+| No real-time fraud detection | writeVersion untuk detect replay |
+| Device compromise | PIN hashing, obfuscated keys |
+| Data loss on device | Data hidup di kartu, bukan device |
+
+### Local Storage Security
+
+| Data | Storage | Protection |
+|------|---------|-----------|
+| Tariff config | localStorage | Plain (non-sensitive) |
+| Operator PINs | localStorage | PBKDF2 hash + salt |
+| Operator session | localStorage | Session-scoped, cleared on logout |
+| Audit logs | IndexedDB | Device-bound, exportable |
+| Card data | NFC card only | HMAC + XOR + binary serialization |
+
+#### Rules
+
+- DILARANG menyimpan card data di localStorage/IndexedDB
+- Card data HANYA hidup di NFC card fisik
+- Operator PIN HANYA disimpan sebagai hash
+- Session harus di-clear saat logout
+- Audit log tidak mengandung raw card data (hanya metadata operasi)
+
+### NFC-Specific Error Handling
+
+| Error | Code | Retryable | User Message |
+|-------|------|-----------|-------------|
+| NFC not supported | `NFC_NOT_SUPPORTED` | No | Perangkat tidak mendukung NFC |
+| NFC disabled | `NFC_DISABLED` | Yes | NFC dinonaktifkan, aktifkan di pengaturan |
+| Card timeout | `NFC_TIMEOUT` | Yes | Kartu tidak terdeteksi, tempelkan kembali |
+| Read failed | `NFC_READ_FAILED` | Yes | Gagal membaca kartu |
+| Write failed | `NFC_WRITE_FAILED` | Yes | Gagal menulis, jangan lepaskan kartu |
+| Card removed | `NFC_CARD_REMOVED` | Yes | Kartu terlepas saat operasi |
+| HMAC invalid | `SHIELD_HMAC_INVALID` | No | Data kartu tidak valid (mungkin rusak) |
+| Card blocked | `CARD_BLOCKED` | No | Kartu diblokir, hubungi admin |
+
+### Security Testing untuk NFC
+
+WAJIB ada test untuk:
+
+- HMAC verification menolak data yang dimanipulasi
+- PIN hashing menghasilkan hash yang berbeda untuk PIN berbeda
+- PIN hashing menghasilkan hash yang sama untuk PIN sama + salt sama
+- writeVersion increment setiap write
+- Read-back verification mendeteksi write failure
+- Payload size validation menolak data > 480 bytes
+- Kartu blocked ditolak di semua operasi
+- Timeout handling tidak menyebabkan data corruption
+- Audit log tidak mengandung sensitive data
+
+### Production Upgrade Path
+
+Untuk upgrade dari prototype ke production:
+
+| Area | Prototype (Current) | Production (Target) |
+|------|-------------------|-------------------|
+| Encryption | XOR obfuscation | AES-256-GCM |
+| Key management | Obfuscated in bundle | Backend signing / secure element |
+| HMAC | Client-side key | Server-provisioned key per device |
+| Audit | Local IndexedDB | Sync to central server (when online) |
+| PIN | PBKDF2 client-side | Server-validated + device binding |
+| Card provisioning | Manual by operator | Backend-issued card certificates |

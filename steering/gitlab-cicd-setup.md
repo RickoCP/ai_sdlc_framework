@@ -2,7 +2,11 @@
 
 ## Overview
 
-Panduan lengkap setup GitLab CI/CD untuk Enterprise AI-Native SDLC Framework.
+Panduan setup **infrastruktur** GitLab CI/CD. File ini fokus pada konfigurasi GitLab (settings, runner, templates), bukan pipeline stages.
+
+> **Untuk pipeline stages dan quality gate thresholds**, lihat `layer-12-quality-gates.md`.
+> **Untuk branch strategy dan commit convention**, lihat `git-workflow-automation.md`.
+> **Untuk issue hierarchy dan labels**, lihat `layer-8-issue-driven-dev.md`.
 
 ## Prerequisites
 
@@ -11,7 +15,9 @@ Panduan lengkap setup GitLab CI/CD untuk Enterprise AI-Native SDLC Framework.
 - Docker installed pada runner
 - Node.js project (atau sesuaikan untuk bahasa lain)
 
-## Step 1: Repository Setup
+---
+
+## Step 1: Repository Settings
 
 ### Enable CI/CD
 ```
@@ -36,14 +42,17 @@ Settings → CI/CD → Variables:
 - DATABASE_URL: (protected, masked)
 - REDIS_URL: (protected, masked)
 
+# Vercel Deployment (WAJIB)
+- VERCEL_TOKEN: (protected, masked) — dari https://vercel.com/account/tokens
+- VERCEL_ORG_ID: (protected) — dari .vercel/project.json
+- VERCEL_PROJECT_ID: (protected) — dari .vercel/project.json
+
 # Monitoring
 - SENTRY_DSN: (protected, masked)
 - SENTRY_AUTH_TOKEN: (protected, masked)
-
-# Deployment
-- KUBE_CONFIG: (protected, masked, file type)
-- DEPLOY_TOKEN: (protected, masked)
 ```
+
+---
 
 ## Step 2: Branch Protection
 
@@ -74,6 +83,8 @@ Settings → Merge Requests:
     - Code owners: Required
 ```
 
+---
+
 ## Step 3: File Structure
 
 ```
@@ -99,62 +110,9 @@ Settings → Merge Requests:
 .gitlab-ci.yml
 ```
 
-## Step 4: Main Pipeline Configuration
+---
 
-### `.gitlab-ci.yml`
-
-```yaml
-stages:
-  - lint
-  - typecheck
-  - test
-  - coverage
-  - security
-  - build
-  - deploy-preview
-  - e2e
-  - deploy-staging
-  - deploy-production
-
-variables:
-  NODE_IMAGE: node:20-alpine
-  DOCKER_IMAGE: docker:24.0.5
-  DOCKER_DIND: docker:24.0.5-dind
-  FF_USE_FASTZIP: "true"
-  CACHE_COMPRESSION_LEVEL: "fast"
-
-default:
-  cache:
-    key:
-      files:
-        - package-lock.json
-    paths:
-      - node_modules/
-    policy: pull
-  retry:
-    max: 2
-    when:
-      - runner_system_failure
-      - stuck_or_timeout_failure
-
-include:
-  - local: '.gitlab/ci/lint.yml'
-  - local: '.gitlab/ci/typecheck.yml'
-  - local: '.gitlab/ci/test.yml'
-  - local: '.gitlab/ci/security.yml'
-  - local: '.gitlab/ci/build.yml'
-  - local: '.gitlab/ci/deploy.yml'
-
-# Workflow rules
-workflow:
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-    - if: '$CI_COMMIT_TAG'
-```
-
-## Step 5: CODEOWNERS
+## Step 4: CODEOWNERS
 
 ### `.gitlab/CODEOWNERS`
 
@@ -186,7 +144,9 @@ src/infrastructure/ @backend-team
 docs/governance/ @tech-lead @security-team
 ```
 
-## Step 6: Issue Templates
+---
+
+## Step 5: Issue Templates
 
 ### `.gitlab/issue_templates/Feature.md`
 
@@ -200,7 +160,6 @@ docs/governance/ @tech-lead @security-team
 <!-- Deskripsi fitur -->
 
 ### User Stories
-<!-- List user stories -->
 - As a [role], I want to [action], so that [benefit]
 
 ### Acceptance Criteria
@@ -216,7 +175,6 @@ docs/governance/ @tech-lead @security-team
 - Design: 
 
 ### Tasks
-<!-- Break down into tasks -->
 - [ ] Task 1
 - [ ] Task 2
 
@@ -230,9 +188,6 @@ docs/governance/ @tech-lead @security-team
 
 ### Parent Feature
 <!-- Link ke parent feature -->
-
-### Description
-<!-- Apa yang harus dilakukan -->
 
 ### Specification
 - API Contract: 
@@ -250,7 +205,7 @@ docs/governance/ @tech-lead @security-team
 <!-- Kiro skills reference -->
 
 ### Branch Name
-`feature/task-{number}-{description}`
+`feature/issue-{number}-{description}`
 
 ### Estimated Time
 <!-- 1-4 hours ideal -->
@@ -286,15 +241,15 @@ docs/governance/ @tech-lead @security-team
 <!-- Critical/High/Medium/Low -->
 
 ### Root Cause (to be filled after investigation)
-<!-- Akar masalah -->
 
 ### Learning (to be filled after fix)
-<!-- Apa yang bisa dipelajari untuk mencegah bug serupa -->
 
 /label ~"type::bug" ~"status::backlog"
 ```
 
-## Step 7: Merge Request Templates
+---
+
+## Step 6: Merge Request Templates
 
 ### `.gitlab/merge_request_templates/Default.md`
 
@@ -336,7 +291,6 @@ Closes #
 
 ### Testing
 - [ ] Unit tests added/updated
-- [ ] Integration tests (if applicable)
 - [ ] Coverage maintained >= 80%
 
 ### Documentation
@@ -345,10 +299,11 @@ Closes #
 - [ ] ADR created (if architecture decision)
 
 ## Screenshots (if UI changes)
-<!-- Before/After screenshots -->
 ```
 
-## Step 8: GitLab Runner Configuration
+---
+
+## Step 7: GitLab Runner Configuration
 
 ### Shared Runner (gitlab.com)
 Sudah tersedia, tidak perlu setup tambahan.
@@ -379,15 +334,17 @@ sudo gitlab-runner register \
   executor = "docker"
   [runners.docker]
     image = "node:20-alpine"
-    privileged = true  # Required for Docker-in-Docker
+    privileged = true
     volumes = ["/cache", "/certs/client"]
-    shm_size = 268435456  # 256MB for Chrome/Playwright
+    shm_size = 268435456
   [runners.cache]
     Type = "s3"
     Shared = true
 ```
 
-## Step 9: Scheduled Pipelines
+---
+
+## Step 8: Scheduled Pipelines
 
 ### Weekly Metrics Collection
 ```
@@ -407,7 +364,9 @@ CI/CD → Schedules → New Schedule:
 - Variables: SCHEDULE_TYPE=security-scan
 ```
 
-## Step 10: Notifications
+---
+
+## Step 9: Notifications
 
 ### GitLab Integrations
 ```
@@ -416,9 +375,8 @@ Settings → Integrations:
 - Email: Critical pipeline failures
 ```
 
-### Notification Rules
+### Notification Job (tambahkan di pipeline)
 ```yaml
-# In .gitlab-ci.yml, add notification job
 notify-failure:
   stage: .post
   script:
@@ -430,6 +388,8 @@ notify-failure:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: on_failure
 ```
+
+---
 
 ## Troubleshooting
 
@@ -452,6 +412,8 @@ notify-failure:
 - Use `--prefer-offline` for npm
 - Parallelize independent jobs
 - Use smaller Docker images (alpine)
+
+---
 
 ## Best Practices
 

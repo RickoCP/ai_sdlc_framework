@@ -28,95 +28,81 @@ Epic
 Representasi dari major feature atau initiative.
 
 ```markdown
-# Epic: User Authentication System
+# Epic: [Title]
 
 ## Objective
-Implementasi sistem autentikasi lengkap dengan JWT, refresh token, dan social login.
+[Tujuan utama epic ini]
 
 ## Scope
-- Login/Register
-- Password reset
-- Social login (Google, GitHub)
-- Session management
-- 2FA
+- [Feature 1]
+- [Feature 2]
 
 ## Success Criteria
-- [ ] User bisa register dan login
-- [ ] Token refresh berjalan otomatis
-- [ ] Social login functional
-- [ ] 2FA optional untuk user
+- [ ] [Criteria 1]
+- [ ] [Criteria 2]
 
 ## Timeline
 - Start: [date]
 - Target: [date]
 
 ## Related Specs
-- docs/specs/prd/user-stories.md#authentication
-- docs/specs/srs/api-contract.md#auth-endpoints
+- docs/specs/prd/user-stories.md#[section]
+- docs/specs/srs/[relevant-spec].md
 ```
 
 ### Feature
 Bagian dari Epic yang bisa di-deliver independently.
 
 ```markdown
-# Feature: JWT Authentication
+# Feature: [Title]
 
 ## Parent Epic
 [Link ke Epic]
 
 ## Description
-Implementasi JWT-based authentication dengan access token dan refresh token.
+[Deskripsi fitur]
 
 ## User Stories
-- US-001: As a user, I want to login with email/password
-- US-002: As a user, I want my session to persist
-- US-003: As a user, I want to logout
+- US-001: As a [role], I want to [action], so that [benefit]
 
 ## Tasks
-- [ ] #task-001: Create auth controller
-- [ ] #task-002: Create login use case
-- [ ] #task-003: Create token service
-- [ ] #task-004: Create auth middleware
-- [ ] #task-005: Write tests
+- [ ] #task-001: [Task title]
+- [ ] #task-002: [Task title]
 
-/label ~"feature" ~"authentication"
-/milestone %"Sprint 1"
+/label ~"type::feature" ~"status::backlog"
+/milestone %"Sprint N"
 ```
 
 ### Task
-Unit kerja yang bisa diselesaikan dalam 1 session.
+Unit kerja yang bisa diselesaikan dalam 1 session (2-4 jam).
 
 ```markdown
-# Task: Create Login Use Case
+# Task: [Title]
 
 ## Parent Feature
 [Link ke Feature]
 
 ## Specification
-- API Contract: docs/specs/srs/api-contract.md#login
-- Business Rules: docs/specs/brd/business-rules.md#authentication
+- API Contract: docs/specs/srs/[spec].md
+- Business Rules: docs/specs/brd/business-rules.md#[section]
 
 ## Acceptance Criteria
-- [ ] Validate email format
-- [ ] Check password against hash
-- [ ] Generate access token (15min expiry)
-- [ ] Generate refresh token (7d expiry)
-- [ ] Return tokens in response
-- [ ] Handle invalid credentials error
-- [ ] Handle locked account error
+- [ ] AC-001: [Criteria]
+- [ ] AC-002: [Criteria]
 
 ## Technical Notes
-- Use bcrypt for password comparison
-- Use jsonwebtoken for token generation
-- Follow create-usecase skill pattern
+- [Implementation hints, patterns to follow]
+
+## Skills to Use
+- .kiro/skills/[relevant-skill].md
 
 ## Branch
-`feature/task-002-login-usecase`
+`feature/task-{number}-{description}`
 
 ## Estimated Time
 2-4 hours
 
-/label ~"task" ~"authentication" ~"backend"
+/label ~"type::task" ~"status::backlog"
 /assign @developer
 ```
 
@@ -125,146 +111,43 @@ Unit kerja yang bisa diselesaikan dalam 1 session.
 ```
 main (production)
 ├── develop (integration)
-│   ├── feature/task-001-auth-controller
-│   ├── feature/task-002-login-usecase
-│   ├── feature/task-003-token-service
-│   └── bugfix/issue-045-token-expiry
-└── hotfix/issue-099-security-patch
+│   ├── feature/issue-{N}-{description}
+│   ├── bugfix/issue-{N}-{description}
+│   └── spike/issue-{N}-{description}
+└── hotfix/issue-{N}-{description}
 ```
 
 ### Naming Convention
 ```
-{type}/{issue-number}-{short-description}
+{type}/issue-{number}-{short-description}
 
 Examples:
-feature/task-001-auth-controller
-bugfix/issue-045-token-expiry
-hotfix/issue-099-security-patch
+feature/issue-12-nfc-registration
+bugfix/issue-45-token-expiry
+hotfix/issue-99-security-patch
 ```
 
-## Merge Request Flow
-
-### MR Template
-
-```markdown
-## Summary
-[Ringkasan perubahan]
-
-## Related Issue
-Closes #[issue-number]
-
-## Specification Reference
-- Spec: [link ke spec]
-- Design: [link ke design]
-
-## Changes Made
-- [Change 1]
-- [Change 2]
-
-## How to Test
-1. [Step 1]
-2. [Step 2]
-
-## Checklist
-- [ ] Code follows project standards
-- [ ] Tests written and passing
-- [ ] No governance violations
-- [ ] Documentation updated
-- [ ] Spec compliance verified
-
-## Screenshots (if UI)
-[Screenshots]
-```
-
-### MR Rules
-1. Setiap MR harus linked ke Issue
-2. Setiap MR harus punya reviewer
-3. CI/CD pipeline harus pass
-4. Coverage tidak boleh turun
-5. No merge tanpa approval
+> **Untuk detail git init, commit convention, auto-push, dan MR automation**, lihat `git-workflow-automation.md`.
 
 ## GitLab Configuration
-
-### Issue Templates
-
-Buat `.gitlab/issue_templates/`:
-
-```
-.gitlab/issue_templates/
-├── Feature.md
-├── Task.md
-├── Bug.md
-└── Spike.md
-```
-
-### Task Template (`.gitlab/issue_templates/Task.md`)
-
-```markdown
-## Task: [Title]
-
-### Parent Feature
-<!-- Link ke parent feature issue -->
-
-### Specification
-<!-- Link ke relevant spec documents -->
-- API Contract: 
-- Business Rules: 
-- Design: 
-
-### Acceptance Criteria
-- [ ] 
-- [ ] 
-
-### Technical Notes
-<!-- Implementation hints, patterns to follow -->
-
-### Skills to Use
-<!-- Reference relevant Kiro skills -->
-- .kiro/skills/create-api.md
-- .kiro/skills/create-test.md
-
-### Branch Name
-`feature/task-{number}-{description}`
-
-### Estimated Time
-<!-- 1-4 hours ideal -->
-
-/label ~"task"
-```
 
 ### Labels
 
 ```
 # Type
-type::epic
-type::feature
-type::task
-type::bug
-type::spike
+type::epic, type::feature, type::task, type::bug, type::spike
 
 # Status
-status::backlog
-status::ready
-status::in-progress
-status::review
-status::done
+status::backlog, status::ready, status::in-progress, status::review, status::done
 
 # Priority
-priority::critical
-priority::high
-priority::medium
-priority::low
+priority::critical, priority::high, priority::medium, priority::low
 
 # Team
-team::backend
-team::frontend
-team::platform
-team::ai
+team::backend, team::frontend, team::platform, team::ai
 
-# Domain
-domain::auth
-domain::payment
-domain::notification
+# Domain (sesuaikan per project)
+domain::auth, domain::payment, domain::notification
 ```
 
 ### Milestones = Sprints
@@ -274,6 +157,30 @@ Sprint 1 (2 weeks)
 Sprint 2 (2 weeks)
 Sprint 3 (2 weeks)
 ```
+
+### Issue Templates
+
+Simpan di `.gitlab/issue_templates/`:
+
+```
+.gitlab/issue_templates/
+├── Feature.md
+├── Task.md
+├── Bug.md
+└── Spike.md
+```
+
+> **Untuk isi lengkap templates**, lihat `gitlab-cicd-setup.md` Step 6.
+
+## Merge Request Rules
+
+1. Setiap MR harus linked ke Issue
+2. Setiap MR harus punya reviewer
+3. CI/CD pipeline harus pass
+4. Coverage tidak boleh turun
+5. No merge tanpa approval
+
+> **Untuk MR templates dan checklist**, lihat `gitlab-cicd-setup.md` Step 7.
 
 ## Workflow dengan Kiro
 
@@ -289,12 +196,12 @@ Gunakan template di .gitlab/issue_templates/"
 "Kerjakan Task #002: Create Login Use Case.
 Baca spec di docs/specs/srs/api-contract.md#login.
 Gunakan skill create-usecase.
-Branch: feature/task-002-login-usecase"
+Branch: feature/issue-002-login-usecase"
 ```
 
 ### Creating MR
 ```
-"Buat Merge Request untuk branch feature/task-002-login-usecase.
+"Buat Merge Request untuk branch feature/issue-002-login-usecase.
 Gunakan MR template. Link ke Issue #002."
 ```
 
