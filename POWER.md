@@ -3,7 +3,7 @@ name: "enterprise-ai-sdlc"
 displayName: "Enterprise AI-Native SDLC Framework"
 description: "Framework SDLC berbasis AI untuk enterprise yang menggabungkan Spec-Driven Development, AI Governance, Multi-Agent Orchestration, dan GitLab CI/CD. Mencegah AI chaos dan pilot graveyard dengan pendekatan terstruktur."
 keywords: ["sdlc", "ai-native", "spec-driven", "governance", "gitlab", "ci-cd", "enterprise", "multi-agent"]
-author: "Enterprise AI Engineering Team"
+author: "ricko_c_putra@telkomsel.co.id"
 ---
 
 # Enterprise AI-Native SDLC Framework
