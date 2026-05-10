@@ -93,8 +93,10 @@ Setiap layer memiliki steering file tersendiri untuk panduan detail:
 - **requirement-traceability.md** - End-to-end flow dari PRD User Story hingga Merge dengan traceability matrix
 - **architecture-standards.md** - **(ALWAYS INCLUDED)** Clean Architecture + DDD + Dependency Injection (Awilix) — acuan arsitektur WAJIB untuk semua layer
 - **test-writing-patterns.md** - **(ALWAYS INCLUDED)** Pattern testing per-layer dengan contoh konkret (Use Case, Repository, ViewModel, Mapper, Middleware)
+- **project-memory.md** - **(ALWAYS INCLUDED)** Context Index + Current State — memastikan AI selalu tahu state project antar session
 - **presentation-material.md** - Generate materi presentasi project (UI/UX, Design, Construction, Quality, Deployment, Security)
 - **tech-stack-profiles.md** - Adaptasi framework ke multi-stack: Next.js, Go, Python (FastAPI)
+- **fast-track-mode.md** - Fast Track Mode, AI Quality Scorecard, Dependency Analysis, Framework Health Check
 
 ## Agent Workflow Rules
 
@@ -293,6 +295,8 @@ Power ini sudah mengintegrasikan konten dari 19 engineering steering files:
 | 22 | Clean Architecture + DI Pattern | architecture-standards.md |
 | 23 | Test Writing Patterns | test-writing-patterns.md |
 | 24 | Tech Stack Profiles | tech-stack-profiles.md |
+| 25 | Project Memory & Resume | project-memory.md |
+| 26 | Fast Track Mode & Quality Scorecard | fast-track-mode.md |
 
 ## Getting Started
 
@@ -488,6 +492,26 @@ Commit message WAJIB mengikuti Conventional Commits. Lihat steering file `git-wo
 ---
 
 ## Changelog
+
+### v1.4.0 (2026-05-10)
+
+**New Features:**
+- ✅ **Project Memory** (`project-memory.md`, always-included) — Context Index + Current State untuk resume antar session
+- ✅ **Fast Track Mode** (`fast-track-mode.md`) — Escape hatch formal untuk deadline pressure dengan debt tracking
+- ✅ **AI Quality Scorecard** — Mengukur AI output quality per sprint (code quality, effectiveness, governance, debt)
+- ✅ **Dependency & Impact Analysis** — Auto-detect impacted files saat core/ berubah
+- ✅ **Framework Health Check** — Scan project compliance terhadap framework standards
+- ✅ **Layer 2 Automation** — Requirement validation gate (auto-validate saat file dibuat)
+- ✅ **Layer 3 Automation** — Spec-first enforcement (block coding tanpa spec)
+- ✅ **Layer 4 Automation** — Design compliance check (validate code vs design)
+- ✅ **Layer 10 Automation** — Context loading + Context Index auto-maintained
+- ✅ **Layer 13 Automation** — Observability checklist + hook + phased approach
+- ✅ **Layer 14 Automation** — Bug learning capture + sprint retro + ADR reminder
+
+**Improvements:**
+- 🔧 11/15 layers sekarang terintegrasi ke workflow (dari 5/15)
+- 🔧 Total 25 steering files (dari 21)
+- 🔧 8 Kiro hooks baru didefinisikan
 
 ### v1.3.0 (2026-05-10)
 
