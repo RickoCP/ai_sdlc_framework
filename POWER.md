@@ -383,16 +383,81 @@ Saat user konfirmasi membuat project baru, AI Agent akan otomatis:
 1. **`git_init`** - Inisialisasi Git repository lokal (path = repo_path)
 2. **Buat `.gitignore`** sesuai tech stack
 3. **Buat struktur folder** sesuai framework (docs/, .kiro/, src/, tests/, .gitlab/)
-4. **Stage + Initial commit** — `git add` + `git commit` (repo_path WAJIB di-pass)
-5. **`create_project`** (GitLab MCP) - Buat repository di GitLab
-6. **`git remote add origin`** — via shell command (CWD = repo_path), karena Git MCP tidak punya tool remote add
-7. **`git push -u origin main`** — Push initial commit
-8. **Buat branch `develop`** + push ke remote
-9. **Setup branch protection** (main, develop)
-10. **Buat labels** sesuai framework (type::*, status::*, priority::*, team::*)
-11. **Buat `.gitlab-ci.yml`** dengan pipeline dasar
+4. **Generate workspace steering files** — Copy architecture & test standards ke `.kiro/steering/` project user (lihat detail di bawah)
+5. **Stage + Initial commit** — `git add` + `git commit` (repo_path WAJIB di-pass)
+6. **`create_project`** (GitLab MCP) - Buat repository di GitLab
+7. **`git remote add origin`** — via shell command (CWD = repo_path), karena Git MCP tidak punya tool remote add
+8. **`git push -u origin main`** — Push initial commit
+9. **Buat branch `develop`** + push ke remote
+10. **Setup branch protection** (main, develop)
+11. **Buat labels** sesuai framework (type::*, status::*, priority::*, team::*)
+12. **Buat `.gitlab-ci.yml`** dengan pipeline dasar
 
 Semua ini dilakukan otomatis menggunakan Git MCP dan GitLab MCP setelah user menjawab pertanyaan project di awal.
+
+### Step 4: Generate Workspace Steering Files (WAJIB)
+
+AI Agent **WAJIB** membuat file steering di `.kiro/steering/` project user agar arsitektur dan test patterns menjadi **acuan permanen** — aktif di setiap chat session tanpa perlu memanggil power lagi.
+
+**Files yang WAJIB di-generate:**
+
+| File Target (di project user) | Source (dari power ini) | Inclusion |
+|-------------------------------|------------------------|-----------|
+| `.kiro/steering/architecture-standards.md` | `steering/architecture-standards.md` | `always` |
+| `.kiro/steering/test-writing-patterns.md` | `steering/test-writing-patterns.md` | `always` |
+| `.kiro/steering/coding-conventions.md` | Generated (ringkasan dari power) | `always` |
+
+**Cara generate:**
+1. Baca konten `architecture-standards.md` dari power ini
+2. Tulis ke `<repo_path>/.kiro/steering/architecture-standards.md`
+3. Baca konten `test-writing-patterns.md` dari power ini
+4. Tulis ke `<repo_path>/.kiro/steering/test-writing-patterns.md`
+5. Generate `coding-conventions.md` ringkas (commit convention, naming, lint rules)
+
+**Template `coding-conventions.md`:**
+```markdown
+---
+inclusion: always
+---
+
+# Coding Conventions
+
+## Commit Convention
+- Format: `<type>(<scope>): <subject>`
+- Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert
+- Subject: lowercase, imperative, max 50 chars, no period
+
+## Naming Convention
+- Files: kebab-case (user-service.ts)
+- Classes/Types: PascalCase (PaymentRepository)
+- Functions/Variables: camelCase (getPaymentDetail)
+- Constants: UPPER_SNAKE_CASE (MAX_RETRY)
+- DI Keys: camelCase (paymentRepository)
+
+## Pre-Push Validation (WAJIB)
+Sebelum push, WAJIB jalankan dan SEMUA harus pass:
+1. `npm run lint` — 0 errors
+2. `npm run typecheck` — 0 errors
+3. `npm run test:unit -- --coverage` — all pass, coverage >= 80%
+
+## Architecture Rules
+- Ikuti Clean Architecture: core → infrastructure → presentation → app
+- Semua dependency via DI container (Awilix)
+- Core TIDAK BOLEH import dari infrastructure/presentation
+- Lihat `.kiro/steering/architecture-standards.md` untuk detail lengkap
+```
+
+**Keuntungan:**
+- User tidak perlu panggil power setiap kali untuk mendapat guidance arsitektur
+- Setiap kali user chat dengan Kiro di project tersebut, arsitektur standards otomatis aktif
+- Planning dan coding selalu mengacu pada arsitektur yang benar
+- Tim baru yang join project langsung mendapat context arsitektur
+
+**Rules:**
+- WAJIB generate saat project setup (step 4)
+- Jika `.kiro/steering/` sudah ada file dengan nama sama → tanyakan user apakah mau overwrite
+- File yang di-generate HARUS di-commit ke repository (bukan di .gitignore)
+- Jika user update arsitektur di power → informasikan bahwa project steering perlu di-sync
 
 **⚠️ CRITICAL — Working Directory:**
 - Git MCP (`@cyanheads/git-mcp-server`) MEMERLUKAN `repo_path` (absolute path) di SETIAP tool call

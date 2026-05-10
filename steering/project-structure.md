@@ -146,9 +146,10 @@ project-root/
 │
 ├── .kiro/
 │   ├── steering/
-│   │   ├── project-standards.md  # Project-wide standards
-│   │   ├── coding-conventions.md # Coding conventions
-│   │   └── ai-guidelines.md     # AI interaction guidelines
+│   │   ├── architecture-standards.md  # (AUTO-GENERATED dari power) Clean Architecture + DI
+│   │   ├── test-writing-patterns.md   # (AUTO-GENERATED dari power) Testing patterns per-layer
+│   │   ├── coding-conventions.md      # (AUTO-GENERATED dari power) Commit, naming, lint rules
+│   │   └── ai-guidelines.md          # AI interaction guidelines (opsional)
 │   ├── skills/
 │   │   ├── create-api.md
 │   │   ├── create-usecase.md
@@ -202,7 +203,7 @@ Semua artifact dari setiap layer SDLC. Ini menjadi **project memory** dan **AI c
 
 ### `.kiro/`
 Kiro-specific configuration:
-- `steering/` — Project standards dan AI guidelines
+- `steering/` — **Auto-generated dari power** saat project setup. Berisi architecture standards, test patterns, dan coding conventions yang aktif di setiap chat session. File ini menjadi acuan permanen untuk planning dan coding.
 - `skills/` — Reusable AI engineering workflows (Layer 6)
 - `settings/mcp.json` — MCP server configuration
 
