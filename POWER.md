@@ -92,7 +92,9 @@ Setiap layer memiliki steering file tersendiri untuk panduan detail:
 - **git-workflow-automation.md** - Git init, remote setup, commit convention, auto-push, branch strategy, dan MR automation
 - **requirement-traceability.md** - End-to-end flow dari PRD User Story hingga Merge dengan traceability matrix
 - **architecture-standards.md** - **(ALWAYS INCLUDED)** Clean Architecture + DDD + Dependency Injection (Awilix) — acuan arsitektur WAJIB untuk semua layer
+- **test-writing-patterns.md** - **(ALWAYS INCLUDED)** Pattern testing per-layer dengan contoh konkret (Use Case, Repository, ViewModel, Mapper, Middleware)
 - **presentation-material.md** - Generate materi presentasi project (UI/UX, Design, Construction, Quality, Deployment, Security)
+- **tech-stack-profiles.md** - Adaptasi framework ke multi-stack: Next.js, Go, Python (FastAPI)
 
 ## Agent Workflow Rules
 
@@ -147,6 +149,82 @@ Saat mengerjakan framework ini secara bertahap (layer by layer), AI Agent **WAJI
 - Memberikan user kontrol atas output di setiap tahap
 - Memungkinkan iterasi cepat per layer
 - Sesuai prinsip "Validate Before Execute"
+
+---
+
+## Solo Mode (Opsional)
+
+Untuk developer yang bekerja sendiri (solo), beberapa ceremony enterprise bisa di-simplify tanpa mengorbankan quality.
+
+### Aktivasi
+
+User cukup menyatakan di awal:
+```
+"Saya bekerja solo / ini project personal"
+```
+
+AI Agent akan otomatis menyesuaikan workflow.
+
+### Yang Berubah di Solo Mode
+
+| Aspek | Enterprise Mode | Solo Mode |
+|-------|----------------|-----------|
+| MR Approval | Wajib 1 reviewer | Self-merge allowed |
+| Sprint Planning | Formal milestone + issues | Simplified task list |
+| Issue Board | Full board (Backlog→Done) | Minimal (Todo→Done) |
+| Branch Strategy | main + develop + feature | main + feature (tanpa develop) |
+| Labels | Full taxonomy (type::, status::, priority::, team::) | Minimal (type:: saja) |
+| Wiki | Full documentation | README.md cukup |
+| Milestone | Per-sprint formal | Opsional |
+| Code Review | AI Review + Human Review | AI Review saja |
+| Commit Convention | Wajib (enforced via CI) | Wajib (tapi tanpa commitlint CI) |
+
+### Yang TETAP SAMA (Tidak Boleh Di-skip)
+
+Meskipun solo, quality engineering tetap dijaga:
+
+- ✅ Clean Architecture + DI pattern (WAJIB)
+- ✅ Lint + Typecheck + Test sebelum push (WAJIB)
+- ✅ Coverage >= 80% (WAJIB)
+- ✅ Conventional Commits (WAJIB, meskipun tanpa CI enforcement)
+- ✅ .gitignore + security (WAJIB)
+- ✅ Spec-Driven Development (WAJIB untuk fitur kompleks)
+- ✅ AI Governance (WAJIB)
+
+### Solo Mode Branch Strategy
+
+```
+main (production-ready)
+└── feature/short-description
+    └── commit → push → self-merge to main
+```
+
+- Tidak perlu branch `develop`
+- Feature branch langsung merge ke `main`
+- Tidak perlu MR approval (self-merge)
+- Tetap gunakan feature branch (jangan push langsung ke main)
+
+### Solo Mode Workflow
+
+```
+1. Buat feature branch dari main
+2. Implement (ikuti architecture standards)
+3. Lint + Typecheck + Test (WAJIB)
+4. Commit (conventional)
+5. Push ke feature branch
+6. Merge ke main (tanpa approval)
+7. Delete feature branch
+```
+
+### AI Agent Rules di Solo Mode
+
+- JANGAN buat milestone kecuali user minta
+- JANGAN buat issue board kompleks
+- JANGAN enforce MR approval
+- TETAP enforce architecture, testing, dan quality
+- TETAP gunakan conventional commits
+- TETAP jalankan lint/typecheck/test sebelum push
+- Simplify output — kurangi ceremony, fokus ke delivery
 
 ---
 
@@ -213,6 +291,8 @@ Power ini sudah mengintegrasikan konten dari 19 engineering steering files:
 | 20 | Commit Convention | git-workflow-automation.md |
 | 21 | Git Workflow Automation | git-workflow-automation.md |
 | 22 | Clean Architecture + DI Pattern | architecture-standards.md |
+| 23 | Test Writing Patterns | test-writing-patterns.md |
+| 24 | Tech Stack Profiles | tech-stack-profiles.md |
 
 ## Getting Started
 
@@ -339,3 +419,34 @@ AI Agent WAJIB melakukan push otomatis pada kondisi berikut:
 - Coverage check di-skip HANYA untuk task docs-only atau config-only
 
 Commit message WAJIB mengikuti Conventional Commits. Lihat steering file `git-workflow-automation.md` untuk format lengkap.
+
+---
+
+## Changelog
+
+### v1.3.0 (2026-05-10)
+
+**New Features:**
+- ✅ **Solo Mode** — Simplified workflow untuk solo developer (tanpa develop branch, tanpa MR approval, tanpa milestone formal)
+- ✅ **Test Writing Patterns** (`test-writing-patterns.md`) — Pattern testing per-layer dengan contoh konkret TypeScript
+- ✅ **Tech Stack Profiles** (`tech-stack-profiles.md`) — Adaptasi framework ke Go dan Python (FastAPI)
+- ✅ **Error Recovery Flows** — 6 recovery scenario untuk stuck-state (MCP crash, push gagal, partial sprint)
+
+**Improvements:**
+- 🔧 Fix Git MCP working directory — `repo_path` (absolute path) wajib di setiap call
+- 🔧 Fix CI `coverage-check` — gunakan `needs` + artifacts, hapus dependency `bc`, validasi 4 metrik
+- 🔧 Add Windows long path fix — `esbuild-wasm` override di package.json
+- 🔧 Add mandatory local validation (lint + typecheck + test) sebelum push
+- 🔧 Architecture-standards.md sebagai always-included steering file
+- 🔧 Post-task hook v1.2.0 — full validation pipeline (lint → typecheck → test → push)
+
+**Breaking Changes:**
+- ❌ `architecture-and-di.md` dihapus (merged ke `architecture-standards.md`)
+- ❌ `quickstart.md` dihapus (merged ke `project-structure.md`)
+
+### v1.2.0 (2026-05-09)
+
+- Initial public release
+- 15 layer framework
+- GitLab + Git MCP integration
+- 21 steering files

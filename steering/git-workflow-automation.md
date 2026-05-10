@@ -1151,6 +1151,150 @@ curl --request POST \
 
 ---
 
+## 10.1 Error Recovery Flows
+
+Jika workflow terhenti di tengah proses (MCP down, network error, partial completion), AI Agent HARUS mengikuti recovery flow berikut.
+
+### Recovery: Git Init Berhasil tapi GitLab Create Gagal
+
+```
+Situasi: .git/ sudah ada, tapi remote belum di-set (GitLab project gagal dibuat)
+
+Recovery:
+1. Cek apakah .git/ ada → YA
+2. Cek apakah remote origin ada → TIDAK
+3. Retry: create_project via GitLab MCP
+4. Jika masih gagal → tanyakan user:
+   "GitLab project gagal dibuat. Opsi:
+   a) Retry (mungkin network issue)
+   b) Buat manual di GitLab, berikan URL
+   c) Skip GitLab, lanjut development lokal dulu"
+5. Setelah dapat URL → git remote add origin <url>
+6. Push existing commits
+```
+
+### Recovery: Push Gagal di Tengah Sprint
+
+```
+Situasi: Commit sudah dibuat tapi push gagal (auth error, network, conflict)
+
+Recovery:
+1. Identifikasi error type:
+   - Auth error → informasikan user untuk update token
+   - Network error → retry 3x dengan delay 5 detik
+   - Conflict → git pull --rebase, resolve, retry push
+   - Protected branch → buat feature branch, push ke sana
+2. Jika semua retry gagal:
+   - Simpan state: branch name, commit hash, target remote
+   - Informasikan user: "Push gagal setelah 3 retry. Commit tersimpan lokal di branch X (hash: abc123). Jalankan manual: git push origin <branch>"
+3. JANGAN rollback commit — commit sudah valid, hanya push yang gagal
+```
+
+### Recovery: MR Creation Gagal Setelah Push
+
+```
+Situasi: Code sudah di-push tapi create_merge_request gagal
+
+Recovery:
+1. Retry create_merge_request 2x
+2. Jika masih gagal → fallback ke GitLab API via curl:
+   curl --request POST \
+     --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN" \
+     --data "source_branch=<branch>&target_branch=develop&title=<title>" \
+     "$GITLAB_API_URL/projects/$PROJECT_ID/merge_requests"
+3. Jika curl juga gagal → informasikan user:
+   "Code sudah di-push ke branch <branch>. MR gagal dibuat otomatis.
+   Buat manual di: https://gitlab.com/<namespace>/<project>/-/merge_requests/new?source_branch=<branch>"
+4. Update issue status tetap ke status::review (code sudah ready)
+```
+
+### Recovery: Coverage Check Gagal (Vitest Error, Bukan Coverage Rendah)
+
+```
+Situasi: npm run test:unit -- --coverage gagal bukan karena test fail, tapi error lain
+
+Kemungkinan error:
+- "Cannot find module" → dependency belum install → npm ci
+- "vitest.config.ts not found" → config belum ada → buat dari template
+- "coverage provider not available" → install @vitest/coverage-v8
+- "ENAMETOOLONG" → cek esbuild override di package.json
+- "out of memory" → tambah NODE_OPTIONS=--max-old-space-size=4096
+
+Recovery:
+1. Identifikasi error message
+2. Apply fix sesuai tabel di atas
+3. Retry test
+4. Jika masih gagal → informasikan user dengan error detail
+5. JANGAN skip coverage check — fix root cause
+```
+
+### Recovery: Partial Sprint Completion
+
+```
+Situasi: Beberapa task sudah push, tapi sprint belum selesai dan ada blocker
+
+Recovery:
+1. Identifikasi task yang sudah selesai vs yang blocked
+2. Untuk task yang selesai:
+   - Pastikan sudah push
+   - Update issue status: status::done
+3. Untuk task yang blocked:
+   - Update issue status: status::blocked
+   - Tambah comment: alasan blocked + dependency
+4. JANGAN buat MR untuk sprint yang belum complete
+5. Informasikan user:
+   "Sprint partially complete. X/Y tasks done. Blocked tasks: [list].
+   Opsi:
+   a) Selesaikan blocked tasks dulu
+   b) Carry-over ke sprint berikutnya
+   c) Buat MR dengan scope yang sudah selesai saja"
+6. Tunggu keputusan user
+```
+
+### Recovery: Git MCP Server Crash Mid-Operation
+
+```
+Situasi: Git MCP server disconnect di tengah operasi
+
+Recovery:
+1. Cek operasi terakhir yang berhasil (git status via shell)
+2. Lanjutkan dengan shell commands sebagai fallback:
+   - git add <files>
+   - git commit -m "<message>"
+   - git push origin <branch>
+3. Informasikan user: "Git MCP tidak tersedia. Menggunakan shell commands."
+4. Setelah selesai, coba reconnect MCP untuk operasi berikutnya
+5. JANGAN retry MCP call yang sama berulang kali — langsung fallback
+```
+
+### Recovery Decision Tree
+
+```
+[Error Terjadi]
+    ↓
+[Identifikasi: Network / Auth / Logic / Tool?]
+    ↓
+├── Network → Retry 3x → Gagal? → Informasikan user
+├── Auth → Informasikan user untuk update credential
+├── Logic (conflict, coverage) → Fix root cause → Retry
+└── Tool (MCP down) → Fallback ke shell → Informasikan user
+    ↓
+[Setelah recovery:]
+├── Berhasil → Lanjut workflow normal
+└── Gagal → Simpan state + informasikan user + tunggu instruksi
+```
+
+### Rules
+
+1. **JANGAN pernah diam saat error** — selalu informasikan user
+2. **JANGAN rollback commit yang valid** — commit sudah benar, hanya delivery yang gagal
+3. **JANGAN retry tanpa batas** — max 3 retry, lalu fallback atau tanya user
+4. **JANGAN skip step** — jika coverage gagal, jangan langsung push tanpa coverage
+5. **SELALU simpan state** — branch name, commit hash, error message
+6. **SELALU berikan opsi** — user harus bisa memilih next action
+
+---
+
 ## 11. Setup Environment Variables (.env)
 
 ### Kenapa Perlu .env
