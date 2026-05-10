@@ -639,3 +639,136 @@ Untuk upgrade dari prototype ke production:
 | Audit | Local IndexedDB | Sync to central server (when online) |
 | PIN | PBKDF2 client-side | Server-validated + device binding |
 | Card provisioning | Manual by operator | Backend-issued card certificates |
+
+
+---
+
+## Workflow Integration — Design Validation dalam Development Flow
+
+### Prinsip
+
+Design bukan hanya dokumen awal yang dilupakan setelah coding dimulai. Design adalah **kontrak** yang harus divalidasi sepanjang development.
+
+---
+
+### 1. Design Document Gate
+
+```
+[Fitur kompleks akan di-implement]
+    ↓
+[AI Agent cek: Apakah design document ada?]
+    ↓
+├── ADA → Validate code terhadap design
+├── BELUM ADA + Fitur kompleks → Buat design dulu
+└── BELUM ADA + Fitur sederhana → Skip, langsung code
+```
+
+**Kapan design document WAJIB:**
+- Fitur yang melibatkan > 3 komponen/service
+- Fitur yang mengubah data model existing
+- Fitur yang melibatkan integrasi external service
+- Fitur yang punya security implications
+- Fitur yang mengubah arsitektur existing
+
+**Kapan design document BOLEH di-skip:**
+- CRUD sederhana yang mengikuti pattern existing
+- UI component baru yang mengikuti design system
+- Bug fix
+- Refactoring
+
+---
+
+### 2. Kiro Hook: Design Compliance Check
+
+```json
+{
+  "name": "Design Compliance Check",
+  "version": "1.0.0",
+  "description": "Validasi bahwa implementation sesuai dengan design document",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Setelah task selesai, cek DESIGN COMPLIANCE:\n\n**1. Cek apakah ada design document untuk fitur ini:**\n- Lihat di docs/design/system/ atau docs/design/technical/\n- Jika ada → lanjut ke step 2\n- Jika tidak ada DAN fitur ini kompleks → informasikan user bahwa design document sebaiknya dibuat\n\n**2. Jika design document ada, validasi:**\n- Apakah data flow di code sesuai dengan sequence diagram di design?\n- Apakah komponen yang dibuat sesuai dengan component diagram?\n- Apakah API contract sesuai dengan yang didefinisikan di design?\n- Apakah error handling sesuai dengan failure scenario di design?\n- Apakah security measures sesuai dengan threat model?\n\n**3. Jika ada DEVIASI dari design:**\n- Informasikan user: 'Implementation berbeda dari design di [area]. Apakah ini intentional?'\n- Jika intentional → update design document agar tetap sinkron\n- Jika tidak intentional → fix implementation agar sesuai design\n\n**4. Jika tidak ada design document:**\n- Untuk fitur sederhana → skip\n- Untuk fitur kompleks → suggest: 'Fitur ini cukup kompleks. Mau saya buatkan design document untuk dokumentasi?'"
+  }
+}
+```
+
+---
+
+### 3. Design Types dan Kapan Dibutuhkan
+
+| Design Type | Kapan Dibutuhkan | Output |
+|-------------|-----------------|--------|
+| System Design | Fitur baru yang melibatkan multiple services | C4 diagram, sequence diagram |
+| Technical Design | Fitur yang mengubah arsitektur/pattern | Component diagram, data flow |
+| UI/UX Design | Fitur dengan user-facing interface baru | Wireframe, component hierarchy |
+| Security Design | Fitur dengan auth/payment/sensitive data | Threat model, trust boundary |
+
+### Minimum Design Document
+
+Untuk fitur yang butuh design, minimal harus ada:
+
+```markdown
+# Design: [Feature Name]
+
+## Overview
+[1 paragraf: apa yang dibangun dan kenapa]
+
+## Data Flow
+[Diagram atau deskripsi: bagaimana data mengalir dari input ke output]
+
+## Components
+[List komponen yang terlibat dan tanggung jawab masing-masing]
+
+## API Contract (jika ada)
+[Endpoint, request/response format]
+
+## Error Scenarios
+[Apa yang bisa gagal dan bagaimana handling-nya]
+
+## Security Considerations
+[Jika ada data sensitif atau auth flow]
+```
+
+---
+
+### 4. Design Review dalam AI Review (Layer 11)
+
+AI Agent WAJIB mengecek design compliance saat melakukan code review:
+
+```markdown
+## Design Review Checklist (tambahan untuk Layer 11)
+
+- [ ] Apakah implementation mengikuti data flow yang didefinisikan di design?
+- [ ] Apakah semua komponen yang didefinisikan di design sudah diimplementasi?
+- [ ] Apakah tidak ada komponen tambahan yang tidak ada di design (scope creep)?
+- [ ] Apakah error handling sesuai dengan failure scenario di design?
+- [ ] Apakah security measures sesuai dengan threat model?
+- [ ] Jika ada deviasi → apakah design document sudah di-update?
+```
+
+---
+
+### 5. Integration dengan Layer Lain
+
+| Layer | Bagaimana Layer 4 Terintegrasi |
+|-------|-------------------------------|
+| Layer 3 (Spec-Driven) | Spec menjadi input untuk design |
+| Layer 8 (Issue-Driven) | Issue yang kompleks HARUS punya design reference |
+| Layer 11 (AI Review) | Review cek design compliance |
+| Layer 13 (Observability) | Design harus include observability points |
+| Layer 14 (Learning) | Design yang sering berubah = signal untuk improve spec |
+
+---
+
+### 6. AI Agent Rules
+
+1. **Fitur kompleks WAJIB punya design** sebelum coding
+2. **Design adalah living document** — update jika implementation berubah
+3. **Deviasi dari design HARUS dikomunikasikan** ke user
+4. **Design review masuk ke AI Review checklist** (Layer 11)
+5. **JANGAN over-design** fitur sederhana — proportional effort
+6. **Security design WAJIB** untuk fitur yang handle sensitive data
+7. **Design document disimpan** di `docs/design/[type]/[feature-name].md`

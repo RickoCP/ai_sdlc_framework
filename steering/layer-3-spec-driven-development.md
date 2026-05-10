@@ -364,3 +364,183 @@ Idea → Problem Statement → Functional Spec → Technical Design
 3. **Single Source of Truth** - Satu fitur = satu dokumen spec utama
 4. **Small, Iterative Delivery** - Fitur dipecah scope kecil
 5. **Traceability** - Setiap perubahan bisa ditelusuri dari spec → code → release
+
+
+---
+
+## Workflow Integration — Enforce Spec-First Before Coding
+
+### Prinsip
+
+Spec-Driven Development bukan saran — ini adalah **gate wajib**. AI Agent DILARANG mulai coding fitur kompleks tanpa specification yang sudah divalidasi.
+
+---
+
+### 1. Spec-First Gate (WAJIB)
+
+```
+[User minta implement fitur baru]
+    ↓
+[AI Agent cek: Apakah spec sudah ada untuk fitur ini?]
+    ↓
+├── SPEC ADA + VALIDATED → Lanjut coding
+├── SPEC ADA + BELUM VALIDATED → Jalankan Layer 2 validation dulu
+└── SPEC BELUM ADA → Buat spec dulu, JANGAN langsung coding
+    ↓
+[Buat spec → Validate → User approve → Baru coding]
+```
+
+**Kapan spec WAJIB ada:**
+- Fitur baru yang melibatkan > 1 layer (use case + repository + UI)
+- Fitur yang melibatkan external service/API
+- Fitur yang melibatkan data model baru
+- Fitur yang punya > 3 acceptance criteria
+- Fitur yang melibatkan auth/payment/security
+
+**Kapan spec BOLEH di-skip:**
+- Bug fix sederhana (1 file, 1 function)
+- Refactoring tanpa perubahan behavior
+- Config/tooling changes
+- Documentation updates
+
+---
+
+### 2. Kiro Hook: Spec-First Enforcement
+
+```json
+{
+  "name": "Spec-First Gate",
+  "version": "1.0.0",
+  "description": "Memastikan spec ada sebelum mulai coding fitur baru",
+  "when": {
+    "type": "preTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "SEBELUM mulai task, cek apakah ini FITUR BARU yang membutuhkan spec:\n\n**Kriteria butuh spec:**\n- Melibatkan > 1 layer (use case + repository + UI)\n- Melibatkan external service/API baru\n- Melibatkan data model/entity baru\n- Punya > 3 acceptance criteria\n- Melibatkan auth/payment/security\n\n**Jika BUTUH spec:**\n1. Cek apakah file spec sudah ada di docs/specs/ untuk fitur ini\n2. Jika BELUM ada → JANGAN mulai coding. Buat spec dulu:\n   - docs/specs/srs/[feature-name]-spec.md\n   - Isi: Overview, Acceptance Criteria, Data Flow, API Contract, Error Scenarios\n   - Tanyakan user untuk review spec sebelum implement\n3. Jika SUDAH ada → cek apakah sudah validated (ada validation report)\n4. Jika belum validated → jalankan validation (Layer 2)\n\n**Jika TIDAK butuh spec (bug fix, refactor, config):**\n→ Skip, lanjut langsung ke implementation\n\n**JANGAN PERNAH:**\n- Mulai coding fitur kompleks tanpa spec\n- Buat spec setelah coding selesai (spec-after = documentation, bukan spec-driven)\n- Skip spec karena 'sudah jelas di kepala'"
+  }
+}
+```
+
+---
+
+### 3. Spec Template (Auto-Generate)
+
+Saat AI Agent perlu membuat spec, gunakan template ini:
+
+```markdown
+# Specification: [Feature Name]
+
+## Status
+Draft | Reviewed | Approved | Implemented
+
+## Overview
+[1-2 paragraf menjelaskan fitur]
+
+## User Stories
+- As a [actor], I want to [action], so that [benefit]
+
+## Acceptance Criteria
+| ID | Criteria | Priority |
+|----|----------|----------|
+| AC-001 | [Specific, measurable criteria] | Must |
+| AC-002 | [Specific, measurable criteria] | Must |
+| AC-003 | [Specific, measurable criteria] | Should |
+
+## Data Flow
+```
+[Input] → [Process] → [Output]
+```
+
+## API Contract (jika ada)
+### Endpoint
+- Method: POST/GET/PUT/DELETE
+- Path: /api/v1/[resource]
+- Request Body: { ... }
+- Response: { ... }
+- Error Responses: { ... }
+
+## Error Scenarios
+| Scenario | Expected Behavior |
+|----------|------------------|
+| [Error case] | [How system should respond] |
+
+## Dependencies
+- [External service/API]
+- [Other features that must exist first]
+
+## Out of Scope
+- [What this feature does NOT include]
+
+## Technical Notes
+- [Architecture decisions, constraints]
+```
+
+---
+
+### 4. Spec Lifecycle
+
+```
+[Draft] → AI Agent buat berdasarkan requirement
+    ↓
+[Review] → User review, berikan feedback
+    ↓
+[Approved] → User approve, siap implement
+    ↓
+[Implemented] → Code selesai, spec menjadi documentation
+    ↓
+[Updated] → Jika ada perubahan saat development, spec di-update
+```
+
+**Rules:**
+- Spec HARUS di-update jika implementation berbeda dari spec
+- Spec yang outdated = tech debt (buat issue)
+- Spec disimpan di `docs/specs/srs/[feature-name]-spec.md`
+
+---
+
+### 5. Traceability: Spec → Code → Test
+
+Setiap acceptance criteria di spec HARUS bisa di-trace ke:
+- Code yang mengimplementasikannya
+- Test yang memvalidasinya
+
+```
+AC-001 → src/core/domains/payment/usecases/CreatePayment.ts
+       → tests/unit/core/domains/payment/usecases/CreatePayment.test.ts
+
+AC-002 → src/infrastructure/repositories/payment/PaymentRepositoryImpl.ts
+       → tests/unit/infrastructure/repositories/payment/PaymentRepositoryImpl.test.ts
+```
+
+AI Agent WAJIB menyertakan referensi AC di commit message:
+```
+feat(payment): implement card registration
+
+Covers: AC-001, AC-002, AC-003
+Refs #12
+```
+
+---
+
+### 6. Integration dengan Layer Lain
+
+| Layer | Bagaimana Layer 3 Terintegrasi |
+|-------|-------------------------------|
+| Layer 2 (Validation) | Requirement HARUS validated sebelum spec dibuat |
+| Layer 4 (Design) | Spec menjadi input untuk technical design |
+| Layer 8 (Issue-Driven) | Setiap issue HARUS reference spec (jika ada) |
+| Layer 11 (AI Review) | Review cek: apakah code sesuai spec? |
+| Layer 14 (Learning) | Spec yang sering berubah = signal untuk improve intake |
+
+---
+
+### 7. AI Agent Rules
+
+1. **Spec-first untuk fitur kompleks** — WAJIB, bukan opsional
+2. **Spec sebelum coding** — bukan setelah (spec-after = documentation)
+3. **User HARUS approve spec** sebelum implementation dimulai
+4. **Spec HARUS di-update** jika implementation berubah
+5. **Setiap AC HARUS traceable** ke code dan test
+6. **JANGAN buat spec yang terlalu detail** untuk fitur sederhana — proportional effort
+7. **Spec adalah living document** — update seiring development, bukan freeze

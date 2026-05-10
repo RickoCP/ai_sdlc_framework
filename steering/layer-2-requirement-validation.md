@@ -218,3 +218,108 @@ Requirement TIDAK BOLEH masuk ke Layer 3 (Spec) jika:
 3. **Document decisions** - Setiap resolution harus didokumentasikan
 4. **Track validation status** - Gunakan GitLab labels
 5. **Automate where possible** - Gunakan CI/CD untuk basic checks
+
+---
+
+## Workflow Integration — Automated Validation Gates
+
+### Prinsip
+
+Requirement Validation BUKAN step opsional. Validation adalah **gate wajib** antara intake dan development. Tanpa validation, AI akan bekerja berdasarkan requirement yang ambigu, incomplete, atau conflicting.
+
+---
+
+### 1. Automated Validation Trigger
+
+AI Agent WAJIB menjalankan validation **OTOMATIS** setelah requirement intake selesai (Layer 1 output tersedia).
+
+```
+[Layer 1: Requirement Intake selesai]
+    ↓
+[TRIGGER: Auto-validate requirements]
+    ↓
+[AI Agent jalankan 4 validation checks:]
+    ├── Ambiguity Check — apakah ada requirement yang bisa diinterpretasi ganda?
+    ├── Completeness Check — apakah ada informasi yang hilang?
+    ├── Conflict Check — apakah ada requirement yang bertentangan?
+    └── Feasibility Check — apakah requirement bisa diimplementasi dengan tech stack yang dipilih?
+    ↓
+[Generate Validation Report]
+    ↓
+[Jika ada issue → BLOCK lanjut ke Layer 3, minta klarifikasi user]
+[Jika clean → lanjut ke Layer 3 (Spec-Driven Development)]
+```
+
+---
+
+### 2. Kiro Hook: Requirement Validation Gate
+
+```json
+{
+  "name": "Requirement Validation Gate",
+  "version": "1.0.0",
+  "description": "Auto-validate requirements sebelum lanjut ke spec/development",
+  "when": {
+    "type": "fileCreated",
+    "patterns": ["docs/requirements/**/*.md", "docs/specs/prd/**/*.md"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "File requirement/PRD baru dibuat. Jalankan VALIDATION OTOMATIS:\n\n**1. Ambiguity Check:**\n- Scan setiap user story/requirement\n- Tandai yang menggunakan kata ambigu: 'cepat', 'mudah', 'baik', 'sesuai', 'dll'\n- Tandai yang tidak punya acceptance criteria spesifik\n- Tandai yang tidak punya definisi measurable\n\n**2. Completeness Check:**\n- Apakah setiap user story punya: Actor, Action, Benefit?\n- Apakah setiap requirement punya acceptance criteria?\n- Apakah ada dependency yang belum didefinisikan?\n- Apakah error/edge case sudah dipertimbangkan?\n\n**3. Conflict Check:**\n- Apakah ada requirement yang bertentangan satu sama lain?\n- Apakah ada requirement yang bertentangan dengan constraint teknis?\n- Apakah ada requirement yang bertentangan dengan governance/security policy?\n\n**4. Feasibility Check:**\n- Apakah requirement bisa diimplementasi dengan tech stack yang dipilih?\n- Apakah ada requirement yang membutuhkan third-party service yang belum tersedia?\n- Apakah timeline realistis untuk scope yang diminta?\n\n**Output:**\nGenerate file `docs/requirements/validation/validation-report-[date].md` dengan:\n- Summary: X requirements validated, Y issues found\n- Detail per issue: requirement ID, issue type, severity, suggestion\n- Recommendation: proceed / needs clarification\n\n**Rules:**\n- Jika ada issue CRITICAL → BLOCK, minta klarifikasi user sebelum lanjut\n- Jika ada issue WARNING → informasikan user, boleh lanjut dengan catatan\n- Jika clean → informasikan user, lanjut ke Layer 3"
+  }
+}
+```
+
+---
+
+### 3. Validation Report Template
+
+```markdown
+# Requirement Validation Report
+
+**Date:** [YYYY-MM-DD]
+**Source:** [file yang divalidasi]
+**Status:** ✅ PASSED / ⚠️ PASSED WITH WARNINGS / ❌ BLOCKED
+
+## Summary
+- Total requirements: [N]
+- Valid: [N]
+- Warnings: [N]
+- Critical issues: [N]
+
+## Issues Found
+
+### Critical (MUST fix before proceeding)
+| # | Requirement | Issue Type | Description | Suggestion |
+|---|-------------|-----------|-------------|------------|
+| 1 | US-003 | Ambiguity | "sistem harus cepat" — tidak ada definisi measurable | Definisikan: response time < 2s |
+
+### Warnings (Can proceed, but should address)
+| # | Requirement | Issue Type | Description | Suggestion |
+|---|-------------|-----------|-------------|------------|
+| 1 | US-007 | Completeness | Tidak ada error scenario | Tambahkan: apa yang terjadi jika payment gagal? |
+
+## Recommendation
+[Proceed to Layer 3 / Needs clarification from stakeholder]
+```
+
+---
+
+### 4. Integration dengan Layer Lain
+
+| Layer | Bagaimana Layer 2 Terintegrasi |
+|-------|-------------------------------|
+| Layer 1 (Intake) | Output Layer 1 → input validation otomatis |
+| Layer 3 (Spec-Driven) | Validation HARUS pass sebelum spec dibuat |
+| Layer 5 (Governance) | Validation cek compliance terhadap governance rules |
+| Layer 8 (Issue-Driven) | Issues tidak boleh dibuat dari requirement yang belum validated |
+
+---
+
+### 5. AI Agent Rules
+
+1. **JANGAN mulai spec/coding tanpa validation** — requirement yang belum validated = risiko rework
+2. **JANGAN skip validation karena "requirement sudah jelas"** — selalu jalankan minimal completeness check
+3. **SELALU generate validation report** — sebagai audit trail
+4. **SELALU informasikan user** tentang hasil validation sebelum lanjut
+5. **Jika user push untuk skip** → informasikan risiko, catat sebagai accepted risk di docs/governance/
