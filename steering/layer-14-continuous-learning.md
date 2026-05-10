@@ -427,3 +427,228 @@ docs/adr/
   ADR-002-di-awilix.md
   ADR-003-clean-architecture.md
 ```
+
+
+---
+
+## Workflow Integration — Menjadikan Learning Otomatis dan Sistematis
+
+### Prinsip
+
+Learning BUKAN aktivitas opsional yang dilakukan "kalau sempat". Learning adalah **bagian dari workflow** yang ter-trigger otomatis di momen yang tepat.
+
+---
+
+### 1. Automated Learning Triggers
+
+| Trigger | Kapan | Action AI Agent |
+|---------|-------|----------------|
+| Bug fix committed | Setelah fix bug di-push | Generate Bug Learning template, update skill/spec yang relevan |
+| Sprint selesai | Setelah MR merged (sprint delivery) | Generate Sprint Retrospective, identify recurring patterns |
+| Incident resolved | Setelah postmortem selesai | Create improvement issues, update governance/skills |
+| Coverage drop | Coverage turun > 5% dari sprint sebelumnya | Buat issue type::testing-debt, identify area yang perlu test |
+| Architecture decision | Saat memilih pattern/library baru | Generate ADR, document trade-offs |
+| Repeated review feedback | Issue yang sama muncul 3x di review | Update skill/steering yang relevan |
+
+---
+
+### 2. Kiro Hooks untuk Learning
+
+#### Hook: Bug Learning Capture
+
+```json
+{
+  "name": "Bug Learning Capture",
+  "version": "1.0.0",
+  "description": "Otomatis capture learning setiap kali bug di-fix",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Cek apakah task yang baru selesai adalah BUG FIX (commit message dimulai dengan 'fix:' atau issue type::bug).\n\nJika YA, lakukan:\n1. Buat file docs/learnings/BUG-[issue-number].md dengan template:\n   - What Happened\n   - Root Cause\n   - Why Not Detected Earlier (kenapa test/review/CI tidak catch)\n   - Prevention (apa yang harus diubah agar tidak terulang)\n2. Identifikasi apakah perlu update:\n   - Skill file (.kiro/skills/) → tambah pattern/check\n   - Test pattern → tambah edge case\n   - Review checklist → tambah check point\n   - CI/CD → tambah validation\n3. Jika perlu update → buat sebagai TODO comment di learning file\n4. Informasikan user: 'Bug learning captured. Rekomendasi improvement: [list]'\n\nJika BUKAN bug fix → skip, tidak perlu learning capture."
+  }
+}
+```
+
+#### Hook: Sprint Retrospective Generator
+
+```json
+{
+  "name": "Sprint Retrospective Generator",
+  "version": "1.0.0",
+  "description": "Generate retrospective otomatis saat sprint selesai",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "User meminta sprint retrospective. Lakukan:\n\n1. Kumpulkan data sprint:\n   - List semua commits di sprint ini (dari milestone/branch)\n   - Hitung: total tasks, completed, carry-over\n   - Hitung: test coverage sekarang vs awal sprint\n   - List: issues yang di-reopen atau butuh rework\n\n2. Generate retrospective document (docs/retrospectives/sprint-[N].md):\n   - AI Performance: tasks completed, rework rate\n   - What Worked: patterns/approaches yang berhasil\n   - What Didn't Work: yang gagal atau butuh banyak iterasi\n   - Recurring Issues: masalah yang muncul berulang\n   - Improvement Actions: concrete next steps\n\n3. Identifikasi improvement:\n   - Jika ada pattern berulang → suggest skill update\n   - Jika coverage turun → suggest testing focus\n   - Jika banyak rework → suggest spec improvement\n\n4. Buat GitLab issues untuk setiap improvement action (type::improvement)\n\n5. Update wiki Changelog dengan sprint summary"
+  }
+}
+```
+
+#### Hook: ADR Reminder
+
+```json
+{
+  "name": "ADR Reminder for Architecture Decisions",
+  "version": "1.0.0",
+  "description": "Mengingatkan untuk membuat ADR saat ada keputusan arsitektur",
+  "when": {
+    "type": "preToolUse",
+    "toolTypes": ["write"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Cek apakah file yang akan ditulis mengandung KEPUTUSAN ARSITEKTUR BARU:\n- Menambah library/dependency baru yang signifikan\n- Mengubah folder structure\n- Menambah layer/pattern baru\n- Mengubah DI registration pattern\n- Menambah external service integration\n\nJika YA:\n1. Tanyakan user: 'Ini terlihat seperti keputusan arsitektur. Mau saya buatkan ADR?'\n2. Jika user setuju → buat docs/adr/ADR-[next-number]-[title].md\n3. Isi: Context, Decision, Alternatives, Consequences, Trade-offs\n\nJika TIDAK (perubahan kecil, refactor, bug fix) → skip, lanjut normal."
+  }
+}
+```
+
+---
+
+### 3. Learning Documents Structure
+
+```
+project-root/
+├── docs/
+│   ├── learnings/
+│   │   ├── BUG-012-double-payment.md      # Bug learning
+│   │   ├── BUG-015-auth-bypass.md         # Bug learning
+│   │   └── PERF-001-slow-query.md         # Performance learning
+│   ├── retrospectives/
+│   │   ├── sprint-1.md                    # Sprint retro
+│   │   ├── sprint-2.md
+│   │   └── quarterly-Q1-2026.md           # Quarterly review
+│   ├── adr/
+│   │   ├── ADR-001-nextjs-app-router.md
+│   │   ├── ADR-002-awilix-di.md
+│   │   └── ADR-003-vitest-over-jest.md
+│   └── tech-debt/
+│       ├── TD-001-missing-validation.md
+│       └── TD-002-legacy-api-adapter.md
+```
+
+AI Agent WAJIB membuat folder `docs/learnings/` dan `docs/retrospectives/` saat project setup.
+
+---
+
+### 4. Improvement Cycle yang Ter-automate
+
+```
+[Bug Fix / Sprint End / Incident]
+    ↓
+[AI Agent otomatis generate learning document]
+    ↓
+[AI Agent identifikasi improvement area]
+    ↓
+[AI Agent suggest concrete changes:]
+    ├── Update .kiro/skills/create-*.md
+    ├── Update .kiro/steering/architecture-standards.md
+    ├── Update docs/governance/ai-policy.md
+    ├── Tambah test case baru
+    └── Tambah CI/CD check
+    ↓
+[User approve/reject suggestions]
+    ↓
+[AI Agent implement approved changes]
+    ↓
+[Verify improvement di sprint berikutnya]
+```
+
+---
+
+### 5. Tech Debt Tracking (Otomatis)
+
+AI Agent WAJIB mendeteksi dan mendokumentasikan tech debt saat:
+
+| Situasi | Action |
+|---------|--------|
+| Menulis code dengan TODO/FIXME/HACK comment | Buat docs/tech-debt/TD-XXX.md + GitLab issue |
+| Coverage turun setelah fitur baru | Buat issue type::testing-debt |
+| Menggunakan workaround karena deadline | Dokumentasikan di learning + buat issue |
+| Dependency outdated (npm audit warning) | Buat issue type::tech-debt, priority::medium |
+| Architecture violation terdeteksi di review | Buat issue + update governance |
+
+```typescript
+// Contoh: AI Agent mendeteksi TODO di code
+// src/infrastructure/repositories/payment/PaymentRepositoryImpl.ts
+// TODO: Handle pagination — currently returns all results
+// → AI Agent WAJIB: buat TD-XXX.md + GitLab issue
+```
+
+---
+
+### 6. Monthly/Quarterly Review Template
+
+AI Agent WAJIB mengingatkan user untuk review berkala:
+
+**Monthly (setiap akhir bulan):**
+```markdown
+# Monthly Engineering Review — [Month Year]
+
+## Metrics
+- Deployment frequency: [N] deploys
+- Lead time: [N] hours average
+- Change failure rate: [N]%
+- MTTR: [N] minutes
+- Test coverage trend: [start]% → [end]%
+- Open tech debt items: [N]
+
+## Top Issues
+1. [Most common bug pattern]
+2. [Most common review feedback]
+3. [Biggest performance bottleneck]
+
+## Actions Taken
+- [Skills updated]
+- [Governance updated]
+- [Architecture decisions made]
+
+## Next Month Focus
+- [Priority improvements]
+```
+
+**Quarterly:**
+- Architecture evolution assessment
+- Tech debt prioritization
+- AI effectiveness review (acceptance rate, hallucination count)
+- Roadmap alignment check
+
+---
+
+### 7. Integration dengan Layer Lain
+
+| Layer | Bagaimana Layer 14 Terintegrasi |
+|-------|--------------------------------|
+| Layer 5 (Governance) | Learning dari incidents → update governance rules |
+| Layer 6 (AI Skills) | Recurring patterns → update/create skills |
+| Layer 8 (Issue-Driven) | Improvement actions → GitLab issues (type::improvement) |
+| Layer 11 (AI Review) | Review patterns → update review checklist |
+| Layer 12 (Quality Gates) | Gaps detected → add CI/CD checks |
+| Layer 13 (Observability) | Production metrics → input untuk learning |
+
+---
+
+### 8. AI Agent Rules untuk Continuous Learning
+
+1. **Setiap bug fix → WAJIB capture learning** (tidak opsional)
+2. **Setiap sprint end → WAJIB generate retrospective** (trigger manual via hook)
+3. **Setiap architecture decision → WAJIB buat ADR** (reminder via hook)
+4. **Setiap TODO/HACK di code → WAJIB buat tech debt record**
+5. **Setiap 3x review feedback yang sama → WAJIB update skill/steering**
+6. **JANGAN biarkan learning hanya jadi dokumen** — setiap learning HARUS punya action item
+7. **JANGAN tunggu user minta** — proactively suggest improvements berdasarkan patterns
+
+---
+
+### 9. Definition of "Learning Complete"
+
+Learning dianggap complete jika:
+- [ ] Dokumen learning dibuat (bug/perf/retro)
+- [ ] Root cause teridentifikasi
+- [ ] Action items didefinisikan
+- [ ] Minimal 1 action item sudah diimplementasi (skill update, test tambahan, atau CI check)
+- [ ] GitLab issue dibuat untuk action items yang belum selesai
+- [ ] Improvement terverifikasi di cycle berikutnya

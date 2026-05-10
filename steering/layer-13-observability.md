@@ -419,3 +419,241 @@ Detection - Triage - Response - Mitigation - Recovery - Postmortem - Follow-up
 - MTTD (Mean Time To Detect)
 - Jumlah incident per bulan
 - Jumlah Sev-1/Sev-2
+
+
+---
+
+## Workflow Integration — Menjadikan Observability Bagian dari Development Flow
+
+### Prinsip
+
+Observability BUKAN afterthought. Observability adalah **bagian dari Definition of Done** untuk setiap fitur.
+
+---
+
+### 1. Observability Checklist per Fitur (WAJIB)
+
+Setiap fitur baru HARUS memenuhi checklist observability sebelum dianggap "done":
+
+```markdown
+## Observability Checklist — [Feature Name]
+
+### Logging
+- [ ] Structured logging ditambahkan di entry point (API handler/route)
+- [ ] Error logging dengan context (userId, requestId, correlationId)
+- [ ] Tidak ada sensitive data di log (password, token, OTP, CVV)
+- [ ] Log level sesuai (info untuk normal, error untuk failure)
+
+### Metrics
+- [ ] Business metric ditambahkan (counter untuk event utama)
+- [ ] Technical metric ditambahkan (duration untuk operasi penting)
+- [ ] Error counter ditambahkan per endpoint/use case
+
+### Tracing
+- [ ] Correlation ID di-propagate dari entry point ke semua layer
+- [ ] Custom span ditambahkan untuk operasi kritis (DB call, external API)
+
+### Error Handling
+- [ ] Error di-capture ke Sentry/error tracker
+- [ ] Error context lengkap (user, request, stack trace)
+- [ ] Graceful degradation jika observability service down
+
+### Alerting
+- [ ] Alert rule didefinisikan untuk failure scenario
+- [ ] Alert threshold realistis (tidak spam)
+```
+
+AI Agent WAJIB mengecek checklist ini saat:
+- Membuat fitur baru (Layer 8 task completion)
+- AI Review (Layer 11)
+- Pre-push validation
+
+---
+
+### 2. AI Agent Rules: Kapan Menambahkan Observability
+
+| Situasi | Action AI Agent |
+|---------|----------------|
+| Membuat API endpoint baru | WAJIB tambah: structured log di handler, duration metric, error counter |
+| Membuat Use Case baru | WAJIB tambah: log di entry/exit, error capture |
+| Membuat Repository baru | WAJIB tambah: log untuk external call, duration metric |
+| Membuat Middleware baru | WAJIB tambah: request log, auth event log |
+| Fix bug | WAJIB tambah: log/metric yang bisa mendeteksi bug ini di masa depan |
+| Performance improvement | WAJIB tambah: before/after metric untuk validasi improvement |
+
+### Pattern: Observability di Setiap Layer
+
+```typescript
+// USE CASE — log business event
+export const CreatePaymentUseCaseImpl = ({
+  paymentRepository,
+  logger,
+  metrics,
+}: {
+  paymentRepository: PaymentRepository;
+  logger: Logger;
+  metrics: MetricsClient;
+}): CreatePaymentUseCase => ({
+  execute: async (params) => {
+    const startTime = Date.now();
+    logger.info('Payment creation started', { userId: params.userId, amount: params.amount });
+
+    try {
+      const result = await paymentRepository.create(params);
+      metrics.counter('payment.created', { status: 'success' });
+      metrics.histogram('payment.creation.duration', Date.now() - startTime);
+      logger.info('Payment created successfully', { paymentId: result.id });
+      return { success: true, data: result };
+    } catch (error) {
+      metrics.counter('payment.created', { status: 'error' });
+      logger.error('Payment creation failed', { error: error.message, userId: params.userId });
+      return { success: false, error };
+    }
+  },
+});
+```
+
+```typescript
+// REPOSITORY — log external call
+export const PaymentRepositoryImpl = ({
+  httpProtocol,
+  logger,
+  metrics,
+}: {
+  httpProtocol: HttpProtocol;
+  logger: Logger;
+  metrics: MetricsClient;
+}): PaymentRepository => ({
+  create: async (params) => {
+    const startTime = Date.now();
+    try {
+      const response = await httpProtocol.post('/api/payments', params);
+      metrics.histogram('http.external.duration', Date.now() - startTime, {
+        endpoint: '/api/payments',
+        method: 'POST',
+        status: 'success',
+      });
+      return response.data;
+    } catch (error) {
+      metrics.histogram('http.external.duration', Date.now() - startTime, {
+        endpoint: '/api/payments',
+        method: 'POST',
+        status: 'error',
+      });
+      logger.error('External API call failed', {
+        endpoint: '/api/payments',
+        error: error.message,
+        duration: Date.now() - startTime,
+      });
+      throw error;
+    }
+  },
+});
+```
+
+---
+
+### 3. DI Registration untuk Observability
+
+Logger dan Metrics WAJIB di-register di DI container dan di-inject ke setiap layer yang membutuhkan:
+
+```typescript
+// src/infrastructure/di/registry/loggingContainer.ts
+import { asFunction } from 'awilix';
+
+export const registerLogging = (container) => {
+  container.register({
+    logger: asFunction(createStructuredLogger).singleton(),
+    metrics: asFunction(createMetricsClient).singleton(),
+    errorTracker: asFunction(createSentryClient).singleton(),
+  });
+};
+```
+
+**Rules:**
+- Logger dan Metrics adalah **singleton** (stateless, shared)
+- JANGAN import logger langsung — selalu via DI injection
+- JANGAN log di core/domain entities — log di use case dan infrastructure
+
+---
+
+### 4. Kiro Hook: Observability Reminder
+
+```json
+{
+  "name": "Observability Check on New Feature",
+  "version": "1.0.0",
+  "description": "Mengingatkan agent untuk menambahkan observability saat membuat fitur baru",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": ["write"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Jika file yang baru ditulis adalah source code (bukan docs/config), cek apakah observability sudah ditambahkan:\n\n1. Apakah ada structured logging di entry point?\n2. Apakah ada error capture dengan context?\n3. Apakah ada metrics (counter/histogram) untuk operasi penting?\n4. Apakah correlation ID di-propagate?\n\nJika BELUM ada dan file ini adalah handler/usecase/repository → TAMBAHKAN sekarang.\nJika file ini adalah entity/mapper/component UI → SKIP (tidak perlu observability langsung).\n\nPattern: inject logger dan metrics via DI, log di entry/exit/error, tambah duration metric untuk operasi I/O."
+  }
+}
+```
+
+---
+
+### 5. Integration dengan Layer Lain
+
+| Layer | Bagaimana Layer 13 Terintegrasi |
+|-------|--------------------------------|
+| Layer 6 (AI Skills) | Skill `create-api`, `create-usecase`, `create-repository` HARUS include observability pattern |
+| Layer 8 (Issue-Driven) | Observability checklist masuk ke Definition of Done per task |
+| Layer 11 (AI Review) | Review checklist: "Apakah fitur ini observable?" |
+| Layer 12 (Quality Gates) | CI/CD cek: apakah logger/metrics di-import di file baru |
+| Layer 14 (Continuous Learning) | Production metrics menjadi input untuk improvement |
+
+---
+
+### 6. Incident Response Integration
+
+Saat incident terjadi, AI Agent HARUS:
+
+```
+[Incident Detected — dari alert/user report]
+    ↓
+1. Cek severity (Sev-1 s/d Sev-4)
+    ↓
+2. Jika Sev-1/Sev-2:
+   - Buat GitLab issue: type::incident, priority::critical
+   - Suggest immediate mitigation (rollback, feature flag off)
+   - Generate postmortem template
+    ↓
+3. Setelah resolved:
+   - Buat postmortem document (docs/incidents/INC-XXX.md)
+   - Identifikasi: "Kenapa observability tidak mendeteksi lebih awal?"
+   - Tambah alert rule baru jika perlu
+   - Update monitoring dashboard
+   - Create follow-up issues (type::tech-debt atau type::improvement)
+    ↓
+4. Feed ke Layer 14 (Continuous Learning):
+   - Update skill jika pattern berulang
+   - Update governance jika ada gap
+```
+
+---
+
+### 7. Minimum Viable Observability (untuk Project Baru)
+
+Untuk project yang baru dimulai, implementasi observability minimal:
+
+**Phase 1 (Day 1 — saat project setup):**
+- Structured logger (console JSON di dev, service di prod)
+- Global error handler + Sentry
+- Request logging middleware (method, path, status, duration)
+
+**Phase 2 (Sprint 1 — saat fitur pertama):**
+- Business metrics (counter untuk event utama)
+- Correlation ID middleware
+- Basic dashboard (request rate, error rate, latency)
+
+**Phase 3 (Sprint 2+ — seiring fitur bertambah):**
+- Custom spans (OpenTelemetry)
+- Alert rules per fitur kritis
+- SLO definition
+
+**AI Agent WAJIB** implement Phase 1 saat project setup (Automated Project Setup step).
