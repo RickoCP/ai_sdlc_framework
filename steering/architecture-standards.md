@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Architecture Standards — Clean Architecture + DI Pattern
 
 ## Overview
@@ -7,6 +11,28 @@ Dokumen ini adalah **engineering guideline WAJIB** untuk seluruh pengembangan pr
 Arsitektur yang digunakan adalah **Clean Architecture** dengan pendekatan **Domain-Driven Design (DDD)** pada **Next.js App Router**, menggunakan **Awilix** sebagai DI container.
 
 Semua AI Agent dan Developer **WAJIB mengikuti aturan dalam dokumen ini**. Jika ada konflik dengan dokumen lain, dokumen ini adalah **sumber kebenaran utama** untuk keputusan arsitektur dan DI.
+
+### Peran Dokumen Ini dalam Framework
+
+Dokumen ini berfungsi sebagai **acuan arsitektur utama** yang WAJIB dirujuk saat mengerjakan **setiap layer** dalam Enterprise AI-Native SDLC Framework:
+
+| Layer | Bagaimana Dokumen Ini Digunakan |
+|-------|--------------------------------|
+| Layer 3 (Spec-Driven Dev) | Specification HARUS mengikuti struktur layer dan naming convention di sini |
+| Layer 4 (Design System) | Technical design HARUS comply dengan dependency rule dan data flow |
+| Layer 6 (AI Skills) | Setiap skill/workflow HARUS menghasilkan code yang sesuai arsitektur ini |
+| Layer 7 (Team Extension) | Team standards TIDAK BOLEH bertentangan dengan aturan di sini |
+| Layer 8 (Issue-Driven Dev) | Setiap task/issue HARUS menghasilkan code yang comply |
+| Layer 9 (Agent Orchestration) | Semua agent HARUS mengikuti pattern ini saat generate code |
+| Layer 11 (AI Review) | Review checklist HARUS mengecek compliance terhadap dokumen ini |
+| Layer 12 (Quality Gates) | CI/CD HARUS enforce dependency rule dan structure |
+
+**AI Agent Rules:**
+- Saat membuat fitur baru → ikuti "Workflow Membuat Fitur Baru" di bawah
+- Saat membuat file baru → ikuti "Naming Convention" dan letakkan di layer yang benar
+- Saat register dependency → ikuti "Registration Pattern" dan "Lifetime Rules"
+- Saat review code → validasi terhadap "Aturan Dependency" dan "Anti-Pattern"
+- **JANGAN PERNAH** menghasilkan code yang melanggar dependency rule, meskipun user meminta shortcut
 
 ---
 
@@ -308,6 +334,20 @@ Rules:
 
 **Component kecil** → terima props dari parent/screen/ViewModel, jangan resolve sendiri
 
+### DI dan Clean Architecture (Relationship)
+
+DI adalah alat untuk **menegakkan arsitektur**, bukan untuk membypass arsitektur.
+
+❌ Salah:
+- Component presentation resolve `paymentRepository`
+- Core use case import `container`
+- Mapper resolve logger dari DI
+
+✅ Benar:
+- Repository di-inject ke use case
+- Use case di-inject ke ViewModel
+- ViewModel di-resolve di screen/container
+
 ---
 
 ## Naming Convention (WAJIB)
@@ -419,12 +459,55 @@ Semua AI Agent dan Developer:
 - **WAJIB** mengikuti dependency rule
 - **WAJIB** menggunakan DI untuk seluruh dependency utama
 - **WAJIB** mendaftarkan dependency baru ke registry yang sesuai
+- **WAJIB** menjaga consistency antara DI pattern dan Clean Architecture
 - **DILARANG** melanggar boundary layer
 - **DILARANG** import implementation konkret lintas layer jika seharusnya di-inject
 - **DILARANG** menggunakan container di `core`
 
-Jika ada konflik antara kemudahan implementasi vs disiplin arsitektur:
-👉 **disiplin arsitektur harus diprioritaskan**
+Jika ada konflik antara kemudahan implementasi vs disiplin arsitektur/DI:
+👉 **disiplin arsitektur dan DI harus diprioritaskan**
+
+Jika ada konflik dengan dokumen lain:
+👉 gunakan dokumen ini sebagai **sumber kebenaran utama untuk keputusan arsitektur dan DI**
+
+---
+
+## Best Practices
+
+### Arsitektur
+
+- Semua business logic → use case
+- Semua external access → repository
+- Semua dependency → DI container
+- Semua mapping → mapper
+- Page di `app/` harus tipis (routing + layout only)
+- Gunakan Server Component sebagai default
+- Minimalkan `use client` — hanya untuk interaksi/state lokal
+
+### Dependency Injection
+
+- Gunakan composition root terpusat (`src/infrastructure/di/`)
+- Register dependency sesuai layer
+- Gunakan factory function dengan object injection
+- Pilih lifecycle dengan sadar (default: singleton untuk stateless)
+- Resolve dependency sedekat mungkin ke boundary komposisi
+- Mock dependency via injection saat testing
+- Jaga registration naming tetap konsisten dan eksplisit
+- Gunakan DI untuk memperkuat Clean Architecture, bukan melemahkannya
+
+---
+
+## Kesimpulan
+
+Arsitektur Clean Architecture + DDD yang diperkuat dengan Dependency Injection memastikan:
+
+- Code lebih rapi dan konsisten
+- Dependency terkontrol dan terisolasi
+- Logic bisnis terisolasi dari framework
+- Testing lebih mudah dan reliable
+- Implementasi bisa diganti tanpa mengubah caller
+- Boundary layer tetap bersih
+- Proyek siap untuk skala enterprise
 
 ---
 

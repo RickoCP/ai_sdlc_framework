@@ -91,7 +91,7 @@ Setiap layer memiliki steering file tersendiri untuk panduan detail:
 - **project-structure.md** - Struktur folder project, naming conventions, dan quickstart guide
 - **git-workflow-automation.md** - Git init, remote setup, commit convention, auto-push, branch strategy, dan MR automation
 - **requirement-traceability.md** - End-to-end flow dari PRD User Story hingga Merge dengan traceability matrix
-- **architecture-standards.md** - Clean Architecture + DDD + Dependency Injection (Awilix) standards WAJIB
+- **architecture-standards.md** - **(ALWAYS INCLUDED)** Clean Architecture + DDD + Dependency Injection (Awilix) — acuan arsitektur WAJIB untuk semua layer
 - **presentation-material.md** - Generate materi presentasi project (UI/UX, Design, Construction, Quality, Deployment, Security)
 
 ## Agent Workflow Rules
@@ -299,19 +299,26 @@ Menyediakan tools untuk:
 
 Saat user konfirmasi membuat project baru, AI Agent akan otomatis:
 
-1. **`git init`** - Inisialisasi Git repository lokal
-2. **`create_project`** (GitLab) - Buat repository di GitLab
-3. **`git remote add origin`** - Hubungkan lokal ke GitLab remote
-4. **Buat struktur folder** sesuai framework (docs/, .kiro/, src/, tests/, .gitlab/)
-5. **Buat `.gitignore`** sesuai tech stack
-6. **Buat `.gitlab-ci.yml`** dengan pipeline dasar
-7. **Initial commit + push** ke GitLab (main branch)
+0. **Tentukan `repo_path`** — Absolute path ke project directory (WAJIB untuk semua Git MCP calls)
+1. **`git_init`** - Inisialisasi Git repository lokal (path = repo_path)
+2. **Buat `.gitignore`** sesuai tech stack
+3. **Buat struktur folder** sesuai framework (docs/, .kiro/, src/, tests/, .gitlab/)
+4. **Stage + Initial commit** — `git add` + `git commit` (repo_path WAJIB di-pass)
+5. **`create_project`** (GitLab MCP) - Buat repository di GitLab
+6. **`git remote add origin`** — via shell command (CWD = repo_path), karena Git MCP tidak punya tool remote add
+7. **`git push -u origin main`** — Push initial commit
 8. **Buat branch `develop`** + push ke remote
 9. **Setup branch protection** (main, develop)
 10. **Buat labels** sesuai framework (type::*, status::*, priority::*, team::*)
-11. **Buat issue templates** di repository
+11. **Buat `.gitlab-ci.yml`** dengan pipeline dasar
 
 Semua ini dilakukan otomatis menggunakan Git MCP dan GitLab MCP setelah user menjawab pertanyaan project di awal.
+
+**⚠️ CRITICAL — Working Directory:**
+- Git MCP (`@cyanheads/git-mcp-server`) MEMERLUKAN `repo_path` (absolute path) di SETIAP tool call
+- Tanpa `repo_path`, semua git operations akan GAGAL
+- Jika Git MCP tidak tersedia, fallback ke shell commands dengan CWD = repo_path
+- Lihat steering file `git-workflow-automation.md` Section 2 untuk detail lengkap
 
 **PENTING:** Jika project sudah ada tapi belum punya git repository, AI Agent WAJIB mendeteksi ini dan menjalankan setup di atas sebelum mulai development. Lihat steering file `git-workflow-automation.md` untuk detail lengkap.
 
@@ -319,11 +326,16 @@ Semua ini dilakukan otomatis menggunakan Git MCP dan GitLab MCP setelah user men
 
 AI Agent WAJIB melakukan push otomatis pada kondisi berikut:
 
-| Trigger | Action |
-|---------|--------|
-| Task selesai | Commit + Push ke feature branch |
-| Sprint selesai | Push + Create Merge Request |
-| Hotfix selesai | Push + Create MR ke main |
-| Initial setup | Push ke main + develop |
+| Trigger | Pre-condition | Action |
+|---------|---------------|--------|
+| Task selesai | Tests pass + Coverage >= 80% | Commit + Push ke feature branch |
+| Sprint selesai | Full test suite pass + Coverage >= 80% | Push + Create Merge Request |
+| Hotfix selesai | Tests pass + Coverage >= 80% | Push + Create MR ke main |
+| Initial setup | — | Push ke main + develop |
+
+**⚠️ BLOCKING RULES:**
+- Test failure = **BLOCK push** — fix tests dulu
+- Coverage < 80% = **BLOCK push** — tambah test dulu
+- Coverage check di-skip HANYA untuk task docs-only atau config-only
 
 Commit message WAJIB mengikuti Conventional Commits. Lihat steering file `git-workflow-automation.md` untuk format lengkap.

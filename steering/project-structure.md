@@ -385,7 +385,9 @@ export default defineConfig({
     environment: 'node',
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html', 'cobertura'],
+      reporter: ['text', 'json', 'json-summary', 'html', 'cobertura'],
+      // 'json-summary' → generates coverage/coverage-summary.json (WAJIB untuk CI coverage-check)
+      // 'cobertura' → generates coverage/cobertura-coverage.xml (untuk GitLab MR widget)
       thresholds: {
         statements: 80,
         branches: 80,
@@ -402,7 +404,9 @@ export default defineConfig({
 });
 ```
 
-### package.json Scripts (WAJIB)
+**⚠️ PENTING:** Reporter `json-summary` WAJIB ada — tanpa ini, CI job `coverage-check` akan gagal karena tidak menemukan `coverage/coverage-summary.json`.
+
+### package.json Scripts & Overrides (WAJIB)
 
 ```json
 {
@@ -418,9 +422,49 @@ export default defineConfig({
     "test": "vitest",
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage"
+  },
+  "overrides": {
+    "esbuild": "npm:esbuild-wasm@latest"
   }
 }
 ```
+
+### ⚠️ Windows Long Path Fix: esbuild Override (WAJIB)
+
+**Masalah:** Di Windows, `npm install` sering gagal dengan error `ENAMETOOLONG` karena native binary packages (terutama `esbuild`) menghasilkan path yang melebihi batas 260 karakter Windows. Ini terjadi terutama jika project path sudah panjang (contoh: `D:/Job/Riset/KIRO AI/SDLC Framework/powers/enterprise-ai-sdlc/projects/my-app/`).
+
+**Solusi:** Tambahkan `overrides` di `package.json`:
+
+```json
+{
+  "overrides": {
+    "esbuild": "npm:esbuild-wasm@latest"
+  }
+}
+```
+
+**Penjelasan:**
+- `esbuild` memiliki native binary dengan path sangat panjang di `node_modules`
+- `esbuild-wasm` adalah versi pure JavaScript (WebAssembly) — fungsionalitas sama, path lebih pendek
+- Override ini berlaku untuk SEMUA dependencies yang menggunakan `esbuild` (termasuk transitive dependencies seperti dari Vite, Next.js, dll)
+- Di CI/CD (Linux/Alpine), override ini tetap aman karena Linux punya batas path ~4096 karakter
+
+**Install Commands:**
+```bash
+# Fresh install (CI/CD dan lokal)
+npm ci
+
+# Tambah package baru
+npm install --save-dev @eslint/eslintrc
+
+# Keduanya akan berhasil di Windows meskipun path project panjang
+```
+
+**AI Agent Rules:**
+1. **SELALU sertakan `overrides.esbuild` di package.json** saat scaffold project baru
+2. **Jika `npm install` gagal dengan ENAMETOOLONG** → cek apakah override sudah ada
+3. **Jangan hapus override ini** — diperlukan untuk kompatibilitas Windows
+4. **Gunakan `npm ci`** (bukan `npm install`) untuk reproducible installs di CI
 
 ### AI Agent Rules: CI-Readiness
 
@@ -434,14 +478,15 @@ export default defineConfig({
 ### Checklist Sebelum Push Pertama
 
 ```markdown
+- [ ] package.json punya `overrides.esbuild: "npm:esbuild-wasm@latest"` (Windows long path fix)
 - [ ] .eslintrc.json / eslint.config.mjs ada dan valid
 - [ ] tsconfig.json ada dan valid
 - [ ] .prettierrc ada
 - [ ] vitest.config.ts / jest.config.ts ada (jika ada test)
 - [ ] package.json punya scripts: lint, build, typecheck, test
+- [ ] `npm ci` berhasil tanpa ENAMETOOLONG error
 - [ ] `npm run lint` berjalan tanpa prompt interaktif
 - [ ] `npm run build` berhasil
 - [ ] `npm run typecheck` berhasil
 - [ ] `npm audit` tidak ada critical vulnerability
-- [ ] Semua dependencies ter-install (`npm ci` berhasil)
 ```

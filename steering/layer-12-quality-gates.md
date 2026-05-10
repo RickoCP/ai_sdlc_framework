@@ -114,7 +114,7 @@ unit-test:
   image: $NODE_IMAGE
   script:
     - npm ci --prefer-offline
-    - npm run test:unit -- --coverage
+    - npm run test:unit -- --coverage --reporter=junit --outputFile=junit.xml
   artifacts:
     when: always
     paths:
@@ -151,22 +151,69 @@ integration-test:
 coverage-check:
   stage: coverage
   image: $NODE_IMAGE
+  needs:
+    - job: unit-test
+      artifacts: true
   script:
-    - npm ci --prefer-offline
-    - npm run test:unit -- --coverage
     - |
-      COVERAGE=$(cat coverage/coverage-summary.json | node -e "
-        const data = require('./coverage/coverage-summary.json');
-        console.log(data.total.lines.pct);
-      ")
-      echo "Coverage: $COVERAGE%"
-      if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-        echo "ERROR: Coverage $COVERAGE% is below threshold 80%"
-        exit 1
-      fi
+      node -e "
+        const fs = require('fs');
+        const summaryPath = './coverage/coverage-summary.json';
+
+        if (!fs.existsSync(summaryPath)) {
+          console.error('ERROR: coverage-summary.json not found.');
+          console.error('Pastikan vitest.config.ts punya reporter: [\"json-summary\"]');
+          process.exit(1);
+        }
+
+        const data = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+        const total = data.total;
+        const threshold = 80;
+
+        console.log('=== Coverage Report ===');
+        console.log('Statements:', total.statements.pct + '%');
+        console.log('Branches:  ', total.branches.pct + '%');
+        console.log('Functions: ', total.functions.pct + '%');
+        console.log('Lines:     ', total.lines.pct + '%');
+        console.log('=======================');
+
+        const failures = [];
+        if (total.statements.pct < threshold) failures.push('Statements: ' + total.statements.pct + '% < ' + threshold + '%');
+        if (total.branches.pct < threshold) failures.push('Branches: ' + total.branches.pct + '% < ' + threshold + '%');
+        if (total.functions.pct < threshold) failures.push('Functions: ' + total.functions.pct + '% < ' + threshold + '%');
+        if (total.lines.pct < threshold) failures.push('Lines: ' + total.lines.pct + '% < ' + threshold + '%');
+
+        if (failures.length > 0) {
+          console.error('');
+          console.error('FAILED: Coverage below ' + threshold + '% threshold:');
+          failures.forEach(f => console.error('  - ' + f));
+          process.exit(1);
+        }
+
+        console.log('');
+        console.log('PASSED: All coverage metrics >= ' + threshold + '%');
+      "
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 ```
+
+**⚠️ PENTING — Agar `coverage-check` Berjalan:**
+
+1. **`unit-test` HARUS generate `coverage-summary.json`** — Pastikan vitest config punya:
+   ```typescript
+   // vitest.config.ts
+   coverage: {
+     provider: 'v8',
+     reporter: ['text', 'json', 'json-summary', 'html', 'cobertura'],
+     // 'json-summary' menghasilkan coverage/coverage-summary.json
+   }
+   ```
+
+2. **`coverage-check` menggunakan `needs` + `artifacts: true`** — Ini mengambil folder `coverage/` dari job `unit-test` tanpa perlu install dependencies atau re-run tests.
+
+3. **Tidak perlu `bc` atau `npm ci`** — Coverage check hanya baca JSON file dan validasi pakai Node.js yang sudah ada di image.
+
+4. **Threshold dicek per-metrik** — Statements, Branches, Functions, dan Lines semua harus >= 80%.
 
 ### Security Stage (`.gitlab/ci/security.yml`)
 

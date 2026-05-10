@@ -173,29 +173,121 @@ module.exports = {
 
 ## 2. Project Initialization (WAJIB di Awal)
 
+### ⚠️ CRITICAL: Working Directory & Repo Path
+
+**Git MCP (`@cyanheads/git-mcp-server`) MEMERLUKAN `repo_path` (absolute path) di SETIAP tool call.** Tanpa ini, semua git operations akan GAGAL.
+
+#### Cara Mendapatkan `repo_path`
+
+AI Agent WAJIB menentukan `repo_path` di awal session:
+
+```
+# Opsi 1: Dari workspace root (RECOMMENDED)
+repo_path = absolute path ke workspace root yang sedang dibuka di Kiro
+
+# Opsi 2: Tanyakan user
+"Di mana lokasi project Anda? (absolute path, contoh: D:/Projects/my-app)"
+
+# Opsi 3: Deteksi dari shell
+Tool: shell command
+Command: pwd (Linux/Mac) atau echo %cd% (Windows CMD) atau (Get-Location).Path (PowerShell)
+```
+
+#### Rules untuk `repo_path`
+
+1. **SELALU gunakan absolute path** — relative path akan gagal
+2. **SELALU pass `repo_path` di setiap Git MCP tool call** — tidak ada default
+3. **Simpan `repo_path` sebagai context** — gunakan di semua subsequent calls
+4. **Windows path**: gunakan forward slash (`D:/Projects/app`) atau escaped backslash (`D:\\Projects\\app`)
+
+#### Contoh BENAR vs SALAH
+
+```
+# ✅ BENAR
+Tool: git_status
+Arguments: { "repo_path": "D:/Projects/my-app" }
+
+# ❌ SALAH — tidak ada repo_path
+Tool: git_status
+Arguments: {}
+
+# ❌ SALAH — relative path
+Tool: git_status
+Arguments: { "repo_path": "./my-app" }
+```
+
+---
+
 ### Kapan Dilakukan
 
 AI Agent WAJIB melakukan git initialization saat:
 - User konfirmasi membuat project baru
 - Project belum memiliki `.git/` directory
 - User minta setup repository
+- **Hook `preTaskExecution` mendeteksi belum ada `.git/`**
+
+### Prerequisite Check (WAJIB SEBELUM Semua Git Operations)
+
+AI Agent WAJIB menjalankan checklist ini **SEBELUM** melakukan git operation apapun:
+
+```
+[CHECK 1] Apakah repo_path sudah ditentukan?
+    → TIDAK: Tentukan dari workspace root atau tanyakan user
+    → YA: Lanjut
+
+[CHECK 2] Apakah .git/ directory ada di repo_path?
+    → TIDAK: Jalankan git_init → lanjut ke Flow Initialization
+    → YA: Lanjut
+
+[CHECK 3] Apakah remote origin sudah di-set?
+    → TIDAK: Tanyakan user apakah mau buat GitLab project baru atau pakai existing
+    → YA: Lanjut
+
+[CHECK 4] Apakah branch develop sudah ada?
+    → TIDAK: Buat branch develop dari main
+    → YA: Ready untuk development
+```
+
+**Implementasi Check dengan MCP:**
+
+```
+# Check 1 & 2: Cek git status (akan error jika belum init)
+Tool: git_status
+Arguments: { "repo_path": "<absolute-project-path>" }
+→ Jika error "not a git repository" → jalankan git_init
+
+# Check 3: Cek remote
+Tool: shell command (fallback jika git MCP tidak punya remote list)
+Command: git remote -v
+CWD: <project-path>
+→ Jika kosong → perlu add remote
+
+# Check 4: Cek branches
+Tool: git_branch_list (atau shell: git branch -a)
+Arguments: { "repo_path": "<absolute-project-path>" }
+→ Jika develop tidak ada → buat
+```
+
+---
 
 ### Flow Initialization
 
 ```
 User konfirmasi project baru
     ↓
-[1] git init (lokal)
+[0] Tentukan repo_path (absolute path ke project directory)
+    ↓
+[1] git init (lokal) — dengan repo_path
     ↓
 [2] Buat .gitignore
     ↓
 [3] Buat struktur folder framework
     ↓
-[4] Initial commit: "chore: initial project setup"
+[4] git add + Initial commit: "chore: initial project setup"
     ↓
 [5] Create GitLab project (via GitLab MCP)
     ↓
-[6] git remote add origin <gitlab-url>
+[6] git remote add origin <gitlab-url> (via shell — Git MCP tidak punya remote add)
     ↓
 [7] git push -u origin main
     ↓
@@ -209,14 +301,30 @@ User konfirmasi project baru
 ### Implementasi dengan MCP
 
 ```
+# Step 0: Tentukan repo_path
+# Gunakan absolute path workspace yang sedang dibuka
+repo_path = "D:/Projects/my-app"  # contoh
+
 # Step 1: Git Init
 Tool: git_init
-Arguments: { "path": "<project-path>" }
+Arguments: { "path": "<repo_path>" }
+# CATATAN: git_init menggunakan "path", bukan "repo_path"
 
-# Step 2-4: Buat files + Initial Commit
+# Step 2: Buat .gitignore (via file write tool atau shell)
+# Tulis file .gitignore di <repo_path>/.gitignore
+
+# Step 3: Buat struktur folder
+# Buat folder: src/, tests/, docs/, .gitlab/ci/, .kiro/
+
+# Step 4: Stage + Commit
+# PENTING: git_commit di @cyanheads/git-mcp-server OTOMATIS stage semua changes
+# ATAU stage spesifik file dulu via shell:
+Shell: git add .gitignore src/ tests/ docs/ .gitlab/ .kiro/
+CWD: <repo_path>
+
 Tool: git_commit
 Arguments: {
-  "repo_path": "<project-path>",
+  "repo_path": "<repo_path>",
   "message": "chore: initial project setup with enterprise-ai-sdlc framework"
 }
 
@@ -228,32 +336,70 @@ Arguments: {
   "visibility": "private",
   "initialize_with_readme": false
 }
+# SIMPAN response → ambil http_url_to_repo atau ssh_url_to_repo
 
-# Step 6-7: Add Remote + Push
-Tool: git_remote (jika tersedia) atau shell command
-Command: git remote add origin <gitlab-url>
+# Step 6: Add Remote (WAJIB via shell — Git MCP tidak punya tool remote add)
+Shell: git remote add origin <gitlab-url-dari-step-5>
+CWD: <repo_path>
 
+# Step 7: Push main
 Tool: git_push
 Arguments: {
-  "repo_path": "<project-path>",
+  "repo_path": "<repo_path>",
   "remote": "origin",
   "branch": "main"
 }
+# CATATAN: Jika error "src refspec main does not match"
+# → branch mungkin bernama "master". Rename dulu:
+# Shell: git branch -M main
 
-# Step 8-9: Create develop branch
+# Step 8: Create develop branch
 Tool: git_branch
 Arguments: {
-  "repo_path": "<project-path>",
+  "repo_path": "<repo_path>",
   "branch_name": "develop"
 }
 
+# Step 9: Push develop
 Tool: git_push
 Arguments: {
-  "repo_path": "<project-path>",
+  "repo_path": "<repo_path>",
   "remote": "origin",
   "branch": "develop"
 }
+
+# Step 10: Branch protection (via GitLab MCP)
+Tool: create_branch (jika perlu) atau protect_branch
+# Atau via GitLab API jika tool tidak tersedia
 ```
+
+### Fallback: Jika Git MCP Tidak Tersedia
+
+Jika Git MCP server tidak aktif atau error, gunakan **shell commands** sebagai fallback:
+
+```bash
+# Semua operasi via shell (CWD harus di-set ke project path)
+git init
+git add .
+git commit -m "chore: initial project setup with enterprise-ai-sdlc framework"
+git remote add origin https://gitlab.com/<namespace>/<project>.git
+git branch -M main
+git push -u origin main
+git checkout -b develop
+git push -u origin develop
+```
+
+### Troubleshooting Initialization
+
+| Error | Penyebab | Solusi |
+|-------|----------|--------|
+| `not a git repository` | `.git/` belum ada | Jalankan `git_init` dengan path yang benar |
+| `repo_path is required` | Tidak pass repo_path | Selalu sertakan absolute path |
+| `remote origin already exists` | Remote sudah di-set | Skip step 6, atau `git remote set-url origin <url>` |
+| `src refspec main does not match` | Belum ada commit, atau branch = master | Commit dulu, lalu `git branch -M main` |
+| `Permission denied` | Token tidak punya write access | Cek scope token: `write_repository` |
+| `Project not found` | GitLab project belum dibuat | Jalankan step 5 dulu |
+| `fatal: refusing to merge unrelated histories` | GitLab init with README | Jangan set `initialize_with_readme: true` |
 
 ### .gitignore Template (Node.js/Next.js)
 
@@ -349,7 +495,22 @@ main (production-ready)
     ↓
 [AI Validation Pass]
     ↓
-[Unit Tests Pass]
+[LOCAL VALIDATION — WAJIB SEBELUM PUSH]
+    ↓
+[1. Lint — WAJIB PASS]
+    → Jalankan: npm run lint
+    → Jika ada error: JANGAN push, fix lint errors dulu
+    → Boleh jalankan: npm run lint:fix untuk auto-fix
+    ↓
+[2. Typecheck — WAJIB PASS]
+    → Jalankan: npm run typecheck
+    → Jika ada error: JANGAN push, fix type errors dulu
+    ↓
+[3. Unit Tests + Coverage — WAJIB PASS >= 80%]
+    → Jalankan: npm run test:unit -- --coverage
+    → Jika test gagal: JANGAN push, fix failing tests dulu
+    → Jika coverage < 80%: JANGAN push, tambah test dulu
+    → Jika coverage >= 80%: Lanjut
     ↓
 git add <relevant-files>
     ↓
@@ -357,15 +518,44 @@ git commit -m "<conventional-commit-message>"
     ↓
 git push origin <feature-branch>
     ↓
-Informasikan user: "Task selesai. Code sudah di-push ke branch feature/issue-{N}."
+Informasikan user: "Task selesai. Code sudah di-push ke branch feature/issue-{N}. 
+  Lint: ✅ | Typecheck: ✅ | Tests: X/X pass | Coverage: X%"
 ```
+
+**Coverage Check Implementation:**
+```bash
+# Jalankan test dengan coverage
+npm run test:unit -- --coverage
+
+# Atau jika pakai vitest
+npx vitest run --coverage
+
+# Parse hasil coverage (dari coverage-summary.json)
+# Threshold: statements >= 80%, branches >= 80%, functions >= 80%, lines >= 80%
+```
+
+**Rules:**
+- Coverage WAJIB dicek SEBELUM commit + push
+- Jika coverage turun di bawah 80% → AI Agent WAJIB menambah test sebelum push
+- Informasikan user berapa coverage saat ini di setiap task completion
+- Jika task tidak mengubah source code (docs only, config only) → skip coverage check
 
 ### Flow: Setelah Sprint Selesai
 
 ```
 [Semua Tasks dalam Sprint Done]
     ↓
-[Coverage Check Pass]
+[Full Test Suite — WAJIB ALL PASS]
+    → Jalankan: npm run test:unit -- --coverage
+    → Jalankan: npm run test:integration (jika ada)
+    → SEMUA test harus pass, ZERO failures
+    ↓
+[Coverage Check — WAJIB >= 80%]
+    → Statements >= 80%
+    → Branches >= 80%
+    → Functions >= 80%
+    → Lines >= 80%
+    → Jika GAGAL: JANGAN buat MR, tambah test dulu
     ↓
 [AI Review Pass]
     ↓
@@ -375,13 +565,18 @@ Create Merge Request (via GitLab MCP):
   - Source: feature branch / develop
   - Target: main (atau develop jika dari feature)
   - Title: "feat: [Sprint N] - [Feature Name]"
-  - Description: (include AC coverage, test results)
+  - Description: (include AC coverage, test results, coverage %)
   - Labels: sprint-N, ready-for-review
     ↓
-Informasikan user: "Sprint selesai. MR sudah dibuat: [MR URL]"
+Informasikan user: "Sprint selesai. MR sudah dibuat: [MR URL]. Coverage: X%."
     ↓
 Tunggu human approval untuk merge
 ```
+
+**Sprint Coverage Gate:**
+- Coverage < 80% = **BLOCK** — tidak boleh buat MR
+- Coverage 80-90% = **PASS** — boleh buat MR, tapi rekomendasikan improvement
+- Coverage > 90% = **EXCELLENT** — buat MR dengan confidence
 
 ### Sprint Commit Flow
 
@@ -441,6 +636,50 @@ Arguments: {
 ## 5. Pre-Push Checklist (AI Agent WAJIB Cek)
 
 Sebelum push, AI Agent WAJIB memastikan:
+
+### ⚠️ Local Validation (WAJIB JALANKAN SEBELUM PUSH)
+
+AI Agent **WAJIB** menjalankan 3 validasi ini secara lokal dan **SEMUA HARUS PASS** sebelum push ke GitLab. Jika salah satu gagal, **DILARANG push** — fix dulu.
+
+```bash
+# 1. LINT — cek code style & errors
+npm run lint
+# HARUS: 0 errors, 0 warnings (atau warnings yang sudah diketahui)
+# JIKA GAGAL: jalankan `npm run lint:fix` lalu cek ulang
+
+# 2. TYPECHECK — cek TypeScript errors
+npm run typecheck
+# HARUS: 0 errors
+# JIKA GAGAL: fix type errors sebelum push
+
+# 3. TEST + COVERAGE — jalankan unit test dengan coverage
+npm run test:unit -- --coverage
+# HARUS: semua test pass + coverage >= 80%
+# JIKA GAGAL: fix failing tests atau tambah test untuk coverage
+```
+
+**Rules:**
+- Ketiga command di atas WAJIB dijalankan **SETIAP kali** sebelum push (bukan hanya push pertama)
+- Jika salah satu gagal → **BLOCK push**, fix masalah terlebih dahulu
+- Urutan eksekusi: lint → typecheck → test (fail fast — jika lint gagal, tidak perlu lanjut)
+- Hasil test + coverage WAJIB dilaporkan ke user sebelum push
+- Untuk task docs-only (tidak ada perubahan source code): lint + typecheck tetap WAJIB, test boleh skip
+
+**Implementasi di Hook (otomatis):**
+```
+Sebelum setiap push:
+  1. npm run lint         → gagal? STOP, fix lint errors
+  2. npm run typecheck    → gagal? STOP, fix type errors  
+  3. npm run test:unit -- --coverage → gagal? STOP, fix tests/coverage
+  4. Semua pass? → proceed with git push
+```
+
+---
+
+### Dependencies (Windows Compatibility)
+- [ ] `package.json` punya `"overrides": { "esbuild": "npm:esbuild-wasm@latest" }`
+- [ ] `npm ci` berhasil tanpa error ENAMETOOLONG
+- [ ] Jika menambah dependency baru, test `npm install` berhasil di Windows
 
 ### CI-Readiness (Push Pertama)
 - [ ] `.eslintrc.json` atau `eslint.config.mjs` ada (WAJIB — tanpa ini lint stage GAGAL)
@@ -749,14 +988,14 @@ Wiki Pages:
 ```json
 {
   "name": "Auto Push After Task Completion",
-  "version": "1.0.0",
-  "description": "Mengingatkan agent untuk commit, push, dan update GitLab setelah menyelesaikan task",
+  "version": "1.2.0",
+  "description": "Menjalankan lint, typecheck, test coverage, commit, push, dan update GitLab setelah menyelesaikan task",
   "when": {
     "type": "postTaskExecution"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Task telah selesai. Lakukan langkah berikut secara OTOMATIS:\n\n**Git Operations:**\n1. Cek git status untuk melihat perubahan\n2. Stage HANYA file yang relevan dengan task ini (jangan git add .)\n3. Commit dengan conventional commit format: <type>(<scope>): <subject>\n4. Push ke current feature branch\n5. Jika ini task terakhir dalam sprint, buat Merge Request ke develop\n\n**GitLab Project Management:**\n6. Update issue status: ubah label dari status::in-progress ke status::review\n7. Tambah comment di issue: summary implementasi + branch + test results\n8. Jika sprint selesai: generate sprint summary, update milestone, update wiki Changelog\n\n**Tools:**\n- Git: git_status, git_commit, git_push\n- GitLab: update_issue, create_issue_note, create_merge_request\n- Discover: milestones, wiki (jika perlu update)\n\n**JANGAN:** commit .env, node_modules, secrets, temporary files.\n**SELALU:** sertakan issue reference di commit footer, update issue board status."
+    "prompt": "Task telah selesai. Lakukan langkah berikut secara OTOMATIS:\n\n**STEP 1 — Local Validation (WAJIB SEBELUM COMMIT — BLOCKING):**\n1. Jalankan: `npm run lint`\n   → Jika error: jalankan `npm run lint:fix`, lalu cek ulang\n   → Jika masih error: FIX manual, JANGAN lanjut\n2. Jalankan: `npm run typecheck`\n   → Jika error: FIX type errors, JANGAN lanjut\n3. Jalankan: `npm run test:unit -- --coverage`\n   → SEMUA test HARUS pass — jika ada failure, FIX dulu\n   → Cek coverage >= 80% (statements, branches, functions, lines)\n   → Jika coverage < 80%: tambah test dulu sampai >= 80%\n4. Jika task hanya docs/config (bukan source code): lint + typecheck tetap WAJIB, test boleh skip\n\n**STEP 2 — Git Operations (HANYA jika Step 1 SEMUA pass):**\n5. Cek git status untuk melihat perubahan\n6. Stage HANYA file yang relevan dengan task ini (jangan git add .)\n7. Commit dengan conventional commit format: <type>(<scope>): <subject>\n8. Push ke current feature branch\n9. Jika ini task terakhir dalam sprint: jalankan FULL test suite + buat Merge Request ke develop\n\n**STEP 3 — GitLab Project Management:**\n10. Update issue status: ubah label dari status::in-progress ke status::review\n11. Tambah comment di issue: summary implementasi + branch + validation results\n12. Jika sprint selesai: generate sprint summary, update milestone, update wiki Changelog\n\n**Tools:**\n- Shell: npm run lint, npm run typecheck, npm run test:unit -- --coverage\n- Git: git_status, git_commit, git_push\n- GitLab: update_issue, create_issue_note, create_merge_request\n\n**BLOCKING RULES:**\n- Lint error = BLOCK push (fix lint first)\n- Typecheck error = BLOCK push (fix types first)\n- Test failure = BLOCK push (fix tests first)\n- Coverage < 80% = BLOCK push (add tests first)\n- JANGAN commit .env, node_modules, secrets, temporary files\n- SELALU informasikan user: Lint ✅/❌ | Typecheck ✅/❌ | Tests X/X | Coverage X%"
   }
 }
 ```
@@ -765,15 +1004,15 @@ Wiki Pages:
 
 ```json
 {
-  "name": "Git Init Reminder",
-  "version": "1.0.0",
-  "description": "Mengingatkan agent untuk setup git jika project belum memiliki repository",
+  "name": "Git Init & Working Directory Check",
+  "version": "1.1.0",
+  "description": "Memastikan git repository dan working directory sudah siap sebelum task dimulai",
   "when": {
     "type": "preTaskExecution"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Sebelum mulai task, cek apakah project sudah memiliki git repository:\n1. Cek apakah .git/ directory ada\n2. Jika BELUM ada: jalankan git init, buat .gitignore, initial commit, create GitLab project, add remote, push\n3. Jika SUDAH ada: cek apakah remote origin sudah di-set. Jika belum, tanyakan user GitLab project URL\n4. Pastikan branch strategy sudah benar (main + develop)\n\nGunakan Git MCP dan GitLab MCP tools."
+    "prompt": "SEBELUM mulai task, jalankan Prerequisite Check WAJIB:\n\n**CHECK 1 — repo_path:**\nTentukan absolute path ke project root (workspace yang sedang dibuka). Simpan sebagai context untuk semua git operations.\n\n**CHECK 2 — .git/ directory:**\nJalankan `git_status` dengan repo_path. Jika error 'not a git repository':\n→ Jalankan `git_init` dengan path = repo_path\n→ Buat .gitignore sesuai tech stack\n→ Stage files + initial commit\n→ Lanjut ke CHECK 3\n\n**CHECK 3 — Remote origin:**\nJalankan shell: `git remote -v` (CWD = repo_path)\nJika kosong:\n→ Tanyakan user: buat GitLab project baru atau pakai existing?\n→ Jika baru: gunakan `create_project` (GitLab MCP), ambil URL dari response\n→ Jalankan shell: `git remote add origin <url>` (CWD = repo_path)\n→ Push: `git push -u origin main`\n\n**CHECK 4 — Branch develop:**\nJalankan shell: `git branch -a` (CWD = repo_path)\nJika develop belum ada:\n→ `git checkout -b develop` + `git push -u origin develop`\n\n**PENTING:**\n- SELALU gunakan absolute path untuk repo_path\n- Jika Git MCP gagal, fallback ke shell commands dengan CWD = repo_path\n- JANGAN skip checks — broken git setup = broken workflow\n- Setelah semua checks pass, informasikan user status git dan lanjut task"
   }
 }
 ```
@@ -822,6 +1061,33 @@ Wiki Pages:
 ---
 
 ## 10. Error Handling
+
+### Git MCP: repo_path Errors
+```
+Error: repo_path is required / missing required parameter
+→ SELALU pass "repo_path" dengan absolute path di setiap Git MCP tool call
+→ Jangan gunakan relative path
+→ Contoh benar: "D:/Projects/my-app" atau "/home/user/projects/my-app"
+→ Contoh salah: "./my-app", "my-app", ""
+```
+
+### Git MCP: Not a Git Repository
+```
+Error: fatal: not a git repository (or any of the parent directories)
+→ .git/ belum ada di repo_path
+→ Jalankan git_init dengan path = repo_path
+→ Setelah init, WAJIB commit minimal 1 file sebelum push
+→ Jangan langsung push setelah init tanpa commit
+```
+
+### Git MCP: Server Not Running
+```
+Error: MCP server 'git' is not connected / tool not found
+→ Cek apakah @cyanheads/git-mcp-server terinstall (npx -y akan auto-install)
+→ Cek Kiro MCP panel → reconnect server
+→ Fallback: gunakan shell commands (git init, git add, git commit, git push)
+→ Shell commands WAJIB dijalankan dengan CWD = repo_path
+```
 
 ### Push Gagal: Authentication
 ```
