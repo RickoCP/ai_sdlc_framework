@@ -139,10 +139,10 @@ Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agen
 | File | Cek Keberadaan |
 |------|---------------|
 | `.kiro/hooks/architect-gate.json` | ✅ harus ada |
-| `.kiro/hooks/security-review.json` | ✅ harus ada |
-| `.kiro/hooks/observability-check.json` | ✅ harus ada |
+| `.kiro/hooks/code-quality-scan.json` | ✅ harus ada (menggantikan security-review + observability-check) |
 | `.kiro/hooks/qa-devops-post-task.json` | ✅ harus ada |
 | `.kiro/hooks/bug-learning-capture.json` | ✅ harus ada |
+| `.kiro/hooks/metrics-collector.json` | ✅ harus ada |
 | `.kiro/hooks/sprint-retrospective.json` | ✅ harus ada |
 | `.kiro/hooks/quality-scorecard.json` | ✅ harus ada |
 | `.kiro/hooks/health-check.json` | ✅ harus ada |
@@ -562,13 +562,20 @@ AI Agent **WAJIB** membuat hook files di `.kiro/hooks/` project user agar automa
 | File Target | Trigger | Fungsi |
 |-------------|---------|--------|
 | `.kiro/hooks/architect-gate.json` | preTaskExecution | Validate spec + design sebelum coding |
-| `.kiro/hooks/security-review.json` | postToolUse (write) | Security scan saat file ditulis |
-| `.kiro/hooks/observability-check.json` | postToolUse (write) | Remind tambah logging/metrics |
+| `.kiro/hooks/code-quality-scan.json` | postToolUse (write) | Security + Observability (merged, smart-filtered) |
 | `.kiro/hooks/qa-devops-post-task.json` | postTaskExecution | Lint + test + push setelah task |
 | `.kiro/hooks/bug-learning-capture.json` | postTaskExecution | Capture learning saat bug fix |
-| `.kiro/hooks/sprint-retrospective.json` | userTriggered | Generate retrospective |
-| `.kiro/hooks/quality-scorecard.json` | userTriggered | Generate quality scorecard |
+| `.kiro/hooks/metrics-collector.json` | postTaskExecution | Auto-collect AI quality metrics |
+| `.kiro/hooks/sprint-retrospective.json` | userTriggered | Generate retrospective (data-driven) |
+| `.kiro/hooks/quality-scorecard.json` | userTriggered | Generate scorecard dari metrics |
 | `.kiro/hooks/health-check.json` | userTriggered | Framework compliance scan |
+
+**Untuk detail lengkap setiap hook file (JSON content, smart filtering logic, metrics system), lihat `steering/hooks-registry.md`.**
+
+**Perubahan v1.5.0:**
+- `security-review.json` + `observability-check.json` → **MERGED** menjadi `code-quality-scan.json` dengan smart filtering (skip docs/config/test/entity)
+- **NEW:** `metrics-collector.json` — auto-collect metrics ke `docs/quality/metrics-log.jsonl` setiap task selesai
+- Retrospective dan Scorecard sekarang **data-driven** (baca dari metrics-log, bukan manual count)
 
 **Hook File Contents (WAJIB persis seperti ini):**
 
