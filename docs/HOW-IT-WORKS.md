@@ -127,9 +127,16 @@ Setelah setup selesai, power ini menghasilkan file-file berikut di project user:
 
 | File | Fungsi | Inclusion |
 |------|--------|-----------|
-| `architecture-standards.md` | Clean Architecture + DI rules | always |
-| `test-writing-patterns.md` | Pattern testing per-layer | always |
+| `architecture-standards.md` | Clean Architecture + DI rules (compact version) | always |
+| `test-writing-patterns.md` | Test patterns + checklist (compact version) | always |
 | `coding-conventions.md` | Commit, naming, lint rules | always |
+
+File-file ini adalah **compact reference** yang di-generate (bukan copy dari power). Berisi rules dan checklist tanpa contoh code panjang. Contoh code lengkap tetap tersedia via power steering saat power aktif.
+
+**Kenapa compact, bukan full copy:**
+- AI Agent tidak bisa copy file antar workspace (power ≠ project)
+- Compact version (~100-150 lines) lebih efisien untuk context window
+- Full version tetap tersedia saat power aktif (loaded dari power steering)
 
 File-file ini menjadi **acuan permanen** — aktif di setiap chat session tanpa perlu memanggil power lagi.
 

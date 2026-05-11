@@ -123,7 +123,7 @@ Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agen
     ↓
 [AUTO-DETECT 3: Apakah .kiro/steering/ sudah ada dan lengkap?]
     → Cek: apakah folder .kiro/steering/ ada?
-    → Jika TIDAK ADA → GENERATE steering files (architecture-standards, test-writing-patterns, coding-conventions)
+    → Jika TIDAK ADA → GENERATE 3 steering files (architecture-standards, test-writing-patterns, coding-conventions) — generate compact version, BUKAN copy dari power
     → Jika ADA → cek apakah lengkap (3 files minimum)?
     → Jika kurang → generate yang missing
     ↓
@@ -493,18 +493,45 @@ AI Agent **WAJIB** membuat file steering di `.kiro/steering/` project user agar 
 
 **Files yang WAJIB di-generate:**
 
-| File Target (di project user) | Source (dari power ini) | Inclusion |
-|-------------------------------|------------------------|-----------|
-| `.kiro/steering/architecture-standards.md` | `steering/architecture-standards.md` | `always` |
-| `.kiro/steering/test-writing-patterns.md` | `steering/test-writing-patterns.md` | `always` |
-| `.kiro/steering/coding-conventions.md` | Generated (ringkasan dari power) | `always` |
+| File Target (di project user) | Cara Generate | Inclusion |
+|-------------------------------|--------------|-----------|
+| `.kiro/steering/architecture-standards.md` | Generate compact version (rules only, tanpa contoh code panjang) | `always` |
+| `.kiro/steering/test-writing-patterns.md` | Generate compact version (rules + checklist, tanpa full examples) | `always` |
+| `.kiro/steering/coding-conventions.md` | Generate dari template di bawah | `always` |
 
-**Cara generate:**
-1. Baca konten `architecture-standards.md` dari power ini
-2. Tulis ke `<repo_path>/.kiro/steering/architecture-standards.md`
-3. Baca konten `test-writing-patterns.md` dari power ini
-4. Tulis ke `<repo_path>/.kiro/steering/test-writing-patterns.md`
-5. Generate `coding-conventions.md` ringkas (commit convention, naming, lint rules)
+**⚠️ PENTING — Kenapa Generate, Bukan Copy:**
+- AI Agent TIDAK bisa copy file dari power workspace ke project workspace
+- Yang dilakukan: generate file BARU berdasarkan knowledge dari steering power
+- File yang di-generate adalah **compact reference** — rules dan checklist tanpa contoh code panjang
+- Contoh code lengkap tetap tersedia via power steering (saat power aktif)
+
+**Cara generate (AI Agent WAJIB ikuti):**
+
+1. **`architecture-standards.md`** — Generate versi ringkas yang berisi:
+   - Front-matter: `inclusion: always`
+   - Dependency Rule (diagram + tabel)
+   - Layer structure (folder tree)
+   - Tanggung jawab per layer (boleh/dilarang — ringkas)
+   - Aturan dependency (tabel strict)
+   - Data flow
+   - DI rules (factory function, registration, lifetime — ringkas)
+   - Naming convention (tabel)
+   - Anti-pattern list (tanpa contoh code panjang)
+   - Enforcement rules
+   - **JANGAN copy seluruh file power** — buat ringkasan ~100-150 lines
+
+2. **`test-writing-patterns.md`** — Generate versi ringkas yang berisi:
+   - Front-matter: `inclusion: always`
+   - Test pyramid (unit/integration/e2e ratio)
+   - Per-layer checklist (apa yang HARUS ditest per layer)
+   - DI-friendly testing rules (direct injection, bukan container)
+   - Anti-pattern list
+   - Coverage rules (80% minimum, 95% untuk auth/payment)
+   - Vitest config essentials (isolate, retry:0, clearMocks)
+   - Naming convention
+   - **JANGAN copy seluruh file power** — buat ringkasan ~80-120 lines
+
+3. **`coding-conventions.md`** — Generate dari template di bawah
 
 **Template `coding-conventions.md`:**
 ```markdown
