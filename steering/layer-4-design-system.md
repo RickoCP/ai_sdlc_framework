@@ -651,6 +651,158 @@ Design bukan hanya dokumen awal yang dilupakan setelah coding dimulai. Design ad
 
 ---
 
+### 0. Mandatory Design Documents (WAJIB Generate Saat Layer 4 Dikerjakan)
+
+Saat user meminta mengerjakan Layer 4 (Design System), AI Agent **WAJIB generate SEMUA dokumen berikut** secara lengkap. Ini bukan on-demand — ini adalah **full design package**.
+
+#### Dokumen yang WAJIB Di-generate
+
+```
+docs/design/
+├── system/
+│   ├── high-level-architecture.md    ← WAJIB
+│   ├── sequence-diagram.md           ← WAJIB
+│   ├── deployment.md                 ← WAJIB
+│   ├── c4-model.md                   ← WAJIB
+│   └── event-flow.md                 ← Opsional (jika event-driven)
+│
+├── technical/
+│   ├── clean-architecture.md         ← WAJIB
+│   ├── folder-structure.md           ← WAJIB
+│   ├── error-handling.md             ← WAJIB
+│   ├── naming-convention.md          ← WAJIB
+│   └── testing-pattern.md            ← WAJIB
+│
+├── security/
+│   ├── threat-model.md               ← WAJIB
+│   ├── trust-boundary.md             ← WAJIB
+│   ├── attack-surface.md             ← Opsional
+│   └── mitigation-plan.md            ← Opsional
+│
+└── ui-ux/
+    ├── wireframe.md                  ← WAJIB (jika ada UI)
+    ├── component-library.md          ← WAJIB (jika ada UI)
+    ├── accessibility.md              ← WAJIB (jika ada UI)
+    └── design-token.md               ← Opsional
+```
+
+#### Flow Generate Design Documents
+
+```
+[User: "Kerjakan Layer 4" atau "Buat design system"]
+    ↓
+[AI Agent baca context:]
+    - docs/product/vision.md (Layer 0)
+    - docs/specs/srs/*.md (Layer 3)
+    - docs/requirements/extracted/*.md (Layer 1)
+    ↓
+[Generate SEMUA dokumen WAJIB secara sequential:]
+    ↓
+━━━ 🏗️ ARCHITECT AGENT ━━━
+1. System Design:
+   - high-level-architecture.md (C4 Level 1-2, tech stack, communication patterns)
+   - sequence-diagram.md (flow utama: user → API → DB → response)
+   - deployment.md (environments, infra, scaling strategy)
+   - c4-model.md (context, container, component diagrams)
+    ↓
+2. Technical Design:
+   - clean-architecture.md (layer structure, dependency rule — sesuai architecture-standards)
+   - folder-structure.md (src/ tree lengkap sesuai project)
+   - error-handling.md (error hierarchy, DomainResult pattern, HTTP mapping)
+   - naming-convention.md (files, classes, functions, DI keys)
+   - testing-pattern.md (test pyramid, per-layer strategy)
+    ↓
+━━━ 🔒 SECURITY AGENT ━━━
+3. Security Design:
+   - threat-model.md (STRIDE analysis, risk matrix)
+   - trust-boundary.md (boundary diagram, data flow trust levels)
+    ↓
+━━━ 🎨 FRONTEND AGENT ━━━
+4. UI/UX Design (jika project punya UI):
+   - wireframe.md (screen list, user flow, layout)
+   - component-library.md (Atomic Design: atoms, molecules, organisms)
+   - accessibility.md (WCAG 2.1 AA checklist, states yang harus di-handle)
+    ↓
+[Semua dokumen di-commit]
+    ↓
+[Update docs/CONTEXT-INDEX.md]
+    ↓
+[Informasikan user: "Layer 4 selesai. [N] design documents generated."]
+    ↓
+[Tanyakan konfirmasi sebelum lanjut ke layer berikutnya]
+```
+
+#### Konten Minimum per Dokumen
+
+**`high-level-architecture.md`** harus berisi:
+- Architecture style (monolith/microservices/modular monolith)
+- System context diagram (C4 Level 1)
+- Container diagram (C4 Level 2) — tech stack per container
+- Communication patterns (sync/async/real-time)
+- Data storage strategy
+
+**`sequence-diagram.md`** harus berisi:
+- Minimal 3 sequence diagrams untuk flow utama
+- Format: Mermaid atau ASCII
+- Cover: happy path + error path
+
+**`deployment.md`** harus berisi:
+- Environments (dev, staging, production)
+- Infrastructure (cloud provider, container, orchestration)
+- Scaling strategy (horizontal/vertical)
+- CI/CD deployment flow
+
+**`clean-architecture.md`** harus berisi:
+- Layer diagram (core → infrastructure → presentation → app)
+- Dependency rule
+- Tanggung jawab per layer
+- Referensi ke `architecture-standards.md` untuk detail
+
+**`folder-structure.md`** harus berisi:
+- Complete `src/` tree sesuai project
+- Penjelasan setiap folder
+- Naming convention per folder
+
+**`error-handling.md`** harus berisi:
+- Error hierarchy (DomainError, ApplicationError, InfrastructureError)
+- DomainResult pattern
+- HTTP status mapping
+- Error code convention
+
+**`threat-model.md`** harus berisi:
+- STRIDE analysis table
+- Trust boundaries diagram
+- Risk matrix (probability × impact)
+- Mitigation strategies per threat
+
+**`wireframe.md`** harus berisi:
+- Screen list (semua halaman)
+- User flow diagram
+- Layout per screen (ASCII wireframe atau deskripsi)
+
+**`component-library.md`** harus berisi:
+- Atomic Design breakdown (atoms, molecules, organisms)
+- Component list per level
+- Props/interface per component utama
+
+**`accessibility.md`** harus berisi:
+- WCAG 2.1 Level AA checklist
+- States yang harus di-handle (loading, empty, error, offline, disabled)
+- Keyboard navigation requirements
+- Screen reader considerations
+
+#### Rules
+
+1. **WAJIB generate SEMUA dokumen WAJIB** saat Layer 4 dikerjakan — bukan sebagian
+2. **Sesuaikan konten** dengan context project (tech stack, fitur, domain)
+3. **Jika project backend-only** (tanpa UI) → skip `ui-ux/` folder, informasikan user
+4. **Jika project tanpa auth/payment** → threat-model tetap WAJIB (minimal basic threats)
+5. **Gunakan Mermaid** untuk diagrams jika memungkinkan
+6. **Commit semua sekaligus** setelah generate
+7. **Tanyakan konfirmasi user** setelah selesai sebelum lanjut ke layer berikutnya
+
+---
+
 ### 1. Design Document Gate
 
 ```
