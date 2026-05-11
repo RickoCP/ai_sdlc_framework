@@ -241,6 +241,39 @@ Saat mengerjakan framework ini secara bertahap (layer by layer), AI Agent **WAJI
 
 ---
 
+### GitLab Project Management (WAJIB di Setiap Aktivitas)
+
+Setiap aktivitas yang berkaitan dengan issue/task/sprint, AI Agent **WAJIB** update GitLab:
+
+| Aktivitas | GitLab Update WAJIB |
+|-----------|-------------------|
+| Task dimulai | `update_issue`: label → `status::in-progress` |
+| Task selesai + pushed | `update_issue`: label → `status::review` + `create_issue_note`: summary |
+| Bug ditemukan | `create_issue`: type::bug + assign ke milestone |
+| Sprint selesai | `create_merge_request` + update semua issues + update milestone |
+| MR merged (oleh user) | `edit_milestone`: close/carry-over + `create_or_update_wiki_page`: Changelog |
+| Improvement identified | `create_issue`: type::improvement |
+| Tech debt detected | `create_issue`: type::tech-debt |
+
+**Rules:**
+1. **SETIAP task yang terkait issue → WAJIB update issue status + comment**
+2. **SETIAP sprint end → WAJIB update milestone + wiki**
+3. **MERGE di GitLab HANYA oleh user** — AI Agent DILARANG merge MR sendiri
+4. **Setelah sprint MR merged → WAJIB tawarkan retro + scorecard + health-check**
+5. **JANGAN skip GitLab updates** — ini bukan opsional, ini bagian dari workflow
+
+**Sprint Completion Package (WAJIB ditawarkan setelah MR merged):**
+```
+"MR sudah merged! 🎉 Saya rekomendasikan:
+1. 📚 Sprint Retrospective — review performance + learnings
+2. 📊 Quality Scorecard — metrics objektif sprint ini
+3. 🏗️ Framework Health Check — cek compliance
+
+Mau jalankan semua, sebagian, atau skip?"
+```
+
+---
+
 ## Solo Mode (Opsional)
 
 Untuk developer yang bekerja sendiri (solo), beberapa ceremony enterprise bisa di-simplify tanpa mengorbankan quality.

@@ -561,22 +561,72 @@ npx vitest run --coverage
     ↓
 git push origin <feature-branch> (jika belum)
     ↓
-Create Merge Request (via GitLab MCP):
-  - Source: feature branch / develop
-  - Target: main (atau develop jika dari feature)
-  - Title: "feat: [Sprint N] - [Feature Name]"
-  - Description: (include AC coverage, test results, coverage %)
-  - Labels: sprint-N, ready-for-review
+[GITLAB PROJECT MANAGEMENT — WAJIB]
     ↓
-Informasikan user: "Sprint selesai. MR sudah dibuat: [MR URL]. Coverage: X%."
+1. Create Merge Request (via GitLab MCP):
+   - Source: feature branch
+   - Target: develop (atau main jika solo mode)
+   - Title: "feat: [Sprint N] - [Feature Name]"
+   - Description: (include AC coverage, test results, coverage %)
+   - Labels: sprint-N, ready-for-review
+   - JANGAN set auto-merge — WAJIB approval dari user
     ↓
-Tunggu human approval untuk merge
+2. Update semua sprint issues: status::review
+   Tool: update_issue (untuk setiap issue di sprint)
+    ↓
+3. Update milestone description: sprint progress summary
+   Tool: edit_milestone
+    ↓
+4. Update wiki page "Changelog": tambah sprint delivery summary
+   Tool: create_or_update_wiki_page
+    ↓
+Informasikan user:
+  "Sprint selesai. MR sudah dibuat: [MR URL]. Coverage: X%.
+   
+   ⚠️ MERGE DILAKUKAN DI GITLAB — bukan oleh AI Agent.
+   Silakan review dan approve MR di GitLab.
+   
+   Setelah merge, saya akan tawarkan:
+   - Sprint Retrospective
+   - Quality Scorecard
+   - Framework Health Check"
+    ↓
+[TUNGGU USER MERGE DI GITLAB]
+    ↓
+[Setelah user konfirmasi MR sudah merged:]
+    ↓
+[WAJIB TAWARKAN — Sprint Completion Package:]
+    ↓
+Informasikan user:
+  "MR sudah merged! 🎉
+   
+   Saya rekomendasikan menjalankan Sprint Completion Package:
+   1. 📚 Sprint Retrospective — review AI performance, what worked/didn't
+   2. 📊 Quality Scorecard — metrics objektif sprint ini vs sebelumnya
+   3. 🏗️ Framework Health Check — cek compliance project
+   
+   Mau jalankan semua, sebagian, atau skip?
+   - 'Jalankan semua' → generate retro + scorecard + health check
+   - 'Retro saja' → hanya retrospective
+   - 'Skip' → lanjut ke sprint berikutnya"
+    ↓
+[Tunggu jawaban user]
+    ↓
+├── "Jalankan semua" → generate retro + scorecard + health check + update milestone + wiki
+├── "Retro saja" / "Scorecard saja" → generate yang diminta
+└── "Skip" → lanjut (tapi informasikan bahwa ini bisa dilakukan nanti)
 ```
 
 **Sprint Coverage Gate:**
 - Coverage < 80% = **BLOCK** — tidak boleh buat MR
 - Coverage 80-90% = **PASS** — boleh buat MR, tapi rekomendasikan improvement
 - Coverage > 90% = **EXCELLENT** — buat MR dengan confidence
+
+**Merge Rules:**
+- AI Agent **DILARANG** merge MR sendiri — merge HARUS dilakukan oleh user di GitLab
+- AI Agent hanya **membuat** MR dan menginformasikan URL-nya
+- User harus review code di GitLab → approve → merge
+- Setelah merge, AI Agent WAJIB tawarkan Sprint Completion Package
 
 ### Sprint Commit Flow
 
