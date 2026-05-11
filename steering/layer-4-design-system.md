@@ -208,7 +208,209 @@ docs/design/ui-ux/
 ├── wireframe.md
 ├── component-library.md
 ├── accessibility.md
-└── design-token.md
+├── design-token.md
+├── i18n-strategy.md
+└── theming.md
+```
+
+### WAJIB: Atomic Design (Struktur Komponen)
+
+Semua shared components **WAJIB** mengikuti Atomic Design methodology:
+
+```
+src/presentation/components/
+├── atoms/              ← Elemen dasar (tidak bisa dipecah lagi)
+│   ├── Button/
+│   │   ├── Button.tsx
+│   │   ├── Button.test.tsx
+│   │   └── index.ts
+│   ├── Input/
+│   ├── Label/
+│   ├── Icon/
+│   ├── Badge/
+│   └── Spinner/
+│
+├── molecules/          ← Kombinasi atoms (1 fungsi spesifik)
+│   ├── FormField/     (Label + Input + Error message)
+│   ├── SearchBar/     (Input + Button)
+│   ├── NavItem/       (Icon + Label)
+│   └── Card/          (Image + Title + Description)
+│
+├── organisms/          ← Komponen kompleks (section of page)
+│   ├── Header/
+│   ├── Sidebar/
+│   ├── DataTable/
+│   ├── LoginForm/
+│   └── PaymentSummary/
+│
+└── templates/          ← Layout structure (opsional)
+    ├── DashboardLayout/
+    └── AuthLayout/
+```
+
+**Rules Atomic Design:**
+1. **Atoms** — tidak boleh import molecule/organism. Hanya menerima props primitif.
+2. **Molecules** — boleh import atoms. Satu fungsi spesifik.
+3. **Organisms** — boleh import atoms + molecules. Bisa punya state lokal.
+4. **Templates** — layout only, tidak ada business logic.
+5. **Semua shared component** harus reusable dan tidak mengandung business logic.
+6. **Feature-specific components** tetap di `src/presentation/features/[feature]/components/`.
+
+### WAJIB: Internationalization (i18n)
+
+Semua project yang punya UI **WAJIB** implement i18n dari awal — bukan ditambahkan belakangan.
+
+#### Struktur i18n
+
+```
+src/presentation/locales/
+├── id.json             ← Bahasa Indonesia (default)
+├── en.json             ← English
+└── index.ts            ← i18n configuration
+```
+
+#### Rules i18n
+
+1. **DILARANG hardcode text** di component — semua text harus dari locale file
+2. **Setiap string yang tampil ke user** harus melalui translation function
+3. **Key naming convention**: `<feature>.<component>.<element>`
+   ```json
+   {
+     "payment.form.title": "Pembayaran",
+     "payment.form.amount_label": "Jumlah",
+     "payment.form.submit_button": "Bayar Sekarang",
+     "payment.error.insufficient_balance": "Saldo tidak cukup",
+     "common.button.cancel": "Batal",
+     "common.button.save": "Simpan"
+   }
+   ```
+4. **Minimal 2 bahasa**: Bahasa Indonesia (id) + English (en)
+5. **Gunakan library**: `next-intl` (Next.js) atau `react-i18next` (React)
+6. **Pluralization dan formatting** harus di-handle (angka, tanggal, mata uang)
+7. **Locale detection**: dari browser preference atau user setting
+
+#### Template: `i18n-strategy.md`
+
+```markdown
+# Internationalization Strategy
+
+## Supported Languages
+| Code | Language | Status |
+|------|----------|--------|
+| id | Bahasa Indonesia | Default |
+| en | English | Supported |
+
+## Library
+- [next-intl / react-i18next]
+
+## Key Convention
+- Format: `<feature>.<component>.<element>`
+- Common keys: `common.button.*`, `common.error.*`, `common.label.*`
+
+## Implementation
+- All user-facing text via translation function
+- No hardcoded strings in components
+- Date/number formatting via locale-aware formatters
+- RTL support: [yes/no]
+```
+
+### WAJIB: Dark & Light Theme
+
+Semua project yang punya UI **WAJIB** support dark dan light theme dari awal.
+
+#### Struktur Theming
+
+```
+src/presentation/
+├── providers/
+│   └── ThemeProvider.tsx       ← Theme context + toggle
+├── styles/
+│   ├── tokens/
+│   │   ├── colors.ts          ← Color tokens (light + dark)
+│   │   ├── spacing.ts         ← Spacing scale
+│   │   ├── typography.ts      ← Font sizes, weights
+│   │   └── index.ts
+│   ├── themes/
+│   │   ├── light.ts           ← Light theme values
+│   │   ├── dark.ts            ← Dark theme values
+│   │   └── index.ts
+│   └── globals.css            ← CSS variables / Tailwind config
+```
+
+#### Rules Theming
+
+1. **DILARANG hardcode warna** — semua warna harus dari design tokens/CSS variables
+2. **Gunakan CSS variables** atau Tailwind `dark:` prefix untuk theming
+3. **Theme detection**: dari system preference (`prefers-color-scheme`) + user toggle
+4. **Persist preference**: simpan di localStorage
+5. **Semua komponen** harus terlihat baik di light DAN dark mode
+6. **Contrast ratio** tetap >= 4.5:1 di kedua theme (WCAG AA)
+7. **Jangan gunakan** pure black (#000) untuk dark mode — gunakan dark gray (#1a1a2e atau similar)
+8. **Images/icons** harus adaptif (atau punya variant untuk dark mode)
+
+#### Design Tokens (Contoh)
+
+```typescript
+// src/presentation/styles/tokens/colors.ts
+export const colors = {
+  light: {
+    background: '#ffffff',
+    surface: '#f8f9fa',
+    text: {
+      primary: '#1a1a2e',
+      secondary: '#6c757d',
+      disabled: '#adb5bd',
+    },
+    border: '#dee2e6',
+    primary: '#0066cc',
+    error: '#dc3545',
+    success: '#28a745',
+  },
+  dark: {
+    background: '#1a1a2e',
+    surface: '#16213e',
+    text: {
+      primary: '#e8e8e8',
+      secondary: '#a0a0a0',
+      disabled: '#6c757d',
+    },
+    border: '#2d2d44',
+    primary: '#4da6ff',
+    error: '#ff6b6b',
+    success: '#51cf66',
+  },
+};
+```
+
+#### Template: `theming.md`
+
+```markdown
+# Theming Strategy
+
+## Supported Themes
+| Theme | Detection | Toggle |
+|-------|-----------|--------|
+| Light | Default / system preference | User toggle |
+| Dark | System preference | User toggle |
+
+## Implementation
+- CSS Variables / Tailwind dark: prefix
+- ThemeProvider context
+- localStorage persistence
+- System preference detection (prefers-color-scheme)
+
+## Design Tokens
+- Colors: light + dark variants
+- Spacing: consistent scale
+- Typography: responsive sizes
+- Shadows: adapted per theme
+- Border radius: consistent
+
+## Rules
+- No hardcoded colors in components
+- All components must look good in both themes
+- Contrast ratio >= 4.5:1 in both themes
+- Images/icons must be theme-adaptive
 ```
 
 ### Template: accessibility.md
@@ -220,7 +422,7 @@ docs/design/ui-ux/
 
 ### Perceivable
 - [ ] All images have alt text
-- [ ] Color contrast ratio >= 4.5:1
+- [ ] Color contrast ratio >= 4.5:1 (both themes)
 - [ ] Text resizable to 200%
 - [ ] Captions for video content
 
@@ -228,27 +430,39 @@ docs/design/ui-ux/
 - [ ] All functionality via keyboard
 - [ ] No keyboard traps
 - [ ] Skip navigation links
-- [ ] Focus indicators visible
+- [ ] Focus indicators visible (both themes)
 
 ### Understandable
 - [ ] Language declared in HTML
 - [ ] Consistent navigation
 - [ ] Error identification and suggestion
 - [ ] Labels for form inputs
+- [ ] All text via i18n (no hardcoded strings)
 
 ### Robust
 - [ ] Valid HTML
 - [ ] ARIA landmarks
 - [ ] Compatible with screen readers
+- [ ] Theme toggle accessible via keyboard
 
 ## States yang Harus Di-handle
-- Loading state
+- Loading state (skeleton)
 - Empty state
 - Error state
 - Offline state
 - Skeleton loading
 - Disabled state
+- Dark/Light variants untuk semua state
 ```
+
+### AI Agent Rules untuk UI/UX
+
+1. **Atomic Design WAJIB** — setiap shared component harus di-categorize (atom/molecule/organism)
+2. **i18n WAJIB dari awal** — DILARANG hardcode text, semua via translation function
+3. **Dark + Light theme WAJIB** — DILARANG hardcode warna, semua via design tokens
+4. **Accessibility WAJIB** — WCAG 2.1 AA compliance
+5. **Saat membuat component baru** → tentukan level Atomic Design + pastikan i18n + pastikan theme-aware
+6. **Saat review UI code** → cek: ada hardcoded text? ada hardcoded color? ada accessibility issue?
 
 ---
 
@@ -683,6 +897,8 @@ docs/design/
     ├── wireframe.md                  ← WAJIB (jika ada UI)
     ├── component-library.md          ← WAJIB (jika ada UI)
     ├── accessibility.md              ← WAJIB (jika ada UI)
+    ├── i18n-strategy.md              ← WAJIB (jika ada UI)
+    ├── theming.md                    ← WAJIB (jika ada UI)
     └── design-token.md               ← Opsional
 ```
 
@@ -721,7 +937,9 @@ docs/design/
 4. UI/UX Design (jika project punya UI):
    - wireframe.md (screen list, user flow, layout)
    - component-library.md (Atomic Design: atoms, molecules, organisms)
-   - accessibility.md (WCAG 2.1 AA checklist, states yang harus di-handle)
+   - accessibility.md (WCAG 2.1 AA + theme accessibility)
+   - i18n-strategy.md (supported languages, key convention, library)
+   - theming.md (dark/light tokens, detection, persistence)
     ↓
 [Semua dokumen di-commit]
     ↓
@@ -790,6 +1008,21 @@ docs/design/
 - States yang harus di-handle (loading, empty, error, offline, disabled)
 - Keyboard navigation requirements
 - Screen reader considerations
+- Theme accessibility (contrast di kedua theme)
+
+**`i18n-strategy.md`** harus berisi:
+- Supported languages (minimal: id + en)
+- Library yang digunakan (next-intl / react-i18next)
+- Key naming convention (`<feature>.<component>.<element>`)
+- Pluralization dan formatting strategy
+- Locale detection method
+
+**`theming.md`** harus berisi:
+- Supported themes (light + dark)
+- Design tokens (colors, spacing, typography per theme)
+- Implementation approach (CSS variables / Tailwind dark:)
+- Theme detection (system preference + user toggle)
+- Persistence strategy (localStorage)
 
 #### Rules
 
