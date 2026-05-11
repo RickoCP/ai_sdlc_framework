@@ -387,15 +387,131 @@ MR comments:   "Security Agent: 0 findings. Approved."
 ## AI Agent Rules untuk Orchestration
 
 1. **Orchestrator SELALU tentukan role sequence** sebelum mulai — jangan langsung coding
-2. **Setiap role switch HARUS eksplisit** — informasikan user "Sekarang saya sebagai [Agent]..."
+2. **Setiap role switch HARUS ditampilkan dengan format banner** (lihat format di bawah)
 3. **Sub-agent untuk task besar** — jika > 5 files, delegate ke sub-agent
 4. **Self untuk task kecil** — jika 1-2 files, role switch cukup
 5. **Security Agent SELALU jalan** — setiap code change harus di-review security
 6. **QA Agent SELALU jalan** — setiap implementation harus punya test
 7. **DevOps Agent SELALU di akhir** — lint + test + push adalah closing ritual
 8. **Jangan skip agent** — setiap role punya value, skip = risk
-9. **Informasikan user** saat berganti role — transparency
+9. **WAJIB tampilkan agent aktif** — user harus selalu tahu agent mana yang sedang bekerja
 10. **Jika satu "agent" gagal** — stop, informasikan user, jangan lanjut ke agent berikutnya
+
+---
+
+## Format Display Agent (WAJIB)
+
+Saat AI Agent berganti role atau mulai bekerja sebagai agent tertentu, **WAJIB** menampilkan banner berikut:
+
+### Format Banner
+
+```
+━━━ 🏗️ ARCHITECT AGENT ━━━
+[Apa yang sedang dilakukan]
+
+━━━ ⚙️ BACKEND AGENT ━━━
+[Apa yang sedang dilakukan]
+
+━━━ 🎨 FRONTEND AGENT ━━━
+[Apa yang sedang dilakukan]
+
+━━━ 🧪 QA AGENT ━━━
+[Apa yang sedang dilakukan]
+
+━━━ 🔒 SECURITY AGENT ━━━
+[Apa yang sedang dilakukan]
+
+━━━ 🚀 DEVOPS AGENT ━━━
+[Apa yang sedang dilakukan]
+
+━━━ 📋 BA AGENT ━━━
+[Apa yang sedang dilakukan]
+
+━━━ 📚 LEARNING AGENT ━━━
+[Apa yang sedang dilakukan]
+```
+
+### Emoji per Agent (WAJIB konsisten)
+
+| Agent | Emoji | Banner |
+|-------|-------|--------|
+| Architect Agent | 🏗️ | `━━━ 🏗️ ARCHITECT AGENT ━━━` |
+| Backend Agent | ⚙️ | `━━━ ⚙️ BACKEND AGENT ━━━` |
+| Frontend Agent | 🎨 | `━━━ 🎨 FRONTEND AGENT ━━━` |
+| QA Agent | 🧪 | `━━━ 🧪 QA AGENT ━━━` |
+| Security Agent | 🔒 | `━━━ 🔒 SECURITY AGENT ━━━` |
+| DevOps Agent | 🚀 | `━━━ 🚀 DEVOPS AGENT ━━━` |
+| BA Agent | 📋 | `━━━ 📋 BA AGENT ━━━` |
+| Learning Agent | 📚 | `━━━ 📚 LEARNING AGENT ━━━` |
+
+### Rules Display
+
+1. **SELALU tampilkan banner** saat mulai bekerja sebagai agent tertentu
+2. **SELALU tampilkan banner** saat berganti role ke agent lain
+3. **Sertakan summary** di bawah banner: apa yang akan/sedang dilakukan
+4. **Di akhir setiap agent phase**, tampilkan status: ✅ Done / ❌ Failed / ⚠️ Warning
+5. **Jangan gabung multiple agent** dalam satu output tanpa banner pemisah
+6. **Format ini WAJIB** — bukan opsional, bukan "nice to have"
+
+### Contoh Output yang BENAR
+
+```
+━━━ 🏗️ ARCHITECT AGENT ━━━
+Validating architecture compliance...
+- Spec: docs/specs/srs/payment-spec.md ✅
+- Design: docs/design/technical/payment-flow.md ✅
+- ADR-002 (Awilix DI): compatible ✅
+Status: ✅ Architecture validated
+
+━━━ ⚙️ BACKEND AGENT ━━━
+Implementing payment use case...
+- Created: src/core/domains/payment/entities/Payment.ts
+- Created: src/core/domains/payment/usecases/CreatePaymentUseCase.ts
+- Created: src/infrastructure/repositories/payment/PaymentRepositoryImpl.ts
+- Registered: DI container updated
+- Observability: logger + metrics injected
+Status: ✅ Implementation complete (3 files)
+
+━━━ 🧪 QA AGENT ━━━
+Writing tests...
+- Created: tests/unit/.../CreatePaymentUseCase.test.ts (8 tests)
+- Created: tests/unit/.../PaymentRepositoryImpl.test.ts (6 tests)
+- Coverage: 91%
+Status: ✅ 14 tests pass, coverage 91%
+
+━━━ 🔒 SECURITY AGENT ━━━
+Reviewing security...
+- Input validation: ✅
+- No sensitive data in logs: ✅
+- Amount manipulation check: ✅
+Status: ✅ 0 findings
+
+━━━ 🚀 DEVOPS AGENT ━━━
+Running quality gates + push...
+- Lint: ✅ | Typecheck: ✅ | Tests: 14/14 ✅ | Coverage: 91%
+- Committed: feat(payment): implement create payment use case
+- Pushed: feature/issue-15-payment → origin
+Status: ✅ Pushed successfully
+```
+
+### Contoh Output yang SALAH (JANGAN seperti ini)
+
+```
+❌ SALAH — tidak ada banner, user tidak tahu agent mana yang bekerja:
+
+"Saya akan implement payment use case. Berikut file yang dibuat:
+- Payment.ts
+- CreatePaymentUseCase.ts
+Lalu saya tulis test dan push."
+
+❌ SALAH — banner tidak konsisten:
+
+"## Backend
+Implementing...
+
+## Testing
+Writing tests..."
+```
 
 ---
 
@@ -406,14 +522,14 @@ User: "Implement fitur NFC Card Registration berdasarkan spec"
 
 AI: "Saya akan mengerjakan ini dengan multi-agent approach:
 
-━━━ STEP 1: Architect Agent ━━━
+━━━ 🏗️ ARCHITECT AGENT ━━━
 Membaca context...
 - Spec: docs/specs/srs/nfc-registration-spec.md ✅
 - Design: docs/design/technical/nfc-flow.md ✅
 - ADR: ADR-003 (Clean Architecture) ✅
-Architecture validated. Proceeding.
+Status: ✅ Architecture validated. Proceeding.
 
-━━━ STEP 2: Backend Agent ━━━
+━━━ ⚙️ BACKEND AGENT ━━━
 Implementing core + infrastructure...
 - Created: src/core/domains/nfc/entities/Card.ts
 - Created: src/core/domains/nfc/repositories/CardRepository.ts
@@ -421,27 +537,35 @@ Implementing core + infrastructure...
 - Created: src/infrastructure/repositories/nfc/CardRepositoryImpl.ts
 - Registered: DI container updated
 - Observability: logger + metrics added
+Status: ✅ Implementation complete (4 files)
 
-━━━ STEP 3: QA Agent ━━━
+━━━ 🧪 QA AGENT ━━━
 Writing tests...
 - Created: tests/unit/core/domains/nfc/usecases/RegisterCardUseCase.test.ts
 - Created: tests/unit/infrastructure/repositories/nfc/CardRepositoryImpl.test.ts
-- Results: 14 tests pass, coverage 89% ✅
+- Results: 14 tests pass, coverage 89%
+Status: ✅ All tests pass, coverage 89%
 
-━━━ STEP 4: Security Agent ━━━
+━━━ 🔒 SECURITY AGENT ━━━
 Reviewing...
 - Input validation: ✅
 - Card data encryption: ✅
 - No sensitive data in logs: ✅
-- Findings: 0 critical, 0 high
+Status: ✅ 0 findings (critical: 0, high: 0)
 
-━━━ STEP 5: DevOps Agent ━━━
+━━━ 🚀 DEVOPS AGENT ━━━
+Running quality gates + push...
 - Lint: ✅ | Typecheck: ✅ | Tests: 14/14 ✅ | Coverage: 89%
 - Committed: feat(nfc): implement card registration
 - Pushed: feature/issue-12-nfc-registration
 - GitLab issue #12: status → review
+Status: ✅ Pushed successfully
 
-Done! Semua agent selesai. Coverage 89%, 0 security findings."
+All agents complete. Summary:
+- Files created: 6 (4 source + 2 test)
+- Tests: 14 pass | Coverage: 89%
+- Security: 0 findings
+- Branch: feature/issue-12-nfc-registration"
 ```
 
 ---

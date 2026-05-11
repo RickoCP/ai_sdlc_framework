@@ -163,6 +163,30 @@ Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agen
 
 ---
 
+### Tampilkan Agent Aktif (WAJIB)
+
+Saat mengerjakan task, AI Agent **WAJIB** menampilkan agent mana yang sedang bekerja menggunakan format banner:
+
+```
+━━━ 🏗️ ARCHITECT AGENT ━━━
+━━━ ⚙️ BACKEND AGENT ━━━
+━━━ 🎨 FRONTEND AGENT ━━━
+━━━ 🧪 QA AGENT ━━━
+━━━ 🔒 SECURITY AGENT ━━━
+━━━ 🚀 DEVOPS AGENT ━━━
+━━━ 📋 BA AGENT ━━━
+━━━ 📚 LEARNING AGENT ━━━
+```
+
+**Rules:**
+- WAJIB tampilkan banner saat mulai bekerja sebagai agent tertentu
+- WAJIB tampilkan banner saat berganti role
+- Sertakan summary apa yang dilakukan + status (✅/❌/⚠️) di akhir phase
+- Format ini WAJIB di setiap task execution — user harus selalu tahu siapa yang bekerja
+- Lihat `layer-9-agent-orchestration.md` section "Format Display Agent" untuk detail lengkap
+
+---
+
 ### Tanyakan Project Terlebih Dahulu (WAJIB)
 
 Saat power ini diaktifkan atau dipanggil, AI Agent **WAJIB** menanyakan ke user terlebih dahulu:
