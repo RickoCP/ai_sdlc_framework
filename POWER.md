@@ -387,15 +387,16 @@ Saat user konfirmasi membuat project baru, AI Agent akan otomatis:
 1. **`git_init`** - Inisialisasi Git repository lokal (path = repo_path)
 2. **Buat `.gitignore`** sesuai tech stack
 3. **Buat struktur folder** sesuai framework (docs/, .kiro/, src/, tests/, .gitlab/)
-4. **Generate workspace steering files** — Copy architecture & test standards ke `.kiro/steering/` project user (lihat detail di bawah)
-5. **Stage + Initial commit** — `git add` + `git commit` (repo_path WAJIB di-pass)
-6. **`create_project`** (GitLab MCP) - Buat repository di GitLab
-7. **`git remote add origin`** — via shell command (CWD = repo_path), karena Git MCP tidak punya tool remote add
-8. **`git push -u origin main`** — Push initial commit
-9. **Buat branch `develop`** + push ke remote
-10. **Setup branch protection** (main, develop)
-11. **Buat labels** sesuai framework (type::*, status::*, priority::*, team::*)
-12. **Buat `.gitlab-ci.yml`** dengan pipeline dasar
+4. **Generate workspace steering files** — Copy architecture & test standards ke `.kiro/steering/` project user
+5. **Generate Kiro hooks** — Buat hook files di `.kiro/hooks/` agar automation aktif (lihat Step 4.5)
+6. **Stage + Initial commit** — `git add` + `git commit` (repo_path WAJIB di-pass)
+7. **`create_project`** (GitLab MCP) - Buat repository di GitLab
+8. **`git remote add origin`** — via shell command (CWD = repo_path)
+9. **`git push -u origin main`** — Push initial commit
+10. **Buat branch `develop`** + push ke remote
+11. **Setup branch protection** (main, develop)
+12. **Buat labels** sesuai framework (type::*, status::*, priority::*, team::*)
+13. **Buat `.gitlab-ci.yml`** dengan pipeline dasar
 
 Semua ini dilakukan otomatis menggunakan Git MCP dan GitLab MCP setelah user menjawab pertanyaan project di awal.
 
@@ -462,6 +463,168 @@ Sebelum push, WAJIB jalankan dan SEMUA harus pass:
 - Jika `.kiro/steering/` sudah ada file dengan nama sama → tanyakan user apakah mau overwrite
 - File yang di-generate HARUS di-commit ke repository (bukan di .gitignore)
 - Jika user update arsitektur di power → informasikan bahwa project steering perlu di-sync
+
+### Step 4.5: Generate Kiro Hooks (WAJIB)
+
+AI Agent **WAJIB** membuat hook files di `.kiro/hooks/` project user agar automation framework (Layer 9, 13, 14) **benar-benar aktif** — bukan hanya dokumentasi.
+
+**Tanpa step ini, hooks hanya ada sebagai teks di steering files dan TIDAK akan tertrigger.**
+
+**Files yang WAJIB di-generate:**
+
+| File Target | Trigger | Fungsi |
+|-------------|---------|--------|
+| `.kiro/hooks/architect-gate.json` | preTaskExecution | Validate spec + design sebelum coding |
+| `.kiro/hooks/security-review.json` | postToolUse (write) | Security scan saat file ditulis |
+| `.kiro/hooks/observability-check.json` | postToolUse (write) | Remind tambah logging/metrics |
+| `.kiro/hooks/qa-devops-post-task.json` | postTaskExecution | Lint + test + push setelah task |
+| `.kiro/hooks/bug-learning-capture.json` | postTaskExecution | Capture learning saat bug fix |
+| `.kiro/hooks/sprint-retrospective.json` | userTriggered | Generate retrospective |
+| `.kiro/hooks/quality-scorecard.json` | userTriggered | Generate quality scorecard |
+| `.kiro/hooks/health-check.json` | userTriggered | Framework compliance scan |
+
+**Hook File Contents (WAJIB persis seperti ini):**
+
+#### `.kiro/hooks/architect-gate.json`
+```json
+{
+  "name": "Architect Gate",
+  "version": "1.0.0",
+  "description": "Validate spec dan design sebelum mulai task",
+  "when": {
+    "type": "preTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "ROLE: Architect Agent\n\nSebelum mulai task:\n1. Baca docs/CURRENT-STATE.md — resume dari session sebelumnya\n2. Baca docs/CONTEXT-INDEX.md — apa saja artifact yang tersedia\n3. Cek apakah spec ada untuk fitur ini (docs/specs/srs/)\n4. Cek apakah design document ada (docs/design/)\n5. Jika fitur kompleks dan spec/design belum ada → buat dulu, JANGAN langsung coding\n6. Jika sudah ada → validate bahwa task sesuai arsitektur\n7. Load relevant context (ADR, learnings) untuk menghindari kesalahan yang sama"
+  }
+}
+```
+
+#### `.kiro/hooks/security-review.json`
+```json
+{
+  "name": "Security Review",
+  "version": "1.0.0",
+  "description": "Quick security scan saat file source ditulis",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": ["write"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "ROLE: Security Agent\n\nJika file yang baru ditulis adalah source code di src/ (bukan docs/config/test):\n1. Quick scan: input validation ada? Sensitive data tidak di-log? Auth check ada?\n2. Jika finding CRITICAL → informasikan user, JANGAN lanjut\n3. Jika clean atau non-source file → skip silently"
+  }
+}
+```
+
+#### `.kiro/hooks/observability-check.json`
+```json
+{
+  "name": "Observability Check",
+  "version": "1.0.0",
+  "description": "Remind tambah logging dan metrics di fitur baru",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": ["write"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Jika file yang baru ditulis adalah use case atau repository di src/ (bukan entity/mapper/test):\n- Apakah ada structured logging (logger.info/error) di entry dan error path?\n- Apakah ada metrics (counter/histogram) untuk operasi penting?\n- Jika BELUM → tambahkan sekarang. Inject logger dan metrics via DI.\n- Jika sudah ada atau file bukan use case/repository → skip."
+  }
+}
+```
+
+#### `.kiro/hooks/qa-devops-post-task.json`
+```json
+{
+  "name": "QA + DevOps Post Task",
+  "version": "1.2.0",
+  "description": "Lint, typecheck, test, commit, push setelah task selesai",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "ROLE: QA Agent → DevOps Agent\n\n**QA Phase:**\n1. npm run lint (jika error → fix dulu)\n2. npm run typecheck (jika error → fix dulu)\n3. npm run test:unit -- --coverage (semua harus pass, coverage >= 80%)\n4. Jika task docs-only → skip test, tetap lint+typecheck\n\n**DevOps Phase (hanya jika QA pass):**\n5. git add (relevant files only, BUKAN git add .)\n6. git commit (conventional format, reference issue di footer)\n7. git push ke feature branch\n8. Update docs/CURRENT-STATE.md\n9. Update docs/CONTEXT-INDEX.md jika ada artifact baru\n\nInformasikan user: Lint ✅/❌ | Typecheck ✅/❌ | Tests X/X | Coverage X% | Pushed to [branch]"
+  }
+}
+```
+
+#### `.kiro/hooks/bug-learning-capture.json`
+```json
+{
+  "name": "Bug Learning Capture",
+  "version": "1.0.0",
+  "description": "Capture learning setiap kali bug di-fix",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Cek apakah task yang baru selesai adalah BUG FIX (commit message 'fix:' atau issue type::bug).\n\nJika YA:\n1. Buat docs/learnings/BUG-[issue-number]-[short-title].md\n2. Isi: What Happened, Root Cause, Why Not Detected Earlier, Prevention actions\n3. Identifikasi: perlu update skill/test/CI?\n4. Informasikan user: 'Bug learning captured. Rekomendasi: [list]'\n\nJika BUKAN bug fix → skip."
+  }
+}
+```
+
+#### `.kiro/hooks/sprint-retrospective.json`
+```json
+{
+  "name": "Sprint Retrospective",
+  "version": "1.0.0",
+  "description": "Generate retrospective saat user trigger",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Generate sprint retrospective:\n1. Kumpulkan data: commits, tasks completed, coverage trend, issues reopened\n2. Buat docs/retrospectives/sprint-[N].md\n3. Isi: AI Performance, What Worked, What Didn't, Recurring Issues, Improvement Actions\n4. Buat GitLab issues untuk improvement actions (type::improvement)\n5. Update docs/CONTEXT-INDEX.md"
+  }
+}
+```
+
+#### `.kiro/hooks/quality-scorecard.json`
+```json
+{
+  "name": "Quality Scorecard",
+  "version": "1.0.0",
+  "description": "Generate AI quality scorecard",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Generate quality scorecard:\n1. Collect metrics: coverage, lint errors, type errors, tasks completed, rework rate\n2. Buat docs/quality/sprint-[N]-scorecard.md\n3. Calculate overall score\n4. Compare dengan sprint sebelumnya (trend)\n5. Generate action items untuk metrics yang gagal\n6. Informasikan user: overall score + top recommendations"
+  }
+}
+```
+
+#### `.kiro/hooks/health-check.json`
+```json
+{
+  "name": "Framework Health Check",
+  "version": "1.0.0",
+  "description": "Scan project compliance terhadap framework",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Scan project compliance:\n1. Structure: folder sesuai? (src/core, infrastructure, presentation, app)\n2. Architecture: ada import violation? (core → infra, presentation → infra)\n3. Testing: coverage >= 80%? Ada file tanpa test?\n4. Docs: CONTEXT-INDEX up-to-date? Spec outdated?\n5. CI/CD: .gitlab-ci.yml valid? ESLint config ada?\n6. Governance: conventional commits? Tech debt tracked?\n\nGenerate docs/quality/health-check-[date].md\nInformasikan user: overall health score + violations + recommendations"
+  }
+}
+```
+
+**Cara Generate:**
+1. Buat folder `<repo_path>/.kiro/hooks/` (jika belum ada)
+2. Tulis setiap file JSON di atas ke folder tersebut
+3. Commit bersama initial setup
+
+**Rules:**
+- WAJIB generate saat project setup
+- Jika `.kiro/hooks/` sudah ada → tanyakan user apakah mau overwrite atau merge
+- Hook files HARUS di-commit ke repository (agar tim lain juga dapat)
+- Jika user mau disable hook tertentu → hapus file-nya atau rename ke `.disabled`
 
 **⚠️ CRITICAL — Working Directory:**
 - Git MCP (`@cyanheads/git-mcp-server`) MEMERLUKAN `repo_path` (absolute path) di SETIAP tool call

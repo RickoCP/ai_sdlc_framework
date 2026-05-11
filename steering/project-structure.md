@@ -150,6 +150,15 @@ project-root/
 │   │   ├── test-writing-patterns.md   # (AUTO-GENERATED dari power) Testing patterns per-layer
 │   │   ├── coding-conventions.md      # (AUTO-GENERATED dari power) Commit, naming, lint rules
 │   │   └── ai-guidelines.md          # AI interaction guidelines (opsional)
+│   ├── hooks/                          # (AUTO-GENERATED dari power) Automation hooks
+│   │   ├── architect-gate.json        # Validate spec/design sebelum task
+│   │   ├── security-review.json       # Security scan saat file ditulis
+│   │   ├── observability-check.json   # Remind logging/metrics
+│   │   ├── qa-devops-post-task.json   # Lint + test + push setelah task
+│   │   ├── bug-learning-capture.json  # Capture learning saat bug fix
+│   │   ├── sprint-retrospective.json  # Generate retro (manual trigger)
+│   │   ├── quality-scorecard.json     # Generate scorecard (manual trigger)
+│   │   └── health-check.json         # Framework compliance scan (manual trigger)
 │   ├── skills/
 │   │   ├── create-api.md
 │   │   ├── create-usecase.md
@@ -203,7 +212,8 @@ Semua artifact dari setiap layer SDLC. Ini menjadi **project memory** dan **AI c
 
 ### `.kiro/`
 Kiro-specific configuration:
-- `steering/` — **Auto-generated dari power** saat project setup. Berisi architecture standards, test patterns, dan coding conventions yang aktif di setiap chat session. File ini menjadi acuan permanen untuk planning dan coding.
+- `steering/` — **Auto-generated dari power** saat project setup. Berisi architecture standards, test patterns, dan coding conventions yang aktif di setiap chat session.
+- `hooks/` — **Auto-generated dari power** saat project setup. Berisi hook files yang mengaktifkan automation (Layer 9, 13, 14). Tanpa folder ini, hooks hanya dokumentasi dan TIDAK akan tertrigger.
 - `skills/` — Reusable AI engineering workflows (Layer 6)
 - `settings/mcp.json` — MCP server configuration
 
