@@ -100,6 +100,69 @@ Setiap layer memiliki steering file tersendiri untuk panduan detail:
 
 ## Agent Workflow Rules
 
+### Auto-Detect & Self-Heal (WAJIB — Jalankan di Awal SETIAP Session)
+
+Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agent **WAJIB** menjalankan auto-detect berikut **SEBELUM** melakukan apapun (termasuk sebelum tanya project):
+
+```
+[Power diaktifkan / Session dimulai]
+    ↓
+[AUTO-DETECT 1: Apakah ini project existing yang sudah pakai framework?]
+    → Cek: apakah ada .kiro/ folder?
+    → Cek: apakah ada docs/ folder?
+    → Cek: apakah ada src/ folder?
+    → Jika YA (minimal 1 ada) → ini project existing, jalankan detect 2-4
+    → Jika TIDAK → ini project baru, lanjut ke "Tanyakan Project"
+    ↓
+[AUTO-DETECT 2: Apakah .kiro/hooks/ sudah ada dan lengkap?]
+    → Cek: apakah folder .kiro/hooks/ ada?
+    → Jika TIDAK ADA → GENERATE semua 8 hook files otomatis
+    → Jika ADA → cek apakah lengkap (8 files)?
+    → Jika kurang → generate yang missing
+    → Informasikan user: "Hooks framework sudah di-setup/updated."
+    ↓
+[AUTO-DETECT 3: Apakah .kiro/steering/ sudah ada dan lengkap?]
+    → Cek: apakah folder .kiro/steering/ ada?
+    → Jika TIDAK ADA → GENERATE steering files (architecture-standards, test-writing-patterns, coding-conventions)
+    → Jika ADA → cek apakah lengkap (3 files minimum)?
+    → Jika kurang → generate yang missing
+    ↓
+[AUTO-DETECT 4: Apakah docs/CURRENT-STATE.md ada?]
+    → Jika ADA → baca dan resume dari last state
+    → Jika TIDAK ADA → buat dengan template kosong
+    ↓
+[Lanjut ke workflow normal]
+```
+
+**Hook Files yang WAJIB Ada (8 files):**
+
+| File | Cek Keberadaan |
+|------|---------------|
+| `.kiro/hooks/architect-gate.json` | ✅ harus ada |
+| `.kiro/hooks/security-review.json` | ✅ harus ada |
+| `.kiro/hooks/observability-check.json` | ✅ harus ada |
+| `.kiro/hooks/qa-devops-post-task.json` | ✅ harus ada |
+| `.kiro/hooks/bug-learning-capture.json` | ✅ harus ada |
+| `.kiro/hooks/sprint-retrospective.json` | ✅ harus ada |
+| `.kiro/hooks/quality-scorecard.json` | ✅ harus ada |
+| `.kiro/hooks/health-check.json` | ✅ harus ada |
+
+**Rules:**
+- Auto-detect WAJIB jalan di awal SETIAP session (bukan hanya project baru)
+- Jika hooks missing → generate TANPA tanya user (self-heal)
+- Jika steering missing → generate TANPA tanya user (self-heal)
+- Informasikan user apa yang di-generate: "Framework hooks/steering sudah di-setup."
+- JANGAN block workflow — detect + heal harus cepat (< 30 detik)
+- Setelah auto-detect selesai → lanjut ke workflow normal (tanya project / resume state)
+
+**Alasan:**
+- Project existing yang di-setup sebelum fitur hooks ditambahkan akan otomatis ter-update
+- User tidak perlu ingat "generate hooks" secara manual
+- Framework self-healing — jika ada file yang terhapus, otomatis dibuat ulang
+- Memastikan Layer 9, 13, 14 SELALU aktif di setiap project
+
+---
+
 ### Tanyakan Project Terlebih Dahulu (WAJIB)
 
 Saat power ini diaktifkan atau dipanggil, AI Agent **WAJIB** menanyakan ke user terlebih dahulu:
