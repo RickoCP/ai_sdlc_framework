@@ -16,12 +16,12 @@ Dokumen ini mendefinisikan **semua hook files** yang WAJIB di-generate di `.kiro
 
 | File | Trigger | Fungsi | Version |
 |------|---------|--------|---------|
-| `architect-gate.json` | preTaskExecution | Validate spec + design sebelum coding | 1.0.0 |
+| `architect-gate.json` | preTaskExecution | Validate spec + design + update issue status::in-progress | 1.1.0 |
 | `code-quality-scan.json` | postToolUse (write) | Security + Observability (merged, smart-filtered) | 2.0.0 |
-| `qa-devops-post-task.json` | postTaskExecution | Lint + test + push setelah task | 1.2.0 |
+| `qa-devops-post-task.json` | postTaskExecution | Lint + test + push + update issue status::review + comment | 2.0.0 |
 | `bug-learning-capture.json` | postTaskExecution | Capture learning saat bug fix | 1.0.0 |
 | `metrics-collector.json` | postTaskExecution | Auto-collect AI quality metrics | 1.0.0 |
-| `sprint-retrospective.json` | userTriggered | Generate retrospective (data-driven) | 1.1.0 |
+| `sprint-retrospective.json` | userTriggered | Generate retro + close milestone + update wiki | 2.0.0 |
 | `quality-scorecard.json` | userTriggered | Generate scorecard dari metrics | 1.1.0 |
 | `health-check.json` | userTriggered | Framework compliance scan | 1.0.0 |
 
@@ -63,14 +63,14 @@ Dokumen ini mendefinisikan **semua hook files** yang WAJIB di-generate di `.kiro
 ```json
 {
   "name": "Architect Gate",
-  "version": "1.0.0",
-  "description": "Validate spec dan design sebelum mulai task",
+  "version": "1.1.0",
+  "description": "Validate spec/design + update GitLab issue status sebelum mulai task",
   "when": {
     "type": "preTaskExecution"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "ROLE: Architect Agent\n\nSebelum mulai task:\n1. Baca docs/CURRENT-STATE.md — resume dari session sebelumnya\n2. Baca docs/CONTEXT-INDEX.md — apa saja artifact yang tersedia\n3. Cek apakah spec ada untuk fitur ini (docs/specs/srs/)\n4. Cek apakah design document ada (docs/design/)\n5. Jika fitur kompleks dan spec/design belum ada → buat dulu, JANGAN langsung coding\n6. Jika sudah ada → validate bahwa task sesuai arsitektur\n7. Load relevant context (ADR, learnings) untuk menghindari kesalahan yang sama"
+    "prompt": "ROLE: Architect Agent\n\nSebelum mulai task:\n1. Baca docs/CURRENT-STATE.md — resume dari session sebelumnya\n2. Baca docs/CONTEXT-INDEX.md — apa saja artifact yang tersedia\n3. Cek apakah spec ada untuk fitur ini (docs/specs/srs/)\n4. Cek apakah design document ada (docs/design/)\n5. Jika fitur kompleks dan spec/design belum ada → buat dulu, JANGAN langsung coding\n6. Jika sudah ada → validate bahwa task sesuai arsitektur\n7. Load relevant context (ADR, learnings) untuk menghindari kesalahan yang sama\n\n**GITLAB PROJECT MANAGEMENT:**\n8. Jika task terkait GitLab issue → update issue label: status::in-progress\n   Tool: update_issue (GitLab MCP)\n   Arguments: { project_id, issue_iid, labels: ['status::in-progress', ...existing labels] }\n9. Jika milestone aktif → pastikan issue ter-assign ke milestone\n\nInformasikan user: 'Task dimulai. Issue #[N] status: in-progress.'"
   }
 }
 ```
@@ -98,14 +98,14 @@ Dokumen ini mendefinisikan **semua hook files** yang WAJIB di-generate di `.kiro
 ```json
 {
   "name": "QA + DevOps Post Task",
-  "version": "1.2.0",
-  "description": "Lint, typecheck, test, commit, push setelah task selesai",
+  "version": "2.0.0",
+  "description": "Lint, typecheck, test, commit, push + update GitLab issue/board",
   "when": {
     "type": "postTaskExecution"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "ROLE: QA Agent → DevOps Agent\n\n**QA Phase:**\n1. npm run lint (jika error → fix dulu)\n2. npm run typecheck (jika error → fix dulu)\n3. npm run test:unit -- --coverage (semua harus pass, coverage >= 80%)\n4. Jika task docs-only → skip test, tetap lint+typecheck\n\n**DevOps Phase (hanya jika QA pass):**\n5. git add (relevant files only, BUKAN git add .)\n6. git commit (conventional format, reference issue di footer)\n7. git push ke feature branch\n8. Update docs/CURRENT-STATE.md\n9. Update docs/CONTEXT-INDEX.md jika ada artifact baru\n\nInformasikan user: Lint ✅/❌ | Typecheck ✅/❌ | Tests X/X | Coverage X% | Pushed to [branch]"
+    "prompt": "ROLE: QA Agent → DevOps Agent\n\n**QA Phase:**\n1. npm run lint (jika error → fix dulu)\n2. npm run typecheck (jika error → fix dulu)\n3. npm run test:unit -- --coverage (semua harus pass, coverage >= 80%)\n4. Jika task docs-only → skip test, tetap lint+typecheck\n\n**DevOps Phase (hanya jika QA pass):**\n5. git add (relevant files only, BUKAN git add .)\n6. git commit (conventional format, reference issue di footer: 'Closes #N' atau 'Refs #N')\n7. git push ke feature branch\n8. Update docs/CURRENT-STATE.md\n9. Update docs/CONTEXT-INDEX.md jika ada artifact baru\n\n**GITLAB PROJECT MANAGEMENT (WAJIB):**\n10. Update issue label: status::in-progress → status::review\n    Tool: update_issue (GitLab MCP)\n    Arguments: { project_id, issue_iid, labels: ['status::review', ...other labels] }\n11. Tambah comment di issue: implementation summary\n    Tool: create_issue_note (GitLab MCP)\n    Arguments: { project_id, issue_iid, body: '✅ Implementation complete.\\n- Branch: `[branch]`\\n- Tests: [N]/[N] passing\\n- Coverage: [X%]\\n- Commit: [hash]' }\n12. Jika ini task TERAKHIR dalam sprint:\n    a. Create Merge Request (feature → develop)\n       Tool: create_merge_request\n    b. Update semua sprint issues: status::review\n    c. Informasikan user: 'Sprint delivery ready. MR created.'\n\nInformasikan user: Lint ✅/❌ | Typecheck ✅/❌ | Tests X/X | Coverage X% | Pushed to [branch] | Issue #[N]: review"
   }
 }
 ```
@@ -144,19 +144,19 @@ Dokumen ini mendefinisikan **semua hook files** yang WAJIB di-generate di `.kiro
 }
 ```
 
-### 6. `sprint-retrospective.json` (UPDATED — Data-Driven)
+### 6. `sprint-retrospective.json` (UPDATED — Data-Driven + GitLab Management)
 
 ```json
 {
   "name": "Sprint Retrospective",
-  "version": "1.1.0",
-  "description": "Generate retrospective dari collected metrics",
+  "version": "2.0.0",
+  "description": "Generate retrospective + update milestone + wiki",
   "when": {
     "type": "userTriggered"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Generate sprint retrospective dari docs/quality/metrics-log.jsonl:\n\n1. Parse metrics-log.jsonl — filter entries untuk sprint ini\n2. Calculate:\n   - Total tasks, rework rate, average coverage\n   - Spec compliance (tasks with spec_exists=true / total)\n   - Observability compliance\n   - Security findings total\n3. Generate docs/retrospectives/sprint-[N].md:\n   - AI Performance (dari metrics)\n   - What Worked / What Didn't\n   - Recurring Issues (patterns)\n   - Improvement Actions\n4. Buat GitLab issues untuk improvements\n5. Update docs/CONTEXT-INDEX.md\n\nInformasikan user: summary + key metrics + recommendations"
+    "prompt": "Generate sprint retrospective + update GitLab:\n\n**PHASE 1 — Generate Retrospective:**\n1. Parse docs/quality/metrics-log.jsonl — filter entries untuk sprint ini\n2. Calculate: total tasks, rework rate, average coverage, spec compliance, observability compliance, security findings\n3. Generate docs/retrospectives/sprint-[N].md\n4. Buat GitLab issues untuk improvement actions (type::improvement)\n\n**PHASE 2 — GitLab Milestone Management (WAJIB):**\n5. List semua issues di milestone sprint ini:\n   Tool: list_issues (filter by milestone)\n6. Cek status setiap issue:\n   - Semua done? → close milestone\n   - Ada yang belum done? → carry-over ke sprint berikutnya:\n     a. Buat milestone baru (Sprint N+1) jika belum ada\n     b. Move carry-over issues ke milestone baru\n     c. Tambah note di issue: 'Carried over from Sprint [N]'\n7. Update milestone description dengan sprint summary\n   Tool: edit_milestone\n\n**PHASE 3 — GitLab Wiki Update (WAJIB):**\n8. Update wiki page 'Changelog':\n   Tool: create_or_update_wiki_page\n   Content: Sprint [N] summary — features delivered, issues closed, carry-over\n9. Jika ada ADR baru sprint ini → update wiki page 'Architecture-Decisions'\n10. Jika ada endpoint baru → update wiki page 'API-Documentation'\n\n**PHASE 4 — Informasikan User:**\n- Sprint summary (tasks, coverage, rework rate)\n- Milestone status (closed / carry-over items)\n- Wiki pages updated\n- Improvement issues created\n\nUpdate docs/CONTEXT-INDEX.md dengan retrospective file baru."
   }
 }
 ```

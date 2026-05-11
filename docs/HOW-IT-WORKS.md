@@ -137,12 +137,12 @@ File-file ini menjadi **acuan permanen** — aktif di setiap chat session tanpa 
 
 | File | Trigger | Agent |
 |------|---------|-------|
-| `architect-gate.json` | preTaskExecution | 🏗️ Architect |
+| `architect-gate.json` | preTaskExecution | 🏗️ Architect + GitLab (issue → in-progress) |
 | `code-quality-scan.json` | postToolUse (write) | 🔒 Security + 📊 Observability |
-| `qa-devops-post-task.json` | postTaskExecution | 🧪 QA + 🚀 DevOps |
+| `qa-devops-post-task.json` | postTaskExecution | 🧪 QA + 🚀 DevOps + GitLab (issue → review + comment) |
 | `bug-learning-capture.json` | postTaskExecution | 📚 Learning |
 | `metrics-collector.json` | postTaskExecution | 📊 Metrics |
-| `sprint-retrospective.json` | userTriggered | 📚 Learning |
+| `sprint-retrospective.json` | userTriggered | 📚 Learning + GitLab (milestone close + wiki update) |
 | `quality-scorecard.json` | userTriggered | 📊 Metrics |
 | `health-check.json` | userTriggered | 🏗️ Architect |
 
@@ -490,6 +490,81 @@ LOCAL (sebelum push — via hooks):        CI (setelah push — via pipeline):
                                          │ 7. Deploy (if main)    │
                                          └────────────────────────┘
 ```
+
+---
+
+## 8.5. GitLab Project Management (Otomatis via Hooks)
+
+Framework ini otomatis mengelola work items, issue board, milestone, dan wiki di GitLab:
+
+### Issue Board Automation
+
+```
+[Task dimulai — architect-gate hook]
+    │
+    ├── update_issue: labels → status::in-progress
+    │   (Issue berpindah dari "Ready" ke "In Progress" di board)
+    │
+[Task selesai — qa-devops-post-task hook]
+    │
+    ├── update_issue: labels → status::review
+    │   (Issue berpindah dari "In Progress" ke "Review" di board)
+    │
+    ├── create_issue_note: implementation summary
+    │   (Comment otomatis: branch, tests, coverage)
+    │
+[MR merged — GitLab native]
+    │
+    └── Issue auto-closed via "Closes #N" di commit message
+        (Issue berpindah ke "Done" di board)
+```
+
+### Milestone Management (Sprint Retrospective Hook)
+
+```
+[User trigger: "sprint selesai" / "retrospective"]
+    │
+    ├── List semua issues di milestone
+    │
+    ├── Semua done?
+    │   ├── YA → close milestone + update description dengan summary
+    │   └── TIDAK → carry-over:
+    │       ├── Buat milestone Sprint N+1
+    │       ├── Move incomplete issues ke milestone baru
+    │       └── Tambah note: "Carried over from Sprint N"
+    │
+    └── Update milestone description: sprint summary
+```
+
+### Wiki Auto-Update (Sprint Retrospective Hook)
+
+| Wiki Page | Kapan Update | Konten |
+|-----------|-------------|--------|
+| `Changelog` | Setiap sprint selesai | Features delivered, issues closed |
+| `Architecture-Decisions` | Saat ADR baru dibuat | Link ke ADR files |
+| `API-Documentation` | Saat endpoint baru | Endpoint list, request/response |
+
+### GitLab Tools yang Digunakan
+
+| Tool (GitLab MCP) | Kapan Dipanggil | Oleh Hook |
+|-------------------|----------------|-----------|
+| `update_issue` | Task mulai + selesai | architect-gate, qa-devops |
+| `create_issue_note` | Task selesai | qa-devops |
+| `create_merge_request` | Sprint selesai | qa-devops |
+| `edit_milestone` | Sprint selesai | sprint-retrospective |
+| `create_or_update_wiki_page` | Sprint selesai | sprint-retrospective |
+| `create_issue` | Improvement/debt found | sprint-retrospective, bug-learning |
+
+### Issue Board Columns (Label Mapping)
+
+```
+Backlog → Ready → In Progress → Review → Done
+   ↓         ↓         ↓           ↓        ↓
+status::   status::  status::    status::  (closed)
+backlog    ready     in-progress  review
+```
+
+AI Agent memindahkan issue antar kolom dengan mengubah label `status::*` via `update_issue`.
 
 ---
 

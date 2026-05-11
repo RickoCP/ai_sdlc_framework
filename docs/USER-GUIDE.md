@@ -163,8 +163,22 @@ Tidak perlu melakukan apa-apa khusus. Setiap task yang selesai otomatis:
 - Update `docs/CURRENT-STATE.md` (save point)
 - Update `docs/CONTEXT-INDEX.md` (jika ada artifact baru)
 - Commit + push
+- **Update GitLab issue** → label berubah ke `status::review`
+- **Comment di issue** → summary implementasi (branch, tests, coverage)
+- **Collect metrics** → append ke `docs/quality/metrics-log.jsonl`
 
 Besok, AI Agent akan resume dari titik terakhir.
+
+### GitLab Board Otomatis Terupdate
+
+Anda tidak perlu manual pindahkan issue di board. Framework otomatis:
+
+| Event | GitLab Action |
+|-------|--------------|
+| Task dimulai | Issue → `status::in-progress` (pindah ke kolom "In Progress") |
+| Task selesai + pushed | Issue → `status::review` + comment (pindah ke "Review") |
+| MR merged | Issue auto-close (pindah ke "Done") |
+| Sprint selesai | Milestone closed/carry-over + wiki Changelog updated |
 
 ---
 
