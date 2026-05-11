@@ -1,277 +1,459 @@
-# Layer 9 — AI Agent Orchestration
+# Layer 9 — AI Agent Orchestration (Practical Implementation)
 
-## Multi-Agent Workflow
+## Overview
+
+Multi-agent di Kiro saat ini diimplementasikan melalui 3 mekanisme:
+1. **Role-Based Prompting** — AI berganti "topi" sesuai task
+2. **Sub-Agent Delegation** — Task didelegasikan ke sub-agent dengan context terisolasi
+3. **Hook Chains** — Hooks yang simulate agent handoff otomatis
+
+Ini BUKAN true parallel multi-agent, tapi menghasilkan output yang **setara** untuk kebanyakan use case.
+
+---
+
+## Agent Registry
+
+### 7 Agent Roles
+
+| Agent | Tanggung Jawab | Trigger | Output |
+|-------|---------------|---------|--------|
+| **BA Agent** | Requirement extraction, user story | User upload dokumen | `docs/requirements/` |
+| **Architect Agent** | Design, ADR, architecture compliance | Fitur baru / review | `docs/design/`, `docs/adr/` |
+| **Security Agent** | Threat model, vulnerability check | Code change / review | Security report |
+| **Backend Agent** | Use case, repository, API | Task implementation | `src/core/`, `src/infrastructure/` |
+| **Frontend Agent** | Component, screen, ViewModel | UI task | `src/presentation/` |
+| **QA Agent** | Test writing, coverage analysis | Post-implementation | `tests/` |
+| **DevOps Agent** | Git, CI/CD, deployment | Post-task / sprint end | Pipeline, MR |
+
+### Agent → Skill Mapping
+
+| Agent | Steering Files yang Digunakan | Skills |
+|-------|------------------------------|--------|
+| BA Agent | layer-1, layer-2 | Requirement extraction |
+| Architect Agent | architecture-standards, layer-4, layer-10 | Design, ADR |
+| Security Agent | layer-4 (security appendix), layer-5 | Threat model, review |
+| Backend Agent | architecture-standards, layer-6, layer-13 | create-usecase, create-repository, create-api |
+| Frontend Agent | architecture-standards, layer-4 (UI/UX) | create-component, Atomic Design |
+| QA Agent | test-writing-patterns, layer-12 | create-test, coverage |
+| DevOps Agent | git-workflow-automation, layer-12 | CI/CD, git ops |
+
+---
+
+## Implementasi 1: Role-Based Prompting
+
+### Cara Kerja
+
+AI Agent mengadopsi role tertentu yang mengubah:
+- **Perspektif** — apa yang diperhatikan
+- **Output format** — apa yang dihasilkan
+- **Constraints** — apa yang tidak boleh dilakukan
+- **Reference** — steering files mana yang dibaca
+
+### Role Activation Patterns
 
 ```
-BA Agent (Requirement Intake)
-    ↓
-Architect Agent (Design & Architecture)
-    ↓
-Security Agent (Threat Modeling & Review)
-    ↓
-Frontend Agent (UI Implementation)
-    ↓
-Backend Agent (API & Business Logic)
-    ↓
-QA Agent (Testing & Validation)
-    ↓
-DevOps Agent (CI/CD & Deployment)
+# Eksplisit — user minta role tertentu
+"Sebagai Security Agent, review code ini"
+"Sebagai QA Agent, tulis test untuk payment use case"
+"Sebagai Architect Agent, apakah design ini sudah benar?"
+
+# Implisit — AI auto-detect role dari task type
+"Implement fitur X"        → Backend Agent (primary) + QA Agent (secondary)
+"Review PR ini"            → Security Agent + Architect Agent
+"Fix bug #23"              → Backend Agent + QA Agent + Learning (Layer 14)
+"Setup monitoring"         → DevOps Agent + Observability (Layer 13)
+"Buat wireframe payment"   → Frontend Agent
 ```
 
-## Agent Roles
+### Role Prompt Templates
 
-### 1. Business Analyst Agent
-**Responsibility:**
-- Requirement extraction dari raw input
-- Stakeholder mapping
-- Feature identification
-- Business process extraction
-
-**Input:** Raw documents, meeting notes, emails
-**Output:** Structured requirements di `docs/requirements/`
-
-**Kiro Implementation:**
+#### Backend Agent Prompt
 ```
-"Bertindak sebagai Business Analyst Agent.
-Baca dokumen berikut dan ekstrak requirements.
-Format output sesuai template di docs/requirements/intake/extracted/"
+Kamu adalah Backend Agent. Tanggung jawabmu:
+- Implement business logic di src/core/ dan src/infrastructure/
+- Ikuti Clean Architecture (architecture-standards.md)
+- Gunakan DI pattern (Awilix factory function)
+- Tambahkan observability (logger + metrics) di setiap use case dan repository
+- JANGAN sentuh src/presentation/ atau src/app/
+
+Context yang HARUS dibaca:
+- docs/specs/srs/[feature]-spec.md (requirement)
+- src/core/domains/[domain]/ (existing entities/interfaces)
+- src/infrastructure/di/registry/ (existing registrations)
 ```
 
-### 2. Architect Agent
-**Responsibility:**
-- System design
-- Architecture decisions
-- Technology selection
-- Integration patterns
-
-**Input:** Validated requirements, existing architecture
-**Output:** Design documents di `docs/design/`
-
-**Kiro Implementation:**
+#### QA Agent Prompt
 ```
-"Bertindak sebagai Architect Agent.
-Berdasarkan requirements di docs/requirements/ dan existing architecture,
-design solusi untuk [feature].
-Ikuti patterns di docs/design/system/high-level-architecture.md"
+Kamu adalah QA Agent. Tanggung jawabmu:
+- Tulis test sesuai test-writing-patterns.md
+- Cover: happy path, error path, edge case
+- Mock dependency langsung (bukan container)
+- Target coverage >= 80% (95% untuk auth/payment)
+- JANGAN ubah source code — hanya tulis test
+
+Context yang HARUS dibaca:
+- Source file yang akan ditest
+- test-writing-patterns.md (pattern per layer)
+- Existing tests di tests/ (untuk consistency)
 ```
 
-### 3. Security Agent
-**Responsibility:**
-- Threat modeling
-- Security review
-- Vulnerability assessment
-- Compliance check
-
-**Input:** Architecture, code changes
-**Output:** Security reports di `docs/design/security/`
-
-**Kiro Implementation:**
+#### Security Agent Prompt
 ```
-"Bertindak sebagai Security Agent.
-Review perubahan code berikut dari perspektif security.
-Check: OWASP Top 10, input validation, auth/authz, data exposure.
-Reference: docs/design/security/threat-model.md"
+Kamu adalah Security Agent. Tanggung jawabmu:
+- Review code dari perspektif security
+- Check: input validation, auth/authz, data exposure, injection
+- Reference: OWASP Top 10, layer-4 security appendix
+- JANGAN fix code — hanya report findings
+- Severity: Critical / High / Medium / Low
+
+Output format:
+| Finding | Severity | File | Line | Recommendation |
 ```
 
-### 4. Frontend Agent
-**Responsibility:**
-- UI component implementation
-- State management
-- Accessibility
-- Responsive design
-
-**Input:** UI/UX design, component specs
-**Output:** Frontend code di `src/presentation/`
-
-**Kiro Implementation:**
+#### Architect Agent Prompt
 ```
-"Bertindak sebagai Frontend Agent.
-Implementasikan component berdasarkan design di docs/design/ui-ux/.
-Ikuti standards di .kiro/skills/create-component.md.
-Pastikan accessibility compliance."
+Kamu adalah Architect Agent. Tanggung jawabmu:
+- Validate architecture compliance
+- Check: dependency rule, layer placement, DI usage
+- Detect: circular dependencies, layer violations
+- Reference: architecture-standards.md
+- Jika ada keputusan arsitektur baru → suggest ADR
+
+Output: compliance report + recommendations
 ```
 
-### 5. Backend Agent
-**Responsibility:**
-- API implementation
-- Business logic
-- Data layer
-- Integration
+---
 
-**Input:** API contracts, business rules, architecture
-**Output:** Backend code di `src/`
+## Implementasi 2: Sub-Agent Delegation
 
-**Kiro Implementation:**
+### Cara Kerja
+
+Kiro punya `invokeSubAgent` yang mendelegasikan task ke context terisolasi. Ini memungkinkan:
+- Main agent tetap fokus di orchestration
+- Sub-agent bekerja di context terpisah (tidak polusi main context)
+- Hasil dikembalikan ke main agent untuk review
+
+### Delegation Patterns
+
+#### Pattern A: Sequential Delegation (Fitur Baru)
+
 ```
-"Bertindak sebagai Backend Agent.
-Implementasikan endpoint berdasarkan spec di docs/specs/srs/api-contract.md.
-Ikuti Clean Architecture pattern.
-Gunakan skills: create-api, create-usecase, create-repository."
+Main Agent (Orchestrator):
+  "User minta implement fitur Payment Top Up"
+  
+  1. [Self — Architect role]
+     → Baca spec, validate design exists
+     
+  2. [Delegate ke Sub-Agent — Backend role]
+     → "Implement entity, use case, repository untuk Payment Top Up
+        berdasarkan spec di docs/specs/srs/payment-topup-spec.md.
+        Ikuti architecture-standards.md."
+     → Sub-agent return: list files created
+     
+  3. [Delegate ke Sub-Agent — QA role]
+     → "Tulis test untuk files berikut: [list dari step 2].
+        Ikuti test-writing-patterns.md.
+        Target coverage >= 80%."
+     → Sub-agent return: test files + coverage report
+     
+  4. [Self — DevOps role]
+     → Lint + Typecheck + Test + Commit + Push
 ```
 
-### 6. QA Agent
-**Responsibility:**
-- Test planning
-- Test implementation
-- Coverage analysis
-- Bug detection
+#### Pattern B: Review Delegation (Code Review)
 
-**Input:** Acceptance criteria, code changes
-**Output:** Test files di `tests/`
-
-**Kiro Implementation:**
 ```
-"Bertindak sebagai QA Agent.
-Tulis tests untuk [feature/code].
-Cover: happy path, error scenarios, edge cases.
-Target coverage: >= 80%.
-Ikuti skill create-test.md."
+Main Agent (Orchestrator):
+  "User minta review code di branch feature/issue-15"
+  
+  1. [Delegate ke Sub-Agent — Security Agent]
+     → "Review semua file yang berubah dari perspektif security.
+        Check OWASP Top 10, input validation, auth."
+     → Return: security findings
+     
+  2. [Delegate ke Sub-Agent — Architect Agent]
+     → "Review semua file yang berubah dari perspektif architecture.
+        Check dependency rule, layer placement, DI usage."
+     → Return: architecture findings
+     
+  3. [Self — Synthesize]
+     → Gabungkan findings dari kedua sub-agent
+     → Present ke user sebagai unified review report
 ```
 
-### 7. DevOps Agent
-**Responsibility:**
-- CI/CD pipeline
-- Infrastructure
-- Deployment
-- Monitoring setup
+#### Pattern C: Parallel-like Delegation (Sprint Planning)
 
-**Input:** Architecture, deployment requirements
-**Output:** CI/CD configs, infrastructure code
+```
+Main Agent (Orchestrator):
+  "User minta breakdown fitur besar menjadi tasks"
+  
+  1. [Delegate ke Sub-Agent — BA Agent]
+     → "Breakdown fitur ini menjadi user stories + acceptance criteria"
+     → Return: user stories
+     
+  2. [Self — Architect role]
+     → Dari user stories, tentukan technical tasks per layer
+     
+  3. [Self — Create GitLab issues]
+     → Buat issues dengan labels agent:: yang sesuai
+```
 
-**Kiro Implementation:**
+### Kapan Gunakan Sub-Agent vs Self
+
+| Situasi | Gunakan | Alasan |
+|---------|---------|--------|
+| Task besar (> 5 files) | Sub-Agent | Isolasi context, tidak polusi main |
+| Review code | Sub-Agent | Perspektif terisolasi per role |
+| Task kecil (1-2 files) | Self (role switch) | Overhead sub-agent tidak worth it |
+| Sequential dependency | Self | Sub-agent tidak bisa baca output sub-agent lain |
+| Independent tasks | Sub-Agent | Bisa "paralel" (sequential tapi isolated) |
+
+---
+
+## Implementasi 3: Hook Chains (Agent Handoff)
+
+### Cara Kerja
+
+Hooks yang ter-chain simulate "agent handoff" — output satu hook menjadi trigger untuk hook berikutnya.
+
+### Chain: Feature Implementation
+
 ```
-"Bertindak sebagai DevOps Agent.
-Setup CI/CD pipeline untuk [feature].
-Platform: GitLab CI/CD.
-Include: lint, test, build, security scan, deploy."
+[preTaskExecution] — Architect Agent
+  "Cek spec ada? Design ada? Context loaded?"
+      ↓ (task mulai)
+[Implementation] — Backend/Frontend Agent
+  AI implement code sesuai role
+      ↓ (file written)
+[postToolUse:write] — Observability Agent
+  "Cek: apakah logging/metrics sudah ditambahkan?"
+      ↓ (task selesai)
+[postTaskExecution] — QA Agent + DevOps Agent
+  "Jalankan lint → typecheck → test → commit → push"
+      ↓ (jika bug fix)
+[postTaskExecution] — Learning Agent
+  "Capture bug learning jika ini fix: commit"
 ```
+
+### Chain: Sprint Completion
+
+```
+[User trigger: "sprint selesai"]
+      ↓
+[DevOps Agent] — Push semua, create MR
+      ↓
+[QA Agent] — Generate coverage report
+      ↓
+[Architect Agent] — Check architecture compliance
+      ↓
+[Learning Agent] — Generate retrospective
+      ↓
+[BA Agent] — Update Context Index + Current State
+```
+
+### Hook Definitions untuk Agent Chain
+
+```json
+{
+  "name": "Agent Chain: Architect Gate",
+  "version": "1.0.0",
+  "description": "Architect Agent validates before task starts",
+  "when": {
+    "type": "preTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "ROLE: Architect Agent\n\nSebelum mulai task:\n1. Baca spec untuk fitur ini (docs/specs/srs/)\n2. Baca design document (docs/design/)\n3. Baca ADR yang relevan (docs/adr/)\n4. Validate: apakah task ini sesuai dengan arsitektur yang sudah diputuskan?\n5. Jika ada conflict → informasikan user sebelum lanjut\n6. Jika OK → set context untuk Backend/Frontend Agent"
+  }
+}
+```
+
+```json
+{
+  "name": "Agent Chain: Security Review Post-Write",
+  "version": "1.0.0",
+  "description": "Security Agent reviews setiap file source yang ditulis",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": ["write"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "ROLE: Security Agent\n\nJika file yang baru ditulis adalah source code di src/:\n1. Quick security scan:\n   - Input validation ada?\n   - Sensitive data tidak di-log?\n   - Auth check ada (jika endpoint protected)?\n   - SQL injection safe (parameterized)?\n2. Jika ada finding CRITICAL → STOP, informasikan user\n3. Jika ada finding MEDIUM/LOW → catat, lanjut\n4. Jika clean → skip\n\nJika file bukan source code → skip entirely."
+  }
+}
+```
+
+```json
+{
+  "name": "Agent Chain: QA + DevOps Post-Task",
+  "version": "1.0.0",
+  "description": "QA Agent validates tests, DevOps Agent handles git",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "ROLE: QA Agent → DevOps Agent (sequential)\n\n**QA Agent Phase:**\n1. Cek: apakah test sudah ditulis untuk code baru?\n2. Jika BELUM → tulis test sekarang (ikuti test-writing-patterns.md)\n3. Jalankan: npm run lint → npm run typecheck → npm run test:unit -- --coverage\n4. Semua HARUS pass. Coverage >= 80%.\n5. Jika gagal → fix sebelum lanjut ke DevOps phase\n\n**DevOps Agent Phase (hanya jika QA pass):**\n6. git add (relevant files only)\n7. git commit (conventional format)\n8. git push ke feature branch\n9. Update GitLab issue status\n10. Jika sprint task terakhir → create MR\n\nInformasikan user: 'QA: ✅ [N] tests, [X%] coverage | DevOps: pushed to [branch]'"
+  }
+}
+```
+
+---
 
 ## Orchestration Patterns
 
-### Sequential Orchestration
-Agents bekerja berurutan, output satu menjadi input berikutnya.
+### Pattern 1: Full Feature (Sequential)
 
 ```
-[BA] → requirements → [Architect] → design → [Backend] → code → [QA] → tests
+User: "Implement fitur [X]"
+
+Orchestrator decides:
+  1. Architect Agent → validate spec + design
+  2. Backend Agent → implement core + infrastructure
+  3. Frontend Agent → implement presentation (jika ada UI)
+  4. QA Agent → write tests
+  5. Security Agent → review
+  6. DevOps Agent → lint + test + push
 ```
 
-### Parallel Orchestration
-Agents bekerja paralel untuk tasks yang independent.
+### Pattern 2: Bug Fix (Compact)
 
 ```
-[Architect] → design
-                ├── [Frontend Agent] → UI code
-                ├── [Backend Agent] → API code
-                └── [QA Agent] → test plan
+User: "Fix bug #23"
+
+Orchestrator decides:
+  1. Backend Agent → fix code
+  2. QA Agent → add regression test
+  3. DevOps Agent → push
+  4. Learning Agent → capture bug learning
 ```
 
-### Review Orchestration
-Agent melakukan review terhadap output agent lain.
+### Pattern 3: Code Review (Parallel-like)
 
 ```
-[Backend Agent] → code → [Security Agent] → review → [QA Agent] → tests
+User: "Review branch feature/issue-15"
+
+Orchestrator delegates:
+  Sub-Agent 1 (Security) → security findings
+  Sub-Agent 2 (Architect) → architecture findings
+  Main Agent → synthesize + present unified report
 ```
 
-## Implementasi dengan Kiro
-
-### Menggunakan Kiro Hooks untuk Orchestration
-
-```json
-{
-  "name": "Security Review on Code Change",
-  "version": "1.0.0",
-  "when": {
-    "type": "fileEdited",
-    "patterns": ["src/**/*.ts"]
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "Bertindak sebagai Security Agent. Review perubahan ini dari perspektif security. Check: input validation, auth, data exposure, injection risks."
-  }
-}
-```
-
-```json
-{
-  "name": "Architecture Check on New Files",
-  "version": "1.0.0",
-  "when": {
-    "type": "fileCreated",
-    "patterns": ["src/**/*.ts"]
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "Bertindak sebagai Architect Agent. Verify file ini sesuai dengan Clean Architecture rules. Check: layer placement, dependency direction, naming convention."
-  }
-}
-```
-
-### Menggunakan Kiro Sub-Agents
-
-Untuk complex tasks, gunakan sub-agents:
+### Pattern 4: Sprint Planning (BA-led)
 
 ```
-"Untuk feature Authentication:
-1. Sebagai Architect Agent: review design di docs/design/
-2. Sebagai Backend Agent: implementasikan berdasarkan spec
-3. Sebagai QA Agent: tulis comprehensive tests
-4. Sebagai Security Agent: review final implementation"
+User: "Plan sprint 4"
+
+Orchestrator decides:
+  1. BA Agent → breakdown features into stories
+  2. Architect Agent → technical task breakdown
+  3. DevOps Agent → create GitLab issues + milestone
 ```
 
-## GitLab Integration
+---
 
-### Agent-Specific CI/CD Jobs
+## Agent Communication Protocol
 
-```yaml
-# Security Agent check di CI/CD
-security-agent-review:
-  stage: review
-  script:
-    - echo "Running automated security checks..."
-    - npm run security:scan
-    - npm run dependency:audit
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+### Via File Artifacts (Primary)
 
-# QA Agent check di CI/CD
-qa-agent-review:
-  stage: test
-  script:
-    - npm run test:coverage
-    - |
-      COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
-      if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-        echo "Coverage below threshold: $COVERAGE%"
-        exit 1
-      fi
-```
-
-### Agent Labels di GitLab
+Agents communicate melalui file yang di-commit ke repository:
 
 ```
-agent::ba
-agent::architect
-agent::security
-agent::frontend
-agent::backend
-agent::qa
-agent::devops
+Architect Agent writes:  docs/design/technical/payment-flow.md
+Backend Agent reads:     docs/design/technical/payment-flow.md → implements
+QA Agent reads:          src/core/domains/payment/ → writes tests
+Security Agent reads:    src/ changes → writes findings
+Learning Agent reads:    git log + issues → writes retrospective
 ```
 
-## Orchestrator Options
+### Via Context Files (State)
 
-| Tool | Use Case | Complexity |
-|------|----------|-----------|
-| Kiro (native) | Single developer workflow | Low |
-| Kiro Hooks | Automated triggers | Medium |
-| Kiro Sub-Agents | Parallel tasks | Medium |
-| Custom MCP | Complex multi-step | High |
+```
+docs/CURRENT-STATE.md    — "Siapa yang terakhir bekerja, apa yang dilakukan"
+docs/CONTEXT-INDEX.md    — "Apa saja artifact yang tersedia"
+```
 
-## Best Practices
+### Via GitLab (Tracking)
 
-1. **Clear role boundaries** - Setiap agent punya scope yang jelas
-2. **Context passing** - Output agent A menjadi input agent B
-3. **Human in the loop** - Manusia tetap decision maker
-4. **Audit trail** - Track semua agent decisions
-5. **Fail gracefully** - Jika satu agent gagal, jangan block yang lain
-6. **Iterative** - Agent bisa di-invoke ulang untuk improvement
+```
+Issue labels:  agent::backend, agent::qa, agent::security
+Issue notes:   "Backend Agent: implementation complete. Ready for QA."
+MR comments:   "Security Agent: 0 findings. Approved."
+```
+
+---
+
+## AI Agent Rules untuk Orchestration
+
+1. **Orchestrator SELALU tentukan role sequence** sebelum mulai — jangan langsung coding
+2. **Setiap role switch HARUS eksplisit** — informasikan user "Sekarang saya sebagai [Agent]..."
+3. **Sub-agent untuk task besar** — jika > 5 files, delegate ke sub-agent
+4. **Self untuk task kecil** — jika 1-2 files, role switch cukup
+5. **Security Agent SELALU jalan** — setiap code change harus di-review security
+6. **QA Agent SELALU jalan** — setiap implementation harus punya test
+7. **DevOps Agent SELALU di akhir** — lint + test + push adalah closing ritual
+8. **Jangan skip agent** — setiap role punya value, skip = risk
+9. **Informasikan user** saat berganti role — transparency
+10. **Jika satu "agent" gagal** — stop, informasikan user, jangan lanjut ke agent berikutnya
+
+---
+
+## Contoh Lengkap: End-to-End Feature Implementation
+
+```
+User: "Implement fitur NFC Card Registration berdasarkan spec"
+
+AI: "Saya akan mengerjakan ini dengan multi-agent approach:
+
+━━━ STEP 1: Architect Agent ━━━
+Membaca context...
+- Spec: docs/specs/srs/nfc-registration-spec.md ✅
+- Design: docs/design/technical/nfc-flow.md ✅
+- ADR: ADR-003 (Clean Architecture) ✅
+Architecture validated. Proceeding.
+
+━━━ STEP 2: Backend Agent ━━━
+Implementing core + infrastructure...
+- Created: src/core/domains/nfc/entities/Card.ts
+- Created: src/core/domains/nfc/repositories/CardRepository.ts
+- Created: src/core/domains/nfc/usecases/RegisterCardUseCase.ts
+- Created: src/infrastructure/repositories/nfc/CardRepositoryImpl.ts
+- Registered: DI container updated
+- Observability: logger + metrics added
+
+━━━ STEP 3: QA Agent ━━━
+Writing tests...
+- Created: tests/unit/core/domains/nfc/usecases/RegisterCardUseCase.test.ts
+- Created: tests/unit/infrastructure/repositories/nfc/CardRepositoryImpl.test.ts
+- Results: 14 tests pass, coverage 89% ✅
+
+━━━ STEP 4: Security Agent ━━━
+Reviewing...
+- Input validation: ✅
+- Card data encryption: ✅
+- No sensitive data in logs: ✅
+- Findings: 0 critical, 0 high
+
+━━━ STEP 5: DevOps Agent ━━━
+- Lint: ✅ | Typecheck: ✅ | Tests: 14/14 ✅ | Coverage: 89%
+- Committed: feat(nfc): implement card registration
+- Pushed: feature/issue-12-nfc-registration
+- GitLab issue #12: status → review
+
+Done! Semua agent selesai. Coverage 89%, 0 security findings."
+```
+
+---
+
+## Integration dengan Framework
+
+| Layer | Bagaimana Layer 9 Terintegrasi |
+|-------|-------------------------------|
+| Layer 3 (Spec) | Architect Agent validate spec sebelum implementation |
+| Layer 4 (Design) | Architect Agent validate design compliance |
+| Layer 8 (Issue-Driven) | DevOps Agent manage GitLab issues + branches |
+| Layer 11 (AI Review) | Security + Architect Agent = AI Review |
+| Layer 12 (Quality Gates) | QA + DevOps Agent = quality enforcement |
+| Layer 13 (Observability) | Backend Agent otomatis tambah observability |
+| Layer 14 (Learning) | Learning Agent capture dari bug fix + sprint end |
