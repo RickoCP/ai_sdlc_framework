@@ -146,6 +146,10 @@ Dokumen ini mendefinisikan **semua hook files** yang WAJIB di-generate di `.kiro
 
 ### 6. `sprint-retrospective.json` (v2.1.0 — Data-Driven + GitLab + Offer Scorecard)
 
+**Trigger:** User bilang "sprint selesai", "retrospective", "jalankan retro", atau setelah MR merged.
+
+**PENTING:** Hook ini adalah `userTriggered` — AI Agent WAJIB mengenali frasa trigger dan MENAWARKAN untuk menjalankan hook ini. Jangan tunggu user bilang persis "jalankan sprint-retrospective hook".
+
 ```json
 {
   "name": "Sprint Retrospective",

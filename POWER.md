@@ -508,9 +508,71 @@ Setiap aktivitas yang berkaitan dengan issue/task/sprint, AI Agent **WAJIB** upd
 1. 📚 Sprint Retrospective — review performance + learnings
 2. 📊 Quality Scorecard — metrics objektif sprint ini
 3. 🏗️ Framework Health Check — cek compliance
+4. 📖 Update GitLab Wiki — Changelog + API docs (jika ada endpoint baru)
 
 Mau jalankan semua, sebagian, atau skip?"
 ```
+
+**Trigger Phrases untuk Sprint Completion (AI Agent WAJIB recognize):**
+
+Saat user bilang salah satu dari frasa berikut, AI Agent WAJIB menjalankan Sprint Completion flow:
+```
+"sprint selesai"
+"sprint done"
+"semua task sudah selesai"
+"sprint complete"
+"selesaikan sprint ini"
+```
+
+**Flow yang WAJIB dijalankan saat trigger di atas:**
+```
+[User: "sprint selesai"]
+    ↓
+━━━ 🚀 DEVOPS AGENT ━━━
+1. Push semua perubahan yang belum di-push
+2. Create Merge Request (feature → develop)
+   - JANGAN auto-merge — WAJIB user approval di GitLab
+3. Update semua sprint issues: status::review
+4. Update milestone description: sprint progress summary
+    ↓
+Informasikan user:
+  "MR dibuat: [URL]. Silakan review dan merge di GitLab.
+   Setelah merged, bilang 'sudah merged' untuk lanjut."
+    ↓
+[User: "sudah merged" / "merged" / "done"]
+    ↓
+━━━ 📚 LEARNING AGENT ━━━
+WAJIB TAWARKAN Sprint Completion Package:
+  "Sprint merged! 🎉 Saya akan jalankan:
+  1. 📚 Sprint Retrospective — review AI performance, what worked/didn't
+  2. 📊 Quality Scorecard — metrics objektif (coverage, rework rate, compliance)
+  3. 🏗️ Framework Health Check — scan compliance project
+  4. 📖 GitLab Wiki Update — Changelog + API Documentation
+  
+  Mau jalankan semua? (recommended) Atau pilih sebagian?"
+    ↓
+[Jika user bilang "jalankan semua" / "semua" / "ya":]
+    ↓
+a. Generate docs/retrospectives/sprint-[N].md (dari metrics-log.jsonl)
+b. Generate docs/quality/sprint-[N]-scorecard.md
+c. Jalankan health check → docs/quality/health-check-[date].md
+d. Update GitLab Wiki:
+   - Page "Changelog": tambah sprint [N] delivery summary
+   - Page "API-Documentation": update jika ada endpoint baru
+   - Page "Architecture-Decisions": update jika ada ADR baru
+e. Close/carry-over milestone di GitLab
+f. Update docs/CURRENT-STATE.md: sprint = N+1
+g. Update docs/CONTEXT-INDEX.md: tambah retro + scorecard
+    ↓
+Informasikan user: summary + next sprint recommendation
+```
+
+**Rules:**
+1. **WAJIB recognize trigger phrases** — jangan tunggu user bilang persis "jalankan retrospective"
+2. **WAJIB tawarkan SETELAH merge** — bukan sebelum merge
+3. **WAJIB include wiki update** — Changelog selalu, API docs jika ada endpoint baru
+4. **Jika user skip** → informasikan bisa dijalankan nanti ("bilang 'retrospective' kapan saja")
+5. **JANGAN jalankan tanpa konfirmasi** — tawarkan dulu, tunggu user approve
 
 ---
 
