@@ -227,7 +227,22 @@ Saat mengerjakan framework ini secara bertahap (layer by layer), AI Agent **WAJI
 **Pattern:**
 ```
 [Selesaikan pengerjaan Layer N]
-→ Tanyakan: "Layer [N] - [Nama Layer] sudah selesai. Apakah hasilnya sudah sesuai, atau ada yang perlu direvisi sebelum lanjut ke layer berikutnya?"
+    ↓
+[CEK KELENGKAPAN DOKUMEN — WAJIB sebelum konfirmasi]
+    ↓
+[Jika ada dokumen yang belum lengkap → lengkapi dulu]
+    ↓
+[Tampilkan checklist ke user:]
+    "Layer [N] - [Nama Layer] selesai.
+    
+    📋 Document Completeness Check:
+    ✅ [dokumen 1] — created
+    ✅ [dokumen 2] — created
+    ❌ [dokumen 3] — MISSING → sedang dilengkapi...
+    
+    Semua dokumen lengkap. Apakah hasilnya sudah sesuai,
+    atau ada yang perlu direvisi sebelum lanjut?"
+    ↓
 → Tunggu konfirmasi user
 → Jika user setuju → lanjut ke Layer N+1
 → Jika user minta revisi → revisi dulu, lalu tanya lagi
@@ -238,6 +253,51 @@ Saat mengerjakan framework ini secara bertahap (layer by layer), AI Agent **WAJI
 - Memberikan user kontrol atas output di setiap tahap
 - Memungkinkan iterasi cepat per layer
 - Sesuai prinsip "Validate Before Execute"
+
+---
+
+### Document Completeness Check (WAJIB Setelah Setiap Layer)
+
+AI Agent **WAJIB** mengecek kelengkapan dokumen setelah menyelesaikan setiap layer. Jika ada yang belum lengkap, **WAJIB dilengkapi SEBELUM** konfirmasi ke user.
+
+**Checklist per Layer:**
+
+| Layer | Dokumen WAJIB | Cek |
+|-------|--------------|-----|
+| **0 — Vision** | `docs/product/vision.md` | ✅ harus ada |
+| **1 — Intake** | `docs/requirements/extracted/*.md` (minimal 1 file) | ✅ harus ada |
+| **2 — Validation** | `docs/requirements/validation/validation-report-*.md` | ✅ harus ada |
+| **3 — Spec-Driven** | `docs/specs/srs/[feature]-spec.md` (per fitur) + `docs/specs/prd/user-stories.md` | ✅ harus ada |
+| **4 — Design** | System: `high-level-architecture.md`, `sequence-diagram.md`, `deployment.md`, `c4-model.md` | ✅ semua harus ada |
+| | Technical: `clean-architecture.md`, `folder-structure.md`, `error-handling.md`, `naming-convention.md`, `testing-pattern.md` | ✅ semua harus ada |
+| | Security: `threat-model.md`, `trust-boundary.md` | ✅ harus ada |
+| | UI/UX (jika ada UI): `wireframe.md`, `component-library.md`, `accessibility.md`, `i18n-strategy.md`, `theming.md` | ✅ semua harus ada |
+| **5 — Governance** | `docs/governance/ai-policy.md` | ✅ harus ada |
+| **6 — Skills** | `.kiro/skills/create-*.md` (minimal 3 files) | ✅ harus ada |
+| **8 — Issue-Driven** | GitLab issues created + milestone + labels | ✅ harus ada |
+| **10 — Context** | `docs/CONTEXT-INDEX.md` + `docs/CURRENT-STATE.md` | ✅ harus ada |
+| **12 — Quality Gates** | `.gitlab-ci.yml` + `.eslintrc.json`/`eslint.config.mjs` + `vitest.config.ts` | ✅ harus ada |
+
+**Flow:**
+```
+[Layer N selesai]
+    ↓
+[AI Agent scan: semua dokumen WAJIB untuk layer ini ada?]
+    ↓
+├── SEMUA ADA → tampilkan checklist ✅ + konfirmasi user
+└── ADA YANG MISSING → 
+    ├── Generate dokumen yang missing
+    ├── Informasikan user: "Dokumen [X] belum ada, sedang dilengkapi..."
+    ├── Setelah lengkap → tampilkan checklist ✅ + konfirmasi user
+    └── JANGAN lanjut ke layer berikutnya sampai SEMUA lengkap
+```
+
+**Rules:**
+1. **JANGAN konfirmasi layer selesai** jika ada dokumen yang missing
+2. **JANGAN lanjut ke layer berikutnya** jika dokumen belum lengkap
+3. **Auto-generate** dokumen yang missing — jangan tanya user "mau buat?"
+4. **Tampilkan checklist** ke user agar transparan apa yang sudah/belum ada
+5. **Update CONTEXT-INDEX.md** setelah dokumen baru di-generate
 
 ---
 
