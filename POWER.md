@@ -301,6 +301,34 @@ AI Agent **WAJIB** mengecek kelengkapan dokumen setelah menyelesaikan setiap lay
 
 ---
 
+### Layer Sequence (DILARANG Skip)
+
+Layer 0-8 **WAJIB dijalankan sequential**. AI Agent **DILARANG** menawarkan skip atau loncat layer.
+
+**Urutan WAJIB:**
+```
+Layer 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → [Sprint dimulai]
+```
+
+**Rules:**
+1. **DILARANG skip layer manapun** dari 0-8 — setiap layer menghasilkan artifact yang dibutuhkan layer berikutnya
+2. **DILARANG menawarkan "mau skip ke Layer X?"** — ini bukan opsional
+3. **DILARANG mulai Sprint** sebelum Layer 0-8 selesai semua
+4. **Layer 6 (Skills) WAJIB** — tanpa skills, AI tidak punya recipe untuk coding konsisten
+5. **Layer 7 (Team Extension) WAJIB** — minimal buat 1 team steering file sesuai domain project
+6. **Jika user minta skip** → informasikan: "Layer [N] diperlukan karena [alasan]. Saya akan mengerjakannya secara ringkas."
+
+**Pengecualian (HANYA jika user eksplisit bilang):**
+- Project existing yang sudah punya artifact → AI boleh **validate** artifact existing tanpa generate ulang
+- Fast Track Mode aktif → Layer 6 dan 7 boleh **simplified** (minimal 3 skills + 1 team file) tapi TIDAK boleh di-skip total
+
+**Kenapa Layer 6 & 7 Tidak Boleh Di-skip:**
+- Layer 6 (Skills) = "recipe" untuk AI membuat code. Tanpa ini, output AI **inconsistent** antar fitur
+- Layer 7 (Team Extension) = domain knowledge. Tanpa ini, AI tidak tahu constraint spesifik (PCI compliance, encryption rules, dll)
+- Keduanya dipakai SETIAP KALI AI coding di sprint — bukan one-time setup yang bisa di-skip
+
+---
+
 ### GitLab Project Management (WAJIB di Setiap Aktivitas)
 
 Setiap aktivitas yang berkaitan dengan issue/task/sprint, AI Agent **WAJIB** update GitLab:
