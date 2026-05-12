@@ -163,6 +163,158 @@ Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agen
 
 ---
 
+### Help Command — "What's Next?" (Kapan Saja)
+
+User bisa bertanya **kapan saja** untuk mendapat guidance tentang apa yang harus dilakukan selanjutnya. AI Agent WAJIB merespons dengan context-aware guidance.
+
+**Trigger phrases:**
+```
+"help"
+"what's next"
+"apa selanjutnya"
+"saya bingung harus ngapain"
+"status"
+"di mana saya sekarang"
+```
+
+**AI Agent WAJIB merespons dengan format:**
+
+```
+━━━ 📍 STATUS & NEXT STEPS ━━━
+
+📊 Current State:
+- Project: [nama project]
+- Mode: [Enterprise / Solo / Fast Track]
+- Sprint: [N] (atau "belum mulai sprint")
+- Layer progress: [X/8 setup layers complete]
+- Current task: [issue #N — title] (atau "tidak ada task aktif")
+- Branch: [current branch]
+
+✅ Yang Sudah Selesai:
+- [Layer/task yang sudah done]
+
+📋 Yang Harus Dilakukan Selanjutnya:
+1. [Next action — paling prioritas]
+2. [Action setelahnya]
+3. [Action opsional]
+
+💡 Tips:
+- [Saran kontekstual berdasarkan state]
+
+Mau saya kerjakan item #1?
+```
+
+**Contoh Response Berdasarkan State:**
+
+#### Jika belum mulai (project baru):
+```
+━━━ 📍 STATUS & NEXT STEPS ━━━
+
+📊 Current State:
+- Project: belum di-setup
+- Layer progress: 0/8
+
+📋 Yang Harus Dilakukan Selanjutnya:
+1. Jawab 5 pertanyaan project (nama, deskripsi, tech stack, baru/existing, layer awal)
+2. Setelah dijawab → AI akan setup project otomatis
+
+Silakan jawab pertanyaan project untuk memulai.
+```
+
+#### Jika di tengah layer setup:
+```
+━━━ 📍 STATUS & NEXT STEPS ━━━
+
+📊 Current State:
+- Project: payment-gateway
+- Mode: Enterprise
+- Layer progress: 4/8 (Layer 0-3 done, Layer 4 in progress)
+
+✅ Yang Sudah Selesai:
+- Layer 0: vision.md ✅
+- Layer 1: requirements extracted ✅
+- Layer 2: validation report ✅
+- Layer 3: payment-spec.md ✅
+
+📋 Yang Harus Dilakukan Selanjutnya:
+1. Selesaikan Layer 4 — Design System (12 dokumen tersisa)
+2. Lanjut Layer 5 — AI Governance
+3. Lanjut Layer 6 — AI Skills
+
+💡 Tips:
+- Layer 4 akan generate 14-16 design documents sekaligus
+- Bilang "lanjutkan Layer 4" untuk melanjutkan
+
+Mau saya lanjutkan Layer 4?
+```
+
+#### Jika di tengah sprint:
+```
+━━━ 📍 STATUS & NEXT STEPS ━━━
+
+📊 Current State:
+- Project: payment-gateway
+- Mode: Enterprise
+- Sprint: 2
+- Current task: #18 — implement refund use case (in-progress)
+- Branch: feature/issue-18-refund
+- Coverage: 85%
+
+✅ Sprint Progress: 3/5 tasks done
+- #15: create payment entity ✅
+- #16: implement top-up ✅
+- #17: implement transfer ✅
+- #18: implement refund ← IN PROGRESS
+- #19: implement notification (next)
+
+📋 Yang Harus Dilakukan Selanjutnya:
+1. Selesaikan issue #18 (refund use case)
+2. Setelah #18 done → kerjakan #19 (notification)
+3. Setelah semua done → sprint completion (MR + retro + scorecard)
+
+💡 Tips:
+- Spec untuk refund ada di docs/specs/srs/refund-spec.md
+- Design ada di docs/design/technical/refund-flow.md
+- Bilang "kerjakan issue #18" untuk lanjut
+
+Mau saya lanjutkan issue #18?
+```
+
+#### Jika sprint selesai:
+```
+━━━ 📍 STATUS & NEXT STEPS ━━━
+
+📊 Current State:
+- Project: payment-gateway
+- Sprint: 2 (ALL TASKS DONE ✅)
+- Coverage: 88%
+- MR: belum dibuat
+
+📋 Yang Harus Dilakukan Selanjutnya:
+1. Create Merge Request (feature → develop)
+2. Setelah MR merged (oleh Anda di GitLab) → Sprint Completion Package:
+   - 📚 Sprint Retrospective
+   - 📊 Quality Scorecard
+   - 🏗️ Framework Health Check
+3. Plan Sprint 3 (jika ada fitur berikutnya)
+
+💡 Tips:
+- Bilang "sprint selesai" untuk trigger MR creation
+- Merge HARUS dilakukan oleh Anda di GitLab (bukan AI)
+
+Mau saya buat MR untuk sprint ini?
+```
+
+**Rules Help Command:**
+1. **Selalu baca CURRENT-STATE.md** sebelum merespons help
+2. **Context-aware** — response berbeda tergantung state project
+3. **Actionable** — selalu berikan next step yang jelas
+4. **Tawarkan eksekusi** — "Mau saya kerjakan item #1?"
+5. **Jangan verbose** — ringkas, to the point, fokus ke action
+6. **Jika CURRENT-STATE.md tidak ada** → buat dulu, lalu respond
+
+---
+
 ### Tampilkan Agent Aktif (WAJIB)
 
 Saat mengerjakan task, AI Agent **WAJIB** menampilkan agent mana yang sedang bekerja menggunakan format banner:
