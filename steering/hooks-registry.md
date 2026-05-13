@@ -12,7 +12,7 @@ Dokumen ini mendefinisikan **semua hook files** yang WAJIB di-generate di `.kiro
 
 ---
 
-## Hook Files (8 files)
+## Hook Files (9 files)
 
 | File | Trigger | Fungsi | Version |
 |------|---------|--------|---------|
@@ -21,13 +21,15 @@ Dokumen ini mendefinisikan **semua hook files** yang WAJIB di-generate di `.kiro
 | `qa-devops-post-task.json` | postTaskExecution | Lint + test + push + WAJIB update issue/board/milestone/wiki | 2.1.0 |
 | `bug-learning-capture.json` | postTaskExecution | Capture learning saat bug fix | 1.0.0 |
 | `metrics-collector.json` | postTaskExecution | Auto-collect AI quality metrics | 1.0.0 |
+| `sprint-end-auto-check.json` | postTaskExecution | **AUTO health check + offer retro saat sprint task terakhir** | 1.0.0 |
 | `sprint-retrospective.json` | userTriggered | Generate retro + close milestone + update wiki + offer scorecard | 2.1.0 |
 | `quality-scorecard.json` | userTriggered | Generate scorecard dari metrics | 1.1.0 |
-| `health-check.json` | userTriggered | Framework compliance scan | 1.0.0 |
+| `health-check.json` | userTriggered | Framework compliance scan (manual trigger) | 1.0.0 |
 
-**Perubahan dari v1.4.0:**
+**Perubahan dari v1.5.0:**
+- **NEW:** `sprint-end-auto-check.json` — otomatis jalankan health check + tawarkan retro/scorecard saat task terakhir sprint selesai
 - `security-review.json` + `observability-check.json` → **MERGED** menjadi `code-quality-scan.json` (v2.0.0) dengan smart filtering
-- **NEW:** `metrics-collector.json` — auto-collect metrics setiap task ke `docs/quality/metrics-log.jsonl`
+- `metrics-collector.json` — auto-collect metrics setiap task ke `docs/quality/metrics-log.jsonl`
 - `sprint-retrospective.json` dan `quality-scorecard.json` sekarang **data-driven** (baca dari metrics-log)
 
 ---
@@ -144,7 +146,24 @@ Dokumen ini mendefinisikan **semua hook files** yang WAJIB di-generate di `.kiro
 }
 ```
 
-### 6. `sprint-retrospective.json` (v2.1.0 — Data-Driven + GitLab + Offer Scorecard)
+### 6. `sprint-end-auto-check.json` (NEW — Automated Health Check at Sprint End)
+
+```json
+{
+  "name": "Sprint End Auto Check",
+  "version": "1.0.0",
+  "description": "Otomatis jalankan health check dan tawarkan retro saat task terakhir sprint selesai",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "CEK apakah ini TASK TERAKHIR dalam sprint aktif:\n\n**Cara detect:**\n1. Baca docs/CURRENT-STATE.md → lihat sprint progress (tasks completed vs total)\n2. Jika tasks completed == total tasks → ini task terakhir\n3. Jika BUKAN task terakhir → SKIP hook ini entirely\n\n**Jika INI TASK TERAKHIR SPRINT:**\n\n━━━ 🏗️ AUTO HEALTH CHECK ━━━\nJalankan framework health check OTOMATIS:\n1. Cek .kiro/hooks/ lengkap (9 files)\n2. Cek .kiro/steering/ lengkap (3+ files)\n3. Cek docs/ structure (CONTEXT-INDEX, CURRENT-STATE, learnings, quality)\n4. Cek architecture compliance (import violations?)\n5. Cek coverage >= 80%\n6. Cek semua sprint issues punya status update\n7. Cek milestone progress\n\nGenerate: docs/quality/health-check-sprint-[N].md\n\n━━━ 📋 SPRINT COMPLETION OFFER ━━━\nInformasikan user:\n'Sprint [N] — semua task selesai! 🎉\n\n🏗️ Auto Health Check: [score]% compliance\n[List violations jika ada]\n\nNext steps:\n1. Saya akan buat MR ke develop. Setelah Anda merge di GitLab, saya akan tawarkan:\n   - 📚 Sprint Retrospective\n   - 📊 Quality Scorecard\n   - 📖 Wiki Update (Changelog + API docs)\n\nMau saya buat MR sekarang?'"
+  }
+}
+```
+
+### 7. `sprint-retrospective.json` (v2.1.0 — Data-Driven + GitLab + Offer Scorecard)
 
 **Trigger:** User bilang "sprint selesai", "retrospective", "jalankan retro", atau setelah MR merged.
 
@@ -256,14 +275,15 @@ Framework ini menggunakan **rework_count** sebagai proxy untuk hallucination:
 Saat auto-detect jalan (awal session), cek 8 files ini:
 
 ```
-.kiro/hooks/architect-gate.json       → harus ada
-.kiro/hooks/code-quality-scan.json    → harus ada (menggantikan security-review + observability-check)
-.kiro/hooks/qa-devops-post-task.json  → harus ada
-.kiro/hooks/bug-learning-capture.json → harus ada
-.kiro/hooks/metrics-collector.json    → harus ada
-.kiro/hooks/sprint-retrospective.json → harus ada
-.kiro/hooks/quality-scorecard.json    → harus ada
-.kiro/hooks/health-check.json         → harus ada
+.kiro/hooks/architect-gate.json        → harus ada
+.kiro/hooks/code-quality-scan.json     → harus ada
+.kiro/hooks/qa-devops-post-task.json   → harus ada
+.kiro/hooks/bug-learning-capture.json  → harus ada
+.kiro/hooks/metrics-collector.json     → harus ada
+.kiro/hooks/sprint-end-auto-check.json → harus ada (NEW — auto health check)
+.kiro/hooks/sprint-retrospective.json  → harus ada
+.kiro/hooks/quality-scorecard.json     → harus ada
+.kiro/hooks/health-check.json          → harus ada
 ```
 
 Jika ada yang missing → generate. Jika ada versi lama (`security-review.json`, `observability-check.json`) → hapus dan ganti dengan `code-quality-scan.json`.

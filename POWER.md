@@ -116,8 +116,8 @@ Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agen
     ↓
 [AUTO-DETECT 2: Apakah .kiro/hooks/ sudah ada dan lengkap?]
     → Cek: apakah folder .kiro/hooks/ ada?
-    → Jika TIDAK ADA → GENERATE semua 8 hook files otomatis
-    → Jika ADA → cek apakah lengkap (8 files)?
+    → Jika TIDAK ADA → GENERATE semua 9 hook files otomatis
+    → Jika ADA → cek apakah lengkap (9 files)?
     → Jika kurang → generate yang missing
     → Informasikan user: "Hooks framework sudah di-setup/updated."
     ↓
@@ -134,15 +134,16 @@ Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agen
 [Lanjut ke workflow normal]
 ```
 
-**Hook Files yang WAJIB Ada (8 files):**
+**Hook Files yang WAJIB Ada (9 files):**
 
 | File | Cek Keberadaan |
 |------|---------------|
 | `.kiro/hooks/architect-gate.json` | ✅ harus ada |
-| `.kiro/hooks/code-quality-scan.json` | ✅ harus ada (menggantikan security-review + observability-check) |
+| `.kiro/hooks/code-quality-scan.json` | ✅ harus ada |
 | `.kiro/hooks/qa-devops-post-task.json` | ✅ harus ada |
 | `.kiro/hooks/bug-learning-capture.json` | ✅ harus ada |
 | `.kiro/hooks/metrics-collector.json` | ✅ harus ada |
+| `.kiro/hooks/sprint-end-auto-check.json` | ✅ harus ada (auto health check) |
 | `.kiro/hooks/sprint-retrospective.json` | ✅ harus ada |
 | `.kiro/hooks/quality-scorecard.json` | ✅ harus ada |
 | `.kiro/hooks/health-check.json` | ✅ harus ada |
