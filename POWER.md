@@ -353,16 +353,70 @@ Sebelum kita mulai, saya perlu memahami project yang akan dikerjakan:
 2. Deskripsi singkat project (apa yang ingin diselesaikan)?
 3. Tech stack yang diinginkan? (contoh: Next.js, Go, Python, dll)
 4. Apakah ini project baru atau project existing?
-5. Layer mana yang ingin dikerjakan terlebih dahulu?
+5. Apakah project ini punya UI? Jika ya:
+   a. Apakah Anda sudah punya Design System sendiri? (color tokens, typography, component library)
+   b. Jika ya — kirimkan detail berikut agar saya integrasikan ke project:
+      - Color palette (primary, secondary, neutral, semantic colors)
+      - Typography (font family, sizes, weights)
+      - Spacing scale
+      - Component library yang dipakai (shadcn, MUI, Ant Design, custom, dll)
+      - Figma/design file link (opsional)
+   c. Jika belum punya — saya akan generate default design system (Atomic Design + tokens)
+6. Layer mana yang ingin dikerjakan terlebih dahulu?
 
 Silakan jawab pertanyaan di atas agar saya bisa menyesuaikan framework dengan kebutuhan project Anda."
 ```
+
+**Jika user punya Design System sendiri:**
+
+AI Agent WAJIB:
+1. Terima detail design system dari user (colors, typography, spacing, component library)
+2. Generate `.kiro/steering/design-system.md` dengan detail tersebut (`inclusion: always`)
+3. Generate `src/presentation/styles/tokens/` berdasarkan input user
+4. Sesuaikan `docs/design/ui-ux/theming.md` dengan tokens user
+5. Sesuaikan `docs/design/ui-ux/component-library.md` dengan library yang dipilih user
+
+**Template `.kiro/steering/design-system.md` (jika user punya design system):**
+```markdown
+---
+inclusion: always
+---
+
+# Design System — [Project Name]
+
+## Color Tokens
+[Dari input user — primary, secondary, neutral, semantic]
+
+## Typography
+[Dari input user — font family, sizes, weights]
+
+## Spacing
+[Dari input user — spacing scale]
+
+## Component Library
+[Library yang dipakai: shadcn / MUI / Ant Design / custom]
+
+## Rules
+- Semua component WAJIB menggunakan tokens di atas
+- DILARANG hardcode warna/font/spacing
+- Jika membuat component baru → ikuti pattern library yang dipilih
+- Dark/Light theme WAJIB menggunakan token variants
+```
+
+**Jika user TIDAK punya Design System:**
+
+AI Agent akan generate default design system saat Layer 4:
+- Default color tokens (neutral + primary blue)
+- Default typography (Inter/system font)
+- Default spacing (4px scale)
+- Atomic Design structure (atoms/molecules/organisms)
 
 **Rules:**
 - JANGAN langsung eksekusi layer tanpa mengetahui context project
 - Tunggu jawaban user sebelum memulai pengerjaan
 - Sesuaikan output setiap layer dengan context project yang diberikan user
 - Jika user hanya menjawab sebagian, tanyakan yang belum dijawab
+- **Jika user punya design system** → integrasikan ke steering + tokens SEBELUM mulai coding
 
 **Alasan:**
 - Framework ini bersifat generic, perlu disesuaikan dengan project spesifik
