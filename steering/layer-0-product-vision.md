@@ -19,16 +19,23 @@ AI tanpa visi akan menyebabkan:
 - Technical debt
 - Pilot graveyard
 
-## Output yang Dihasilkan
+## Output yang Dihasilkan (SEMUA WAJIB)
 
 ```
 docs/product/
-├── vision.md
-├── roadmap.md
-├── business-goals.md
-├── success-metrics.md
-└── ai-opportunities.md
+├── vision.md              ← WAJIB — problem statement, target user, value proposition
+├── roadmap.md             ← WAJIB — phase/milestone timeline
+├── business-goals.md      ← WAJIB — KPI, revenue model, business objectives
+├── success-metrics.md     ← WAJIB — measurable criteria untuk validasi keberhasilan
+└── ai-opportunities.md    ← WAJIB — di mana AI bisa accelerate development
 ```
+
+**Kenapa SEMUA wajib:**
+- `vision.md` — tanpa ini, AI tidak tahu apa yang dibangun
+- `roadmap.md` — tanpa ini, AI tidak tahu prioritas dan timeline
+- `business-goals.md` — tanpa ini, AI tidak bisa prioritaskan fitur berdasarkan business value
+- `success-metrics.md` — tanpa ini, tidak ada cara mengukur apakah project berhasil
+- `ai-opportunities.md` — tanpa ini, AI tidak tahu di mana bisa paling membantu
 
 ## Template: vision.md
 

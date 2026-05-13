@@ -476,7 +476,7 @@ AI Agent **WAJIB** mengecek kelengkapan dokumen setelah menyelesaikan setiap lay
 
 | Layer | Dokumen WAJIB | Cek |
 |-------|--------------|-----|
-| **0 — Vision** | `docs/product/vision.md` | ✅ harus ada |
+| **0 — Vision** | `docs/product/vision.md` + `roadmap.md` + `business-goals.md` + `success-metrics.md` | ✅ semua harus ada |
 | **1 — Intake** | `docs/requirements/extracted/*.md` (minimal 1 file) | ✅ harus ada |
 | **2 — Validation** | `docs/requirements/validation/validation-report-*.md` | ✅ harus ada |
 | **3 — Spec-Driven** | `docs/specs/srs/[feature]-spec.md` (per fitur) + `docs/specs/prd/user-stories.md` | ✅ harus ada |
