@@ -910,6 +910,132 @@ Saat user ingin menambahkan issue baru, sprint baru, atau fitur baru — AI Agen
 
 ---
 
+### 5. Pertanyaan Inisiasi Sprint & Task (WAJIB Ditanyakan)
+
+Saat user minta mulai sprint baru atau task baru, AI Agent **WAJIB** menanyakan pertanyaan berikut. Jika user tidak menjawab semua, berikan **rekomendasi default** dan konfirmasi.
+
+#### Inisiasi Sprint Baru
+
+```
+"Sprint baru akan dimulai. Saya perlu informasi berikut:
+
+1. Nama/nomor sprint? 
+   → Default: Sprint [N+1] (increment dari sprint terakhir)
+
+2. Durasi sprint?
+   → Default: 2 minggu
+
+3. Fitur/epic apa yang akan dikerjakan?
+   → WAJIB dijawab user (tidak ada default — ini menentukan scope)
+
+4. Apakah ada carry-over dari sprint sebelumnya?
+   → Default: Saya cek dari milestone sebelumnya (auto-detect issues yang belum done)
+
+5. Apakah ada deadline khusus atau dependency external?
+   → Default: Tidak ada (standard sprint timeline)
+
+6. Prioritas utama sprint ini?
+   → Default: Delivery fitur baru
+   → Opsi: delivery fitur / fix bugs / tech debt payback / mixed
+
+Jika Anda hanya jawab nomor 3 (fitur), saya akan gunakan default untuk sisanya.
+Konfirmasi sebelum saya mulai planning?"
+```
+
+**Rekomendasi Default Sprint:**
+
+| Pertanyaan | Default | Kapan Berbeda |
+|-----------|---------|---------------|
+| Nama | Sprint [N+1] | User mau custom naming |
+| Durasi | 2 minggu | Deadline mendesak → 1 minggu |
+| Fitur | — (WAJIB user jawab) | — |
+| Carry-over | Auto-detect dari milestone sebelumnya | User mau reset clean |
+| Deadline | Tidak ada | Ada demo/release date |
+| Prioritas | Delivery fitur | Banyak bugs → fix bugs. Banyak debt → payback |
+
+**Setelah user jawab (minimal pertanyaan #3):**
+```
+AI: "Sprint [N+1] akan saya setup dengan:
+- Durasi: 2 minggu ([start] — [end])
+- Fitur: [yang user bilang]
+- Carry-over: [N] issues dari Sprint [N]
+- Prioritas: Delivery fitur
+
+Konfirmasi? Atau ada yang mau diubah?"
+```
+
+---
+
+#### Inisiasi Task/Issue Baru
+
+```
+"Task baru akan dibuat. Saya perlu informasi berikut:
+
+1. Deskripsi task (apa yang harus dilakukan)?
+   → WAJIB dijawab user
+
+2. Tipe task?
+   → Default: feat (fitur baru)
+   → Opsi: feat / fix / refactor / docs / chore / test
+
+3. Domain/area?
+   → Default: Auto-detect dari deskripsi (payment, auth, notification, dll)
+
+4. Sprint assignment?
+   → Default: Sprint aktif saat ini
+
+5. Acceptance criteria?
+   → Default: AI generate berdasarkan deskripsi, user review
+   → Rekomendasi: minimal 3 AC per task
+
+6. Dependencies?
+   → Default: Tidak ada
+   → AI cek: apakah ada entity/interface yang belum dibuat?
+
+Jika Anda hanya bilang deskripsi task, saya akan generate sisanya dan konfirmasi."
+```
+
+**Rekomendasi Default Task:**
+
+| Pertanyaan | Default | Kapan Berbeda |
+|-----------|---------|---------------|
+| Deskripsi | — (WAJIB user jawab) | — |
+| Tipe | `feat` | Bug → `fix`. Cleanup → `refactor`. Docs → `docs` |
+| Domain | Auto-detect dari deskripsi | User specify jika ambigu |
+| Sprint | Sprint aktif | Standalone (di luar sprint) |
+| AC | AI generate 3-5 AC, user review | User punya AC sendiri |
+| Dependencies | Tidak ada (AI cek otomatis) | User tahu ada blocker |
+
+**Contoh: User hanya bilang deskripsi**
+```
+User: "Buat fitur export data ke CSV"
+
+AI: "Task akan saya buat dengan detail berikut:
+- Title: feat: implement data export to CSV
+- Type: feat
+- Domain: data (auto-detected)
+- Sprint: Sprint 3 (aktif)
+- Acceptance Criteria (generated):
+  1. User bisa export data dari halaman list ke file CSV
+  2. File CSV berisi semua kolom yang ditampilkan di tabel
+  3. Export handle data > 10.000 rows tanpa timeout
+  4. Nama file: [entity]-export-[timestamp].csv
+  5. Error handling: informasikan user jika export gagal
+- Dependencies: Tidak ada
+
+Konfirmasi? Atau ada yang mau diubah?"
+```
+
+**Rules:**
+1. **Minimal pertanyaan #1 (deskripsi) WAJIB dijawab user** — sisanya boleh default
+2. **SELALU konfirmasi** sebelum create issue di GitLab
+3. **SELALU generate AC** jika user tidak provide — user bisa revisi
+4. **Auto-detect domain** dari kata kunci di deskripsi
+5. **Jika user jawab singkat** → AI lengkapi dengan default, konfirmasi
+6. **JANGAN create issue tanpa konfirmasi** — user harus approve detail
+
+---
+
 ## Key Principles
 
 ### 1. Validate Before Execute
