@@ -31,11 +31,10 @@ docs/specs/prd/
 ### System Requirements Specification (SRS)
 ```
 docs/specs/srs/
-├── architecture.md
-├── sequence-diagram.md
+├── [feature]-spec.md
+├── api-contract.md
 ├── state-flow.md
 ├── failure-scenario.md
-├── api-contract.md
 └── data-model.md
 ```
 
@@ -142,7 +141,7 @@ Simpan di docs/specs/prd/"
 ```
 "Berdasarkan PRD di docs/specs/prd/,
 generate System Requirements Specification.
-Include: architecture, sequence diagram, state flow, failure scenarios, API contracts.
+Include: state flow, failure scenarios, API contracts, data model.
 Simpan di docs/specs/srs/"
 ```
 
@@ -159,7 +158,7 @@ Gunakan Kiro Spec feature untuk setiap fitur:
 
 1. **Create Spec** di Kiro untuk fitur yang akan dibangun
 2. **Requirements** - Referensikan docs/specs/prd/user-stories.md
-3. **Design** - Referensikan docs/specs/srs/architecture.md
+3. **Design** - Referensikan docs/design/system/high-level-architecture.md
 4. **Tasks** - Break down menjadi implementable tasks
 
 Contoh Kiro Spec:
@@ -170,7 +169,7 @@ Contoh Kiro Spec:
 #[[file:docs/specs/prd/user-stories.md]]
 
 ## Design
-#[[file:docs/specs/srs/architecture.md]]
+#[[file:docs/design/system/high-level-architecture.md]]
 #[[file:docs/design/security/threat-model.md]]
 
 ## Tasks
