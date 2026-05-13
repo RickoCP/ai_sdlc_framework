@@ -800,6 +800,90 @@ Setiap sprint yang dijalankan **WAJIB** mengikuti workflow lengkap framework ini
 
 ---
 
+### 4. WAJIB Ikuti Workflow Saat Tambah Issue / Sprint / Fitur Baru
+
+Saat user ingin menambahkan issue baru, sprint baru, atau fitur baru — AI Agent **WAJIB** mengikuti workflow framework ini. DILARANG langsung coding tanpa melalui proses yang benar.
+
+**Saat user bilang "tambah issue baru" / "ada fitur baru" / "buat task baru":**
+
+```
+[User minta tambah issue/fitur]
+    ↓
+1. Tentukan: apakah ini masuk sprint aktif atau sprint baru?
+   → Jika sprint aktif masih berjalan → tambahkan ke sprint aktif
+   → Jika sprint sudah selesai → buat sprint baru
+    ↓
+2. Jalankan Spec-First Gate (Layer 3):
+   → Fitur kompleks? → WAJIB buat spec dulu
+   → Bug fix / task kecil? → boleh langsung
+    ↓
+3. Buat GitLab Issue:
+   → Title, description, acceptance criteria
+   → Labels: type::feat/fix/chore, priority::*, domain::*
+   → Assign ke milestone aktif
+    ↓
+4. Buat branch dari develop (atau main di Solo Mode):
+   → Naming: feature/issue-[N]-[description]
+    ↓
+5. Ikuti per-task workflow (step 5-12 dari Sprint Workflow):
+   → Architect Gate → Implementation → Security → QA → DevOps → Metrics
+    ↓
+6. Update GitLab: issue status + comment + milestone progress
+```
+
+**Saat user bilang "mulai sprint baru" / "plan sprint [N]":**
+
+```
+[User minta sprint baru]
+    ↓
+1. Cek: apakah sprint sebelumnya sudah di-close?
+   → Jika BELUM → close dulu (carry-over issues, update wiki, retro)
+   → Jika SUDAH → lanjut
+    ↓
+2. Buat milestone baru di GitLab:
+   → Title: Sprint [N]
+   → Start date + due date
+    ↓
+3. Breakdown fitur menjadi issues (BA Agent + Architect Agent):
+   → User stories → technical tasks → GitLab issues
+    ↓
+4. Assign semua issues ke milestone
+    ↓
+5. Buat labels jika ada domain baru
+    ↓
+6. Update CURRENT-STATE.md: sprint = N, tasks = [list]
+    ↓
+7. Informasikan user: "Sprint [N] ready. [X] issues created. Mau mulai task pertama?"
+```
+
+**Saat user bilang "tambah hotfix" / "ada bug urgent":**
+
+```
+[User report bug urgent]
+    ↓
+1. Buat GitLab issue: type::bug, priority::critical
+    ↓
+2. Buat branch: hotfix/issue-[N]-[description] (dari main)
+    ↓
+3. Fix → Test → Push (ikuti per-task workflow)
+    ↓
+4. Create MR ke main → TUNGGU user merge
+    ↓
+5. Setelah merged → bug learning capture (Layer 14)
+    ↓
+6. Update issue status + wiki (jika perlu)
+```
+
+**Rules:**
+1. **SELALU buat GitLab issue** — tidak ada task tanpa issue (traceability)
+2. **SELALU assign ke milestone** — tidak ada issue orphan
+3. **SELALU ikuti per-task workflow** — tidak ada shortcut
+4. **SELALU update CURRENT-STATE.md** — state harus reflect reality
+5. **Sprint baru HARUS close sprint lama dulu** — tidak boleh overlap tanpa carry-over
+6. **Hotfix tetap ikuti workflow** — hanya branch strategy yang berbeda (dari main, bukan develop)
+
+---
+
 ## Key Principles
 
 ### 1. Validate Before Execute
