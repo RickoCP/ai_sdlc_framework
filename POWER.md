@@ -368,7 +368,19 @@ Sebelum kita mulai, saya perlu memahami project yang akan dikerjakan:
       - Component library yang dipakai (shadcn, MUI, Ant Design, custom, dll)
       - Figma/design file link (opsional)
    c. Jika belum punya — saya akan generate default design system (Atomic Design + tokens)
-6. Layer mana yang ingin dikerjakan terlebih dahulu?
+6. Apakah GitLab credentials sudah di-setup?
+   - GITLAB_PERSONAL_ACCESS_TOKEN (dari GitLab → User Settings → Access Tokens, scope: api, read_repository, write_repository)
+   - GITLAB_API_URL (contoh: https://gitlab.com/api/v4)
+   
+   Jika BELUM:
+   → Saya akan bantu set environment variable di OS Anda.
+   → Windows: [Environment]::SetEnvironmentVariable('GITLAB_PERSONAL_ACCESS_TOKEN', 'glpat-xxx', 'User')
+   → Linux/Mac: export GITLAB_PERSONAL_ACCESS_TOKEN='glpat-xxx' (di ~/.bashrc)
+   → Setelah set, restart Kiro.
+   
+   Jika SUDAH: lanjut.
+
+7. Layer mana yang ingin dikerjakan terlebih dahulu?
 
 Silakan jawab pertanyaan di atas agar saya bisa menyesuaikan framework dengan kebutuhan project Anda."
 ```
