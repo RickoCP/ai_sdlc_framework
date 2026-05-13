@@ -640,7 +640,23 @@ Informasikan user: summary + next sprint recommendation
 
 ---
 
-## Solo Mode (Opsional)
+## Solo Mode (Opsional — HANYA Jika User Eksplisit Minta)
+
+**⚠️ DEFAULT MODE ADALAH ENTERPRISE MODE.**
+
+AI Agent **DILARANG** mengaktifkan Solo Mode kecuali user **EKSPLISIT** bilang salah satu dari:
+- "Saya bekerja solo"
+- "Ini project personal"
+- "Solo mode"
+- "Saya sendiri"
+
+**DILARANG assume Solo Mode** berdasarkan:
+- ❌ Jumlah orang di session (selalu 1 di Kiro — bukan indikator)
+- ❌ Ukuran project (project kecil tetap bisa Enterprise)
+- ❌ Tech stack (apapun stack-nya, default Enterprise)
+- ❌ "Sepertinya ini project kecil" (AI DILARANG assume)
+
+**Jika user tidak menyebutkan mode → SELALU gunakan Enterprise Mode (full ceremony).**
 
 Untuk developer yang bekerja sendiri (solo), beberapa ceremony enterprise bisa di-simplify tanpa mengorbankan quality.
 
