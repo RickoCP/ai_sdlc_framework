@@ -706,6 +706,100 @@ main (production-ready)
 
 ---
 
+## Strict Rules (TIDAK BOLEH DILANGGAR)
+
+### 1. DILARANG Merge Tanpa Konfirmasi User
+
+AI Agent **DILARANG KERAS** melakukan merge — baik di GitLab maupun di local git — tanpa konfirmasi eksplisit dari user.
+
+**DILARANG:**
+```
+❌ git merge feature/xxx ke main/develop (local)
+❌ Merge MR via GitLab MCP tanpa user approve
+❌ Set auto-merge pada MR
+❌ Squash merge tanpa user bilang "merge"
+```
+
+**WAJIB:**
+```
+✅ Buat MR di GitLab → informasikan URL → tunggu user merge manual di GitLab
+✅ Jika user bilang "merge" → konfirmasi dulu: "Merge [branch] ke [target]? (y/n)"
+✅ Setelah user konfirmasi → baru eksekusi merge
+```
+
+**Alasan:** Merge adalah operasi irreversible yang mengubah branch utama. User HARUS review dan approve sebelum merge terjadi.
+
+---
+
+### 2. WAJIB Update GitLab Wiki + Issues Setiap Sprint Selesai
+
+Setelah sprint selesai (MR merged), AI Agent **WAJIB** melakukan update berikut — TANPA perlu user minta:
+
+| Update | Tool | Konten |
+|--------|------|--------|
+| Wiki "Changelog" | `create_or_update_wiki_page` | Sprint [N]: features delivered, issues closed, carry-over |
+| Wiki "API-Documentation" | `create_or_update_wiki_page` | Endpoint baru (jika ada) |
+| Wiki "Architecture-Decisions" | `create_or_update_wiki_page` | ADR baru (jika ada) |
+| Semua sprint issues | `update_issue` | Label → `status::done` (atau carry-over) |
+| Milestone | `edit_milestone` | Close (jika semua done) atau update description |
+| Improvement issues | `create_issue` | Dari retrospective action items |
+
+**Rules:**
+- Wiki update WAJIB — bukan opsional
+- Issue status update WAJIB — board harus reflect reality
+- Milestone close/carry-over WAJIB — jangan biarkan milestone open tanpa alasan
+- Jika GitLab MCP gagal → retry 2x → informasikan user untuk manual update
+
+---
+
+### 3. WAJIB Ikuti Workflow Power di Setiap Sprint
+
+Setiap sprint yang dijalankan **WAJIB** mengikuti workflow lengkap framework ini. AI Agent DILARANG "shortcut" atau skip step.
+
+**Sprint Workflow WAJIB (tidak boleh di-skip):**
+
+```
+[SPRINT PLANNING]
+1. Buat/update milestone di GitLab
+2. Breakdown fitur → issues (Epic → Feature → Task)
+3. Assign issues ke milestone
+4. Buat branch dari develop (atau main di Solo Mode)
+
+[PER TASK — WAJIB untuk setiap task]
+5. 🏗️ Architect Gate: load context + validate spec/design
+6. ⚙️/🎨 Implementation: code sesuai architecture standards
+7. 🔒 Security scan: setiap file write di-scan
+8. 📊 Observability: logging + metrics ditambahkan
+9. 🧪 QA: lint + typecheck + test (coverage >= 80%)
+10. 🚀 DevOps: commit + push + update issue status
+11. 📊 Metrics: collect ke metrics-log.jsonl
+12. 📚 Learning: capture jika bug fix
+
+[SPRINT END — WAJIB setelah semua task done]
+13. Push semua perubahan
+14. Create MR → TUNGGU user merge di GitLab
+15. Setelah merged → TAWARKAN Sprint Completion Package:
+    - 📚 Retrospective
+    - 📊 Scorecard
+    - 🏗️ Health Check
+    - 📖 Wiki Update
+16. Update milestone (close/carry-over)
+17. Update wiki Changelog
+18. Update semua issues status
+19. Update CURRENT-STATE.md (sprint = N+1)
+```
+
+**DILARANG:**
+- ❌ Skip Architect Gate (langsung coding tanpa cek spec)
+- ❌ Skip QA (push tanpa lint/typecheck/test)
+- ❌ Skip issue update (push tanpa update GitLab)
+- ❌ Skip wiki update setelah sprint
+- ❌ Skip metrics collection
+- ❌ Merge tanpa konfirmasi user
+- ❌ Mulai sprint baru tanpa close sprint sebelumnya
+
+---
+
 ## Key Principles
 
 ### 1. Validate Before Execute
