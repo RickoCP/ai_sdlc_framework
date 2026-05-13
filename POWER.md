@@ -479,7 +479,7 @@ AI Agent **WAJIB** mengecek kelengkapan dokumen setelah menyelesaikan setiap lay
 | **0 — Vision** | `docs/product/vision.md` + `roadmap.md` + `business-goals.md` + `success-metrics.md` | ✅ semua harus ada |
 | **1 — Intake** | `docs/requirements/extracted/user-stories.md` + `functional-requirements.md` + `non-functional-requirements.md` | ✅ semua harus ada |
 | **2 — Validation** | `docs/requirements/validation/validation-report-*.md` | ✅ harus ada |
-| **3 — Spec-Driven** | `docs/specs/srs/[feature]-spec.md` + `architecture.md` + `sequence-diagram.md` + `api-contract.md` + `docs/specs/prd/user-stories.md` | ✅ semua harus ada |
+| **3 — Spec-Driven** | `docs/specs/srs/[feature]-spec.md` + `architecture.md` + `sequence-diagram.md` + `api-contract.md` + `state-flow.md` + `failure-scenario.md` + `data-model.md` + `docs/specs/prd/user-stories.md` | ✅ semua harus ada |
 | **4 — Design** | System: `high-level-architecture.md`, `sequence-diagram.md`, `deployment.md`, `c4-model.md` | ✅ semua harus ada |
 | | Technical: `clean-architecture.md`, `folder-structure.md`, `error-handling.md`, `naming-convention.md`, `testing-pattern.md` | ✅ semua harus ada |
 | | Security: `threat-model.md`, `trust-boundary.md` | ✅ harus ada |
