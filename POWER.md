@@ -472,23 +472,27 @@ Saat mengerjakan framework ini secara bertahap (layer by layer), AI Agent **WAJI
 
 AI Agent **WAJIB** mengecek kelengkapan dokumen setelah menyelesaikan setiap layer. Jika ada yang belum lengkap, **WAJIB dilengkapi SEBELUM** konfirmasi ke user.
 
-**Checklist per Layer:**
+**Checklist per Layer (SEMUA WAJIB — tidak ada yang opsional):**
 
 | Layer | Dokumen WAJIB | Cek |
 |-------|--------------|-----|
-| **0 — Vision** | `docs/product/vision.md` + `roadmap.md` + `business-goals.md` + `success-metrics.md` | ✅ semua harus ada |
+| **0 — Vision** | `docs/product/vision.md` + `roadmap.md` + `business-goals.md` + `success-metrics.md` + `ai-opportunities.md` | ✅ semua harus ada |
 | **1 — Intake** | `docs/requirements/extracted/user-stories.md` + `functional-requirements.md` + `non-functional-requirements.md` | ✅ semua harus ada |
-| **2 — Validation** | `docs/requirements/validation/validation-report-*.md` | ✅ harus ada |
-| **3 — Spec-Driven** | `docs/specs/srs/[feature]-spec.md` + `architecture.md` + `sequence-diagram.md` + `api-contract.md` + `state-flow.md` + `failure-scenario.md` + `data-model.md` + `docs/specs/prd/user-stories.md` | ✅ semua harus ada |
-| **4 — Design** | System: `high-level-architecture.md`, `sequence-diagram.md`, `deployment.md`, `c4-model.md` | ✅ semua harus ada |
-| | Technical: `clean-architecture.md`, `folder-structure.md`, `error-handling.md`, `naming-convention.md`, `testing-pattern.md` | ✅ semua harus ada |
-| | Security: `threat-model.md`, `trust-boundary.md` | ✅ harus ada |
-| | UI/UX (jika ada UI): `wireframe.md`, `component-library.md`, `accessibility.md`, `i18n-strategy.md`, `theming.md` | ✅ semua harus ada |
-| **5 — Governance** | `docs/governance/ai-policy.md` | ✅ harus ada |
-| **6 — Skills** | `.kiro/skills/create-*.md` (minimal 3 files) | ✅ harus ada |
-| **8 — Issue-Driven** | GitLab issues created + milestone + labels | ✅ harus ada |
-| **10 — Context** | `docs/CONTEXT-INDEX.md` + `docs/CURRENT-STATE.md` | ✅ harus ada |
-| **12 — Quality Gates** | `.gitlab-ci.yml` + `.eslintrc.json`/`eslint.config.mjs` + `vitest.config.ts` | ✅ harus ada |
+| **2 — Validation** | `docs/requirements/validation/validation-report-*.md` + `ambiguity-report.md` + `conflict-analysis.md` + `risk-analysis.md` | ✅ semua harus ada |
+| **3 — Spec-Driven** | `docs/specs/brd/business-flow.md` + `stakeholder-matrix.md` | ✅ semua harus ada |
+| | `docs/specs/prd/user-stories.md` + `acceptance-criteria.md` + `feature-matrix.md` | ✅ semua harus ada |
+| | `docs/specs/srs/[feature]-spec.md` + `architecture.md` + `sequence-diagram.md` + `api-contract.md` + `state-flow.md` + `failure-scenario.md` + `data-model.md` | ✅ semua harus ada |
+| **4 — Design** | System: `high-level-architecture.md` + `sequence-diagram.md` + `deployment.md` + `c4-model.md` + `event-flow.md` | ✅ semua harus ada |
+| | Technical: `clean-architecture.md` + `folder-structure.md` + `error-handling.md` + `naming-convention.md` + `testing-pattern.md` | ✅ semua harus ada |
+| | Security: `threat-model.md` + `trust-boundary.md` + `attack-surface.md` + `mitigation-plan.md` | ✅ semua harus ada |
+| | UI/UX (jika ada UI): `wireframe.md` + `component-library.md` + `accessibility.md` + `i18n-strategy.md` + `theming.md` + `design-token.md` | ✅ semua harus ada |
+| **5 — Governance** | `docs/governance/ai-policy.md` + `approved-tools.md` + `security-policy.md` + `code-review-policy.md` | ✅ semua harus ada |
+| **6 — Skills** | `.kiro/skills/create-api.md` + `create-usecase.md` + `create-repository.md` + `create-component.md` + `create-test.md` + `create-migration.md` | ✅ semua harus ada (6 files) |
+| **7 — Team Extension** | `.kiro/steering/team/[domain]-team.md` (minimal 1 per domain project) | ✅ harus ada |
+| **8 — Issue-Driven** | GitLab: issues + milestone + labels + board + issue templates (Feature, Task, Bug) + MR templates | ✅ semua harus ada |
+| **10 — Context** | `docs/CONTEXT-INDEX.md` + `docs/CURRENT-STATE.md` | ✅ semua harus ada |
+| **12 — Quality Gates** | `.gitlab-ci.yml` + `.eslintrc.json`/`eslint.config.mjs` + `tsconfig.json` + `.prettierrc` + `vitest.config.ts` + `commitlint.config.js` | ✅ semua harus ada |
+| **14 — Learning** | `docs/learnings/` folder + `docs/retrospectives/` folder + `docs/adr/` folder + `docs/tech-debt/` folder + `docs/quality/metrics-log.jsonl` | ✅ semua harus ada |
 
 **Flow:**
 ```
