@@ -878,7 +878,7 @@ docs/design/
 │   ├── sequence-diagram.md           ← WAJIB
 │   ├── deployment.md                 ← WAJIB
 │   ├── c4-model.md                   ← WAJIB
-│   └── event-flow.md                 ← Opsional (jika event-driven)
+│   └── event-flow.md                 ← WAJIB
 │
 ├── technical/
 │   ├── clean-architecture.md         ← WAJIB
@@ -890,8 +890,8 @@ docs/design/
 ├── security/
 │   ├── threat-model.md               ← WAJIB
 │   ├── trust-boundary.md             ← WAJIB
-│   ├── attack-surface.md             ← Opsional
-│   └── mitigation-plan.md            ← Opsional
+│   ├── attack-surface.md             ← WAJIB
+│   └── mitigation-plan.md            ← WAJIB
 │
 └── ui-ux/
     ├── wireframe.md                  ← WAJIB (jika ada UI)
@@ -899,7 +899,7 @@ docs/design/
     ├── accessibility.md              ← WAJIB (jika ada UI)
     ├── i18n-strategy.md              ← WAJIB (jika ada UI)
     ├── theming.md                    ← WAJIB (jika ada UI)
-    └── design-token.md               ← Opsional
+    └── design-token.md               ← WAJIB (jika ada UI)
 ```
 
 #### Flow Generate Design Documents

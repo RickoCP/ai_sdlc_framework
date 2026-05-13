@@ -85,9 +85,9 @@ Saat power diaktifkan atau session baru dimulai, AI Agent menjalankan **auto-det
                          ▼
 ┌─────────────────────────────────────────────────────────┐
 │  AUTO-DETECT 2: Hooks lengkap?                           │
-│  Cek: .kiro/hooks/ ada? 8 files lengkap?                │
+│  Cek: .kiro/hooks/ ada? 9 files lengkap?                │
 ├─────────────────────────────────────────────────────────┤
-│  TIDAK ADA → generate semua 8 hook files                 │
+│  TIDAK ADA → generate semua 9 hook files                 │
 │  KURANG → generate yang missing                          │
 │  LENGKAP → skip                                          │
 └────────────────────────┬────────────────────────────────┘
@@ -107,6 +107,15 @@ Saat power diaktifkan atau session baru dimulai, AI Agent menjalankan **auto-det
 ├─────────────────────────────────────────────────────────┤
 │  ADA → baca, resume dari last state                      │
 │  TIDAK ADA → buat template kosong                        │
+└────────────────────────┬────────────────────────────────┘
+                         ▼
+┌─────────────────────────────────────────────────────────┐
+│  AUTO-DETECT 5: MCP config ada?                          │
+│  Cek: .kiro/settings/mcp.json ada dengan autoApprove?   │
+├─────────────────────────────────────────────────────────┤
+│  TIDAK ADA → generate mcp.json dengan autoApprove list   │
+│  ADA tapi tanpa autoApprove → tambahkan autoApprove      │
+│  LENGKAP → skip                                          │
 └────────────────────────┬────────────────────────────────┘
                          ▼
 ┌─────────────────────────────────────────────────────────┐
@@ -140,7 +149,7 @@ File-file ini adalah **compact reference** yang di-generate (bukan copy dari pow
 
 File-file ini menjadi **acuan permanen** — aktif di setiap chat session tanpa perlu memanggil power lagi.
 
-### `.kiro/hooks/` — Automation Hooks (8 files)
+### `.kiro/hooks/` — Automation Hooks (9 files)
 
 | File | Trigger | Agent |
 |------|---------|-------|
@@ -149,6 +158,7 @@ File-file ini menjadi **acuan permanen** — aktif di setiap chat session tanpa 
 | `qa-devops-post-task.json` | postTaskExecution | 🧪 QA + 🚀 DevOps + GitLab (issue → review + comment) |
 | `bug-learning-capture.json` | postTaskExecution | 📚 Learning |
 | `metrics-collector.json` | postTaskExecution | 📊 Metrics |
+| `sprint-end-auto-check.json` | postTaskExecution | 🏗️ Auto Health Check + Sprint Completion Offer |
 | `sprint-retrospective.json` | userTriggered | 📚 Learning + GitLab (milestone close + wiki update) |
 | `quality-scorecard.json` | userTriggered | 📊 Metrics |
 | `health-check.json` | userTriggered | 🏗️ Architect |
@@ -655,6 +665,7 @@ project-root/
 │       ├── qa-devops-post-task.json     ← postTaskExecution
 │       ├── bug-learning-capture.json    ← postTaskExecution
 │       ├── metrics-collector.json       ← postTaskExecution
+│       ├── sprint-end-auto-check.json   ← postTaskExecution
 │       ├── sprint-retrospective.json    ← userTriggered
 │       ├── quality-scorecard.json       ← userTriggered
 │       └── health-check.json           ← userTriggered

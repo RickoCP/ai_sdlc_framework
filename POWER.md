@@ -1170,6 +1170,7 @@ AI Agent **WAJIB** membuat hook files di `.kiro/hooks/` project user agar automa
 | `.kiro/hooks/qa-devops-post-task.json` | postTaskExecution | Lint + test + push setelah task |
 | `.kiro/hooks/bug-learning-capture.json` | postTaskExecution | Capture learning saat bug fix |
 | `.kiro/hooks/metrics-collector.json` | postTaskExecution | Auto-collect AI quality metrics |
+| `.kiro/hooks/sprint-end-auto-check.json` | postTaskExecution | Auto health check + offer retro saat sprint task terakhir |
 | `.kiro/hooks/sprint-retrospective.json` | userTriggered | Generate retrospective (data-driven) |
 | `.kiro/hooks/quality-scorecard.json` | userTriggered | Generate scorecard dari metrics |
 | `.kiro/hooks/health-check.json` | userTriggered | Framework compliance scan |

@@ -72,13 +72,13 @@ Buka chat dan ketik:
 Aktifkan Enterprise AI-SDLC Framework
 ```
 
-Jika berhasil, AI Agent akan menampilkan pesan selamat datang dan 5 pertanyaan project.
+Jika berhasil, AI Agent akan menampilkan pesan selamat datang dan 6 pertanyaan project.
 
 ---
 
 ## 3. First Time Setup
 
-### Menjawab 5 Pertanyaan
+### Menjawab 6 Pertanyaan
 
 Saat pertama kali mengaktifkan power, AI Agent akan bertanya:
 
@@ -89,7 +89,8 @@ Selamat datang di Enterprise AI-Native SDLC Framework!
 2. Deskripsi singkat project (apa yang ingin diselesaikan)?
 3. Tech stack yang diinginkan? (contoh: Next.js, Go, Python, dll)
 4. Apakah ini project baru atau project existing?
-5. Layer mana yang ingin dikerjakan terlebih dahulu?
+5. Apakah project ini punya UI? Jika ya, apakah Anda sudah punya Design System sendiri?
+6. Layer mana yang ingin dikerjakan terlebih dahulu?
 ```
 
 **Contoh jawaban:**
@@ -109,7 +110,7 @@ Untuk **project baru**, AI Agent akan otomatis:
 2. ✅ Buat `.gitignore` sesuai tech stack
 3. ✅ Buat struktur folder (docs/, src/, tests/, .kiro/, .gitlab/)
 4. ✅ Generate workspace steering files (3 files di `.kiro/steering/`)
-5. ✅ Generate Kiro hooks (8 files di `.kiro/hooks/`)
+5. ✅ Generate Kiro hooks (9 files di `.kiro/hooks/`)
 6. ✅ Initial commit + push
 7. ✅ Buat repository di GitLab
 8. ✅ Setup branch protection
@@ -502,7 +503,7 @@ Fast Track otomatis nonaktif setelah:
 
 **Solusi:**
 1. Cek folder `.kiro/hooks/` ada di project
-2. Cek 8 file JSON ada dan valid
+2. Cek 9 file JSON ada dan valid
 3. Bilang ke AI: "Cek hooks framework" — akan auto-heal jika missing
 4. Restart Kiro jika hooks baru di-generate
 

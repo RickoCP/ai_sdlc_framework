@@ -13,7 +13,7 @@
 2. [Masalah yang Diselesaikan](#2-masalah-yang-diselesaikan)
 3. [Arsitektur Framework](#3-arsitektur-framework)
 4. [15 Layer — Penjelasan Lengkap](#4-15-layer--penjelasan-lengkap)
-5. [25 Steering Files](#5-25-steering-files)
+5. [26 Steering Files](#5-26-steering-files)
 6. [Mode Operasi](#6-mode-operasi)
 7. [Automated Workflow & Hooks](#7-automated-workflow--hooks)
 8. [MCP Server Integration](#8-mcp-server-integration)
@@ -208,7 +208,7 @@ Layer 14 [AUTOMATED]  Continuous Learning — bug capture + retro + ADR
 
 ---
 
-## 5. 25 Steering Files
+## 5. 26 Steering Files
 
 ### Always Included (aktif di setiap session)
 
@@ -306,6 +306,7 @@ Untuk deadline mendesak:
 | Auto Push After Task | Lint → Typecheck → Test → Commit → Push |
 | Design Compliance Check | Validate code vs design document |
 | Bug Learning Capture | Auto-generate learning doc untuk bug fix |
+| Sprint End Auto Check | Auto health check + offer retro saat sprint task terakhir |
 | Save Project State | Update CURRENT-STATE + CONTEXT-INDEX |
 
 ### Post-Tool-Use Hooks
@@ -393,7 +394,7 @@ export GITLAB_API_URL="https://gitlab.com/api/v4"
 
 ### Step 5: Mulai Gunakan
 
-Panggil power di chat, jawab 5 pertanyaan project, dan framework akan setup semuanya otomatis.
+Panggil power di chat, jawab 6 pertanyaan project, dan framework akan setup semuanya otomatis.
 
 ---
 
@@ -401,7 +402,7 @@ Panggil power di chat, jawab 5 pertanyaan project, dan framework akan setup semu
 
 ### Memulai Project Baru
 
-1. Panggil power → jawab 5 pertanyaan
+1. Panggil power → jawab 6 pertanyaan
 2. AI Agent otomatis: git init → create GitLab project → setup folder → push
 3. Mulai development dengan Layer 3 (Spec-Driven)
 
@@ -520,10 +521,10 @@ Prinsip framework (dependency rule, spec-first, quality gates) berlaku di semua 
 | Metric | Value |
 |--------|-------|
 | Version | 1.4.0 |
-| Total Steering Files | 25 |
+| Total Steering Files | 26 |
 | Automated Layers | 11/15 (73%) |
 | Always-Included Files | 3 |
-| Kiro Hooks Defined | ~15 |
+| Kiro Hooks Defined | ~16 |
 | Tech Stacks Supported | 3 (Next.js, Go, Python) |
 | Operating Modes | 3 (Enterprise, Solo, Fast Track) |
 | Integrated Standards | 26 |
