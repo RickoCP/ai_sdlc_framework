@@ -131,6 +131,11 @@ Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agen
     → Jika ADA → baca dan resume dari last state
     → Jika TIDAK ADA → buat dengan template kosong
     ↓
+[AUTO-DETECT 5: Apakah .kiro/settings/mcp.json ada dengan autoApprove?]
+    → Jika TIDAK ADA → GENERATE mcp.json dengan autoApprove list lengkap
+    → Jika ADA tapi tanpa autoApprove → tambahkan autoApprove list
+    → Jika ADA dan lengkap → skip
+    ↓
 [Lanjut ke workflow normal]
 ```
 
@@ -1314,6 +1319,73 @@ AI Agent **WAJIB** membuat hook files di `.kiro/hooks/` project user agar automa
 - Jika `.kiro/hooks/` sudah ada → tanyakan user apakah mau overwrite atau merge
 - Hook files HARUS di-commit ke repository (agar tim lain juga dapat)
 - Jika user mau disable hook tertentu → hapus file-nya atau rename ke `.disabled`
+
+### Step 4.6: Generate MCP Config dengan autoApprove (WAJIB)
+
+AI Agent **WAJIB** membuat `.kiro/settings/mcp.json` di project user agar MCP tools bisa berjalan **tanpa approval popup** untuk operasi rutin.
+
+**Tanpa step ini, user akan mendapat popup approval setiap kali AI Agent melakukan git commit, push, create issue, dll — sangat mengganggu workflow.**
+
+**File yang WAJIB di-generate: `.kiro/settings/mcp.json`**
+
+```json
+{
+  "mcpServers": {
+    "gitlab": {
+      "command": "npx",
+      "args": ["-y", "@zereight/mcp-gitlab"],
+      "env": {
+        "GITLAB_PERSONAL_ACCESS_TOKEN": "${GITLAB_PERSONAL_ACCESS_TOKEN}",
+        "GITLAB_API_URL": "${GITLAB_API_URL}"
+      },
+      "autoApprove": [
+        "create_repository",
+        "create_project",
+        "create_label",
+        "create_issue",
+        "create_milestone",
+        "create_branch",
+        "create_merge_request",
+        "create_issue_note",
+        "create_or_update_wiki_page",
+        "update_issue",
+        "edit_milestone",
+        "push_files",
+        "create_or_update_file",
+        "discover_tools",
+        "search_repositories",
+        "get_file_contents",
+        "list_issues"
+      ]
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@cyanheads/git-mcp-server"],
+      "autoApprove": [
+        "git_init",
+        "git_add",
+        "git_commit",
+        "git_remote",
+        "git_push",
+        "git_pull",
+        "git_branch",
+        "git_checkout",
+        "git_merge",
+        "git_status",
+        "git_log",
+        "git_diff"
+      ]
+    }
+  }
+}
+```
+
+**Rules:**
+- WAJIB generate saat project setup
+- Jika `.kiro/settings/mcp.json` sudah ada → **merge** autoApprove list (jangan overwrite seluruh file)
+- Credentials WAJIB tetap sebagai `${VARIABLE_NAME}` — JANGAN hardcode token
+- File ini HARUS di-commit ke repository (agar tim lain juga dapat autoApprove)
+- Informasikan user: "MCP config dengan autoApprove sudah di-setup. Pastikan environment variables sudah di-set."
 
 **⚠️ CRITICAL — Working Directory:**
 - Git MCP (`@cyanheads/git-mcp-server`) MEMERLUKAN `repo_path` (absolute path) di SETIAP tool call
