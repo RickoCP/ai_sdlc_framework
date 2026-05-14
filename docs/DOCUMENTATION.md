@@ -13,7 +13,7 @@
 2. [Masalah yang Diselesaikan](#2-masalah-yang-diselesaikan)
 3. [Arsitektur Framework](#3-arsitektur-framework)
 4. [15 Layer — Penjelasan Lengkap](#4-15-layer--penjelasan-lengkap)
-5. [26 Steering Files](#5-26-steering-files)
+5. [Steering Files](#5-steering-files)
 6. [Mode Operasi](#6-mode-operasi)
 7. [Automated Workflow & Hooks](#7-automated-workflow--hooks)
 8. [MCP Server Integration](#8-mcp-server-integration)
@@ -175,6 +175,11 @@ Layer 14 [AUTOMATED]  Continuous Learning — bug capture + retro + ADR
 - Security: `threat-model.md` + `trust-boundary.md` + `attack-surface.md` + `mitigation-plan.md`
 - UI/UX (jika ada UI): `wireframe.md` + `component-library.md` + `accessibility.md` + `i18n-strategy.md` + `theming.md` + `design-token.md`
 
+**Design System Options (ditanyakan di pertanyaan inisiasi #5):**
+- **Signal Design System** (built-in) — sudah tersedia di framework via `signal-design-system-complete.md`
+- **Custom** — user punya design system sendiri (kirimkan file/detail)
+- **Default** — generate default design system (Atomic Design + neutral tokens)
+
 **Automation:** ✅ Hook `postTaskExecution` — validate code vs design document  
 **Gate:** Informasikan deviasi, suggest update
 
@@ -268,7 +273,7 @@ Layer 14 [AUTOMATED]  Continuous Learning — bug capture + retro + ADR
 
 ---
 
-## 5. 26 Steering Files
+## 5. Steering Files
 
 ### Always Included (aktif di setiap session)
 
@@ -277,6 +282,7 @@ Layer 14 [AUTOMATED]  Continuous Learning — bug capture + retro + ADR
 | `architecture-standards.md` | Clean Architecture + DDD + Awilix DI — acuan arsitektur WAJIB |
 | `test-writing-patterns.md` | Pattern testing per-layer dengan contoh TypeScript |
 | `project-memory.md` | Context Index + Current State untuk resume antar session |
+| `hooks-registry.md` | Definisi lengkap 9 hook files (JSON content, smart filtering, metrics) |
 
 ### Layer Files (15 files)
 
@@ -298,7 +304,7 @@ Layer 14 [AUTOMATED]  Continuous Learning — bug capture + retro + ADR
 | `layer-13-observability.md` | Observability |
 | `layer-14-continuous-learning.md` | Continuous Learning |
 
-### Operational Files (7 files)
+### Operational Files (8 files)
 
 | File | Fungsi |
 |------|--------|
@@ -309,6 +315,7 @@ Layer 14 [AUTOMATED]  Continuous Learning — bug capture + retro + ADR
 | `presentation-material.md` | Generate materi presentasi |
 | `tech-stack-profiles.md` | Adaptasi ke Go, Python (FastAPI) |
 | `fast-track-mode.md` | Fast Track, Quality Scorecard, Health Check |
+| `signal-design-system-complete.md` | Signal Design System (built-in option untuk UI) |
 
 ---
 
@@ -319,11 +326,14 @@ Layer 14 [AUTOMATED]  Continuous Learning — bug capture + retro + ADR
 Full ceremony untuk tim enterprise:
 - Sprint planning dengan milestones
 - Full issue board (Backlog → Ready → In Progress → Review → Done)
-- Branch strategy: main + develop + feature
+- Branch strategy: main + develop + feature (feature → develop → main)
+- MR target: feature branch → `develop` (NEVER langsung ke `main`)
+- Code review offer BEFORE creating MR
 - MR approval wajib
 - Full label taxonomy
-- Wiki documentation
+- Wiki documentation (Home, Changelog, API-Documentation, Architecture-Decisions)
 - Formal retrospectives
+- Close issue dengan `state_event: "close"` (bukan hanya label update)
 
 ### Solo Mode
 
@@ -362,44 +372,28 @@ AI jalankan semuanya otomatis tanpa konfirmasi per-layer:
 
 ## 7. Automated Workflow & Hooks
 
-### Pre-Task Execution Hooks
+### 9 Hook Files (WAJIB Ada di `.kiro/hooks/`)
 
-| Hook | Fungsi |
-|------|--------|
-| Git Init & Working Directory Check | Pastikan git repo ready |
-| Spec-First Gate | Block coding tanpa spec (fitur kompleks) |
-| Load Context Before Task | Load CURRENT-STATE + CONTEXT-INDEX |
+| File | Trigger | Agent/Fungsi |
+|------|---------|--------------|
+| `architect-gate.json` | preTaskExecution | 🏗️ Architect + GitLab (issue → in-progress) |
+| `code-quality-scan.json` | postToolUse (write) | 🔒 Security + 📊 Observability (smart-filtered) |
+| `qa-devops-post-task.json` | postTaskExecution | 🧪 QA + 🚀 DevOps + GitLab (issue → review + comment) |
+| `bug-learning-capture.json` | postTaskExecution | 📚 Learning (capture saat bug fix) |
+| `metrics-collector.json` | postTaskExecution | 📊 Metrics (auto-collect ke metrics-log.jsonl) |
+| `sprint-end-auto-check.json` | postTaskExecution | 🏗️ Compliance Validator + Sprint Completion Offer |
+| `sprint-retrospective.json` | userTriggered | 📚 Learning + GitLab (milestone close + wiki update) |
+| `quality-scorecard.json` | userTriggered | 📊 Metrics (generate scorecard dari metrics) |
+| `health-check.json` | userTriggered | 🏗️ Architect (framework compliance scan) |
 
-### Post-Task Execution Hooks
+### Hook Trigger Types
 
-| Hook | Fungsi |
-|------|--------|
-| Auto Push After Task | Lint → Typecheck → Test → Commit → Push |
-| Design Compliance Check | Validate code vs design document |
-| Bug Learning Capture | Auto-generate learning doc untuk bug fix |
-| Sprint End Auto Check | Auto health check + offer retro saat sprint task terakhir |
-| Save Project State | Update CURRENT-STATE + CONTEXT-INDEX |
-
-### Post-Tool-Use Hooks
-
-| Hook | Fungsi |
-|------|--------|
-| Observability Check | Remind tambah logging/metrics di fitur baru |
-| Impact Analysis | Detect impacted files saat core/ berubah |
-
-### File Event Hooks
-
-| Hook | Trigger | Fungsi |
-|------|---------|--------|
-| Requirement Validation Gate | `docs/requirements/**` created | Auto-validate requirements |
-
-### User-Triggered Hooks
-
-| Hook | Fungsi |
-|------|--------|
-| Sprint Retrospective Generator | Generate retro document |
-| Sprint Quality Scorecard | Generate quality metrics |
-| Framework Health Check | Scan project compliance |
+| Type | Kapan Fire | Hook Files |
+|------|-----------|------------|
+| `preTaskExecution` | Sebelum task dimulai | architect-gate |
+| `postToolUse` (write) | Setelah file ditulis | code-quality-scan |
+| `postTaskExecution` | Setelah task selesai | qa-devops, bug-learning, metrics-collector, sprint-end-auto-check |
+| `userTriggered` | User trigger manual | sprint-retrospective, quality-scorecard, health-check |
 
 ---
 
@@ -475,12 +469,12 @@ Panggil power di chat, jawab 8 pertanyaan project, dan framework akan setup semu
 
 1. Panggil power → jawab 8 pertanyaan
 2. AI Agent otomatis: git init → create GitLab project → setup folder → push
-3. Mulai development dengan Layer 3 (Spec-Driven)
+3. Mulai dari Layer 0 (Product Vision) → sequential sampai Layer 8 → Sprint dimulai
 
 ### Development Cycle (Per Sprint)
 
 ```
-1. Sprint Planning → buat issues di GitLab
+1. Sprint Planning → buat issues + milestone + wiki pages (Home, Changelog, API-Documentation, Architecture-Decisions) di GitLab
 2. Per Task:
    a. AI load context (spec, design, ADR)
    b. AI buat spec (jika belum ada)
@@ -488,7 +482,13 @@ Panggil power di chat, jawab 8 pertanyaan project, dan framework akan setup semu
    d. AI jalankan lint + typecheck + test
    e. AI commit + push
    f. AI update issue status
-3. Sprint End → MR + Retrospective + Scorecard
+3. Sprint End:
+   a. Push semua perubahan
+   b. Code review offer (AI review sebelum MR)
+   c. Create MR (feature → develop, NEVER ke main di Enterprise mode)
+   d. Tunggu user merge di GitLab
+   e. Sprint Completion Package: retro + scorecard + health check + wiki update
+   f. Close issues (state_event: "close" + label status::done)
 ```
 
 ### Perintah Berguna
@@ -580,7 +580,7 @@ Prinsip framework (dependency rule, spec-first, quality gates) berlaku di semua 
 **A:** Gunakan AI Quality Scorecard (trigger: "sprint scorecard"). Mengukur acceptance rate, rework rate, spec compliance, dan governance compliance.
 
 ### Q: Apakah semua 15 layer harus dijalankan?
-**A:** Tidak harus sequential. Layer 0-4 (planning) bisa di-skip untuk project existing. Layer 8-14 (execution) adalah inti yang selalu aktif.
+**A:** Layer 0-8 WAJIB dijalankan sequential — DILARANG skip. Setiap layer menghasilkan artifact yang dibutuhkan layer berikutnya. Untuk project existing yang sudah punya artifact, AI boleh validate artifact existing tanpa generate ulang, tapi layer tetap tidak boleh di-skip. Layer 9-14 adalah execution layers yang selalu aktif via hooks.
 
 ### Q: Bagaimana onboarding developer baru?
 **A:** Developer baru cukup buka project → `.kiro/steering/` otomatis aktif → arsitektur dan conventions langsung tersedia tanpa briefing manual.
@@ -592,13 +592,13 @@ Prinsip framework (dependency rule, spec-first, quality gates) berlaku di semua 
 | Metric | Value |
 |--------|-------|
 | Version | 1.5.0 |
-| Total Steering Files | 26 |
+| Total Steering Files | 27 |
 | Automated Layers | 11/15 (73%) |
-| Always-Included Files | 3 |
+| Always-Included Files | 4 |
 | Kiro Hooks Defined | 9 |
 | Tech Stacks Supported | 3 (Next.js, Go, Python) |
 | Operating Modes | 4 (Enterprise, Solo, Fast Track, Zero Touch) |
-| Integrated Standards | 26 |
+| Integrated Standards | 27 |
 | MCP Servers | 2 (GitLab, Git) |
 
 ---
