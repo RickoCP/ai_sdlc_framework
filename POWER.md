@@ -380,10 +380,59 @@ Sebelum kita mulai, saya perlu memahami project yang akan dikerjakan:
    
    Jika SUDAH: lanjut.
 
-7. Layer mana yang ingin dikerjakan terlebih dahulu?
+7. Mode development yang diinginkan?
+   a. **Enterprise** (default) — konfirmasi setiap layer, full ceremony, kontrol penuh
+   b. **Solo** — simplified workflow untuk developer tunggal
+   c. **Zero Touch** — AI jalankan semuanya otomatis tanpa konfirmasi per-layer
+      (hanya stop di merge point — user tetap harus approve merge di GitLab)
+   
+   → Default: Enterprise (jika tidak dijawab)
+
+8. Layer mana yang ingin dikerjakan terlebih dahulu?
+   → Default: Layer 0 (mulai dari awal)
 
 Silakan jawab pertanyaan di atas agar saya bisa menyesuaikan framework dengan kebutuhan project Anda."
 ```
+
+**Mode Development:**
+
+| Mode | Behavior | Kapan Pakai |
+|------|----------|-------------|
+| **Enterprise** (default) | Konfirmasi setiap layer, full ceremony | Tim, production project |
+| **Solo** | Simplified (tanpa develop branch, self-merge) | Developer tunggal |
+| **Zero Touch** | AI jalankan semua otomatis, hanya stop di merge | Prototype cepat, PoC |
+
+**Zero Touch Mode — Apa yang Terjadi:**
+```
+[User jawab pertanyaan → pilih Zero Touch]
+    ↓
+AI jalankan TANPA STOP (Layer 0-8):
+- Generate semua docs (vision, requirements, specs, design, governance, skills)
+- Setup GitLab (project, issues, milestone, labels)
+- Setup hooks + steering + MCP config
+    ↓
+[Informasikan user: "Setup selesai. Sprint 1 ready dengan [N] issues."]
+    ↓
+AI kerjakan SEMUA issues sequential (tanpa user bilang per-issue):
+- Issue #1 → full agent chain → push
+- Issue #2 → full agent chain → push
+- ...
+- Issue #N → full agent chain → push
+    ↓
+[Auto health check → Create MR]
+    ↓
+[STOP — "MR dibuat: [URL]. Silakan merge di GitLab."]
+    ↓
+[Setelah user merge → auto retro + scorecard + wiki update]
+```
+
+**Zero Touch Rules:**
+1. **HANYA aktif jika user eksplisit pilih** di pertanyaan #7
+2. **Tetap enforce quality** — lint, typecheck, test, coverage >= 80%
+3. **Tetap enforce architecture** — Clean Architecture, DI, observability
+4. **STOP di merge point** — AI DILARANG merge sendiri
+5. **Jika ada error/failure** → stop, informasikan user, tunggu instruksi
+6. **User bisa interrupt kapan saja** — bilang "stop" atau "pause"
 
 **Jika user punya Design System sendiri:**
 
