@@ -146,19 +146,19 @@ Dokumen ini mendefinisikan **semua hook files** yang WAJIB di-generate di `.kiro
 }
 ```
 
-### 6. `sprint-end-auto-check.json` (NEW — Automated Health Check at Sprint End)
+### 6. `sprint-end-auto-check.json` (v2.0.0 — Health Check + Compliance Validator)
 
 ```json
 {
-  "name": "Sprint End Auto Check",
-  "version": "1.0.0",
-  "description": "Otomatis jalankan health check dan tawarkan retro saat task terakhir sprint selesai",
+  "name": "Sprint End Auto Check + Compliance Validator",
+  "version": "2.0.0",
+  "description": "Otomatis jalankan health check + compliance validation saat task terakhir sprint selesai",
   "when": {
     "type": "postTaskExecution"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "CEK apakah ini TASK TERAKHIR dalam sprint aktif:\n\n**Cara detect:**\n1. Baca docs/CURRENT-STATE.md → lihat sprint progress (tasks completed vs total)\n2. Jika tasks completed == total tasks → ini task terakhir\n3. Jika BUKAN task terakhir → SKIP hook ini entirely\n\n**Jika INI TASK TERAKHIR SPRINT:**\n\n━━━ 🏗️ AUTO HEALTH CHECK ━━━\nJalankan framework health check OTOMATIS:\n1. Cek .kiro/hooks/ lengkap (9 files)\n2. Cek .kiro/steering/ lengkap (3+ files)\n3. Cek docs/ structure (CONTEXT-INDEX, CURRENT-STATE, learnings, quality)\n4. Cek architecture compliance (import violations?)\n5. Cek coverage >= 80%\n6. Cek semua sprint issues punya status update\n7. Cek milestone progress\n\nGenerate: docs/quality/health-check-sprint-[N].md\n\n━━━ 📋 SPRINT COMPLETION OFFER ━━━\nInformasikan user:\n'Sprint [N] — semua task selesai! 🎉\n\n🏗️ Auto Health Check: [score]% compliance\n[List violations jika ada]\n\nNext steps:\n1. Saya akan buat MR ke develop. Setelah Anda merge di GitLab, saya akan tawarkan:\n   - 📚 Sprint Retrospective\n   - 📊 Quality Scorecard\n   - 📖 Wiki Update (Changelog + API docs)\n\nMau saya buat MR sekarang?'"
+    "prompt": "CEK apakah ini TASK TERAKHIR dalam sprint aktif:\n\n**Cara detect:**\n1. Baca docs/CURRENT-STATE.md → lihat sprint progress (tasks completed vs total)\n2. Jika tasks completed == total tasks → ini task terakhir\n3. Jika BUKAN task terakhir → SKIP hook ini entirely\n\n**Jika INI TASK TERAKHIR SPRINT:**\n\n━━━ 🏗️ COMPLIANCE VALIDATION (WAJIB) ━━━\n\nValidasi apakah semua rules framework diikuti selama sprint ini:\n\n**1. CEK ISSUES:**\n- List semua sprint issues via GitLab MCP\n- Semua punya label status::done? Jika TIDAK → update label\n- Semua state = closed? Jika TIDAK → close dengan state_event:'close'\n- Semua punya comment (implementation summary)? Jika TIDAK → tambah comment\n\n**2. CEK BRANCH TARGET:**\n- Jika ada MR yang sudah dibuat → target branch = develop (bukan main)?\n- Jika SALAH TARGET → WARNING ke user: 'MR target salah! Harus ke develop.'\n\n**3. CEK WIKI:**\n- Wiki 'Changelog' punya entry untuk sprint ini? Jika TIDAK → flag\n- Wiki 'API-Documentation' updated (jika ada endpoint baru)? Jika TIDAK → flag\n\n**4. CEK MILESTONE:**\n- Milestone description updated dengan progress? Jika TIDAK → update\n- Milestone progress = 100%? Jika TIDAK → report carry-over items\n\n**5. CEK METRICS:**\n- docs/quality/metrics-log.jsonl punya entry untuk SETIAP task sprint ini?\n- Jika ada task yang missing → report berapa yang missing\n\n**6. CEK DOCS:**\n- CURRENT-STATE.md up-to-date? Jika TIDAK → update\n- CONTEXT-INDEX.md punya semua artifact sprint ini? Jika TIDAK → update\n\n━━━ 📋 COMPLIANCE REPORT ━━━\n\nTampilkan report ke user:\n'Sprint [N] Compliance Report:\n| Check | Status | Detail |\n|-------|--------|--------|\n| Issues closed | ✅/❌ | [N]/[total] closed |\n| Issues have comments | ✅/❌ | [N]/[total] |\n| MR target correct | ✅/❌ | [target branch] |\n| Wiki updated | ✅/❌ | [pages] |\n| Milestone progress | ✅/❌ | [%] |\n| Metrics collected | ✅/❌ | [N]/[total] tasks |\n| Docs up-to-date | ✅/❌ | [status] |\n\nCompliance Score: [X]% ([N]/7 checks pass)'\n\n**AUTO-FIX:** Jika ada yang MISS dan bisa di-fix otomatis → FIX SEKARANG:\n- Close issues yang belum closed\n- Tambah comment yang missing\n- Update CURRENT-STATE dan CONTEXT-INDEX\n- Update milestone description\nInformasikan: 'Auto-fixed [N] issues. Compliance: 100%'\n\n━━━ 📋 SPRINT COMPLETION OFFER ━━━\n\nSetelah compliance validation selesai:\n'Sprint [N] — semua task selesai! 🎉\nCompliance: [X]%\n\nNext steps:\n1. Saya akan buat MR ke develop (BUKAN main).\n2. Setelah Anda merge di GitLab → saya tawarkan retro + scorecard + wiki update.\n\nMau saya buat MR sekarang?'"
   }
 }
 ```
