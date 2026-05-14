@@ -810,6 +810,7 @@ AI Agent **DILARANG KERAS** melakukan merge — baik di GitLab maupun di local g
 ❌ Merge MR via GitLab MCP tanpa user approve
 ❌ Set auto-merge pada MR
 ❌ Squash merge tanpa user bilang "merge"
+❌ Create MR dari feature branch ke main (SALAH TARGET!)
 ```
 
 **WAJIB:**
@@ -819,7 +820,31 @@ AI Agent **DILARANG KERAS** melakukan merge — baik di GitLab maupun di local g
 ✅ Setelah user konfirmasi → baru eksekusi merge
 ```
 
-**Alasan:** Merge adalah operasi irreversible yang mengubah branch utama. User HARUS review dan approve sebelum merge terjadi.
+**⚠️ BRANCH TARGET RULES (WAJIB DIIKUTI):**
+
+| Source Branch | Target Branch | Kapan |
+|--------------|---------------|-------|
+| `feature/*` | **`develop`** | Sprint delivery (SELALU ke develop, BUKAN main!) |
+| `bugfix/*` | **`develop`** | Bug fix non-urgent |
+| `hotfix/*` | **`main`** | HANYA untuk hotfix production critical |
+| `develop` | **`main`** | Release ke production (setelah QA di develop) |
+
+**DILARANG KERAS:**
+- ❌ `feature/*` → `main` (SALAH! Harus ke `develop` dulu)
+- ❌ `bugfix/*` → `main` (SALAH! Harus ke `develop` dulu)
+- ❌ Skip `develop` branch (kecuali hotfix)
+
+**Flow yang BENAR:**
+```
+feature/issue-N → MR ke develop → merge → test di develop → MR ke main → release
+```
+
+**Jika Solo Mode (tanpa develop):**
+```
+feature/issue-N → MR ke main (Solo Mode SAJA — karena tidak ada develop)
+```
+
+**Alasan:** Merge adalah operasi irreversible yang mengubah branch utama. Feature branch HARUS melalui `develop` dulu untuk integration testing sebelum ke `main` (production).
 
 ---
 
