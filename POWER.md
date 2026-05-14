@@ -212,48 +212,6 @@ Mau saya kerjakan item #1?
 
 **Contoh Response Berdasarkan State:**
 
-#### Jika belum mulai (project baru):
-```
-━━━ 📍 STATUS & NEXT STEPS ━━━
-
-📊 Current State:
-- Project: belum di-setup
-- Layer progress: 0/8
-
-📋 Yang Harus Dilakukan Selanjutnya:
-1. Jawab 5 pertanyaan project (nama, deskripsi, tech stack, baru/existing, layer awal)
-2. Setelah dijawab → AI akan setup project otomatis
-
-Silakan jawab pertanyaan project untuk memulai.
-```
-
-#### Jika di tengah layer setup:
-```
-━━━ 📍 STATUS & NEXT STEPS ━━━
-
-📊 Current State:
-- Project: payment-gateway
-- Mode: Enterprise
-- Layer progress: 4/8 (Layer 0-3 done, Layer 4 in progress)
-
-✅ Yang Sudah Selesai:
-- Layer 0: vision.md ✅
-- Layer 1: requirements extracted ✅
-- Layer 2: validation report ✅
-- Layer 3: payment-spec.md ✅
-
-📋 Yang Harus Dilakukan Selanjutnya:
-1. Selesaikan Layer 4 — Design System (12 dokumen tersisa)
-2. Lanjut Layer 5 — AI Governance
-3. Lanjut Layer 6 — AI Skills
-
-💡 Tips:
-- Layer 4 akan generate 14-16 design documents sekaligus
-- Bilang "lanjutkan Layer 4" untuk melanjutkan
-
-Mau saya lanjutkan Layer 4?
-```
-
 #### Jika di tengah sprint:
 ```
 ━━━ 📍 STATUS & NEXT STEPS ━━━
@@ -286,30 +244,7 @@ Mau saya lanjutkan Layer 4?
 Mau saya lanjutkan issue #18?
 ```
 
-#### Jika sprint selesai:
-```
-━━━ 📍 STATUS & NEXT STEPS ━━━
-
-📊 Current State:
-- Project: payment-gateway
-- Sprint: 2 (ALL TASKS DONE ✅)
-- Coverage: 88%
-- MR: belum dibuat
-
-📋 Yang Harus Dilakukan Selanjutnya:
-1. Create Merge Request (feature → develop)
-2. Setelah MR merged (oleh Anda di GitLab) → Sprint Completion Package:
-   - 📚 Sprint Retrospective
-   - 📊 Quality Scorecard
-   - 🏗️ Framework Health Check
-3. Plan Sprint 3 (jika ada fitur berikutnya)
-
-💡 Tips:
-- Bilang "sprint selesai" untuk trigger MR creation
-- Merge HARUS dilakukan oleh Anda di GitLab (bukan AI)
-
-Mau saya buat MR untuk sprint ini?
-```
+(Contoh lain: lihat docs/USER-GUIDE.md section "Help Command")
 
 **Rules Help Command:**
 1. **Selalu baca CURRENT-STATE.md** sebelum merespons help
@@ -724,83 +659,24 @@ Mau jalankan semua, sebagian, atau skip?"
 
 **Trigger Phrases untuk Sprint Completion (AI Agent WAJIB recognize):**
 
-Saat user bilang salah satu dari frasa berikut, AI Agent WAJIB menjalankan Sprint Completion flow:
 ```
-"sprint selesai"
-"sprint done"
-"semua task sudah selesai"
-"sprint complete"
-"selesaikan sprint ini"
+"sprint selesai" / "sprint done" / "semua task sudah selesai" / "sprint complete" / "selesaikan sprint ini"
 ```
 
-**Flow yang WAJIB dijalankan saat trigger di atas:**
-```
-[User: "sprint selesai"]
-    ↓
-━━━ 🚀 DEVOPS AGENT ━━━
-1. **LOCAL VALIDATION (WAJIB SEBELUM MR — BLOCKING):**
-   - `npm run lint` → HARUS 0 errors
-   - `npm run typecheck` → HARUS 0 errors
-   - `npm run test:unit -- --coverage` → HARUS all pass, coverage >= 80%
-   - Jika SALAH SATU gagal → FIX DULU, JANGAN buat MR
-2. Push semua perubahan yang belum di-push
-    ↓
-━━━ 🔒 CODE REVIEW OFFER (WAJIB TANYAKAN) ━━━
-3. **SEBELUM buat MR, WAJIB tanyakan user:**
-   ```
-   "Semua task selesai dan tests pass. Sebelum saya buat MR:
-   
-   Apakah Anda mau saya lakukan code review terlebih dahulu?
-   - 'Ya' → Saya review: architecture compliance, security, best practices
-   - 'Tidak' → Langsung buat MR
-   
-   (Review akan mencakup: dependency rule, DI usage, observability, 
-    error handling, naming convention, test quality)"
-   ```
-   → Jika user bilang "ya" / "review dulu":
-     - Jalankan AI Review (Security Agent + Architect Agent)
-     - Tampilkan findings
-     - Fix jika ada issue
-     - Setelah clean → lanjut buat MR
-   → Jika user bilang "tidak" / "langsung MR":
-     - Lanjut buat MR tanpa review tambahan
-    ↓
-4. Create Merge Request (feature → develop)
-   - JANGAN auto-merge — WAJIB user approval di GitLab
-5. Update semua sprint issues: status::review
-6. Update milestone description: sprint progress summary
-    ↓
-Informasikan user:
-  "MR dibuat: [URL]. Silakan review dan merge di GitLab.
-   Setelah merged, bilang 'sudah merged' untuk lanjut."
-    ↓
-[User: "sudah merged" / "merged" / "done"]
-    ↓
-━━━ 📚 LEARNING AGENT ━━━
-WAJIB TAWARKAN Sprint Completion Package:
-  "Sprint merged! 🎉 Saya akan jalankan:
-  1. 📚 Sprint Retrospective — review AI performance, what worked/didn't
-  2. 📊 Quality Scorecard — metrics objektif (coverage, rework rate, compliance)
-  3. 🏗️ Framework Health Check — scan compliance project
-  4. 📖 GitLab Wiki Update — Changelog + API Documentation
-  
-  Mau jalankan semua? (recommended) Atau pilih sebagian?"
-    ↓
-[Jika user bilang "jalankan semua" / "semua" / "ya":]
-    ↓
-a. Generate docs/retrospectives/sprint-[N].md (dari metrics-log.jsonl)
-b. Generate docs/quality/sprint-[N]-scorecard.md
-c. Jalankan health check → docs/quality/health-check-[date].md
-d. Update GitLab Wiki:
-   - Page "Changelog": tambah sprint [N] delivery summary
-   - Page "API-Documentation": update jika ada endpoint baru
-   - Page "Architecture-Decisions": update jika ada ADR baru
-e. Close/carry-over milestone di GitLab
-f. Update docs/CURRENT-STATE.md: sprint = N+1
-g. Update docs/CONTEXT-INDEX.md: tambah retro + scorecard
-    ↓
-Informasikan user: summary + next sprint recommendation
-```
+**Flow Sprint Completion (detail lengkap: `steering/git-workflow-automation.md`):**
+
+1. **LOCAL VALIDATION (BLOCKING):** lint + typecheck + test (coverage >= 80%). Jika gagal → fix dulu.
+2. **Push** semua perubahan yang belum di-push.
+3. **CODE REVIEW OFFER:** Tanyakan user apakah mau AI review sebelum MR (architecture, security, best practices).
+4. **Create MR** (feature → develop). JANGAN auto-merge.
+5. **Update issues** (status::review) + milestone description.
+6. **Informasikan user:** MR URL + instruksi merge di GitLab.
+7. **Setelah user bilang "sudah merged"** → Tawarkan Sprint Completion Package:
+   - 📚 Retrospective (docs/retrospectives/sprint-[N].md)
+   - 📊 Scorecard (docs/quality/sprint-[N]-scorecard.md)
+   - 🏗️ Health Check (docs/quality/health-check-[date].md)
+   - 📖 GitLab Wiki Update (Changelog, API-Documentation, Architecture-Decisions)
+8. **Close/carry-over milestone** + update CURRENT-STATE.md (sprint = N+1)
 
 **Rules:**
 1. **WAJIB recognize trigger phrases** — jangan tunggu user bilang persis "jalankan retrospective"
@@ -1497,38 +1373,7 @@ AI Agent **WAJIB** membuat file steering di `.kiro/steering/` project user agar 
 
 3. **`coding-conventions.md`** — Generate dari template di bawah
 
-**Template `coding-conventions.md`:**
-```markdown
----
-inclusion: always
----
-
-# Coding Conventions
-
-## Commit Convention
-- Format: `<type>(<scope>): <subject>`
-- Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert
-- Subject: lowercase, imperative, max 50 chars, no period
-
-## Naming Convention
-- Files: kebab-case (user-service.ts)
-- Classes/Types: PascalCase (PaymentRepository)
-- Functions/Variables: camelCase (getPaymentDetail)
-- Constants: UPPER_SNAKE_CASE (MAX_RETRY)
-- DI Keys: camelCase (paymentRepository)
-
-## Pre-Push Validation (WAJIB)
-Sebelum push, WAJIB jalankan dan SEMUA harus pass:
-1. `npm run lint` — 0 errors
-2. `npm run typecheck` — 0 errors
-3. `npm run test:unit -- --coverage` — all pass, coverage >= 80%
-
-## Architecture Rules
-- Ikuti Clean Architecture: core → infrastructure → presentation → app
-- Semua dependency via DI container (Awilix)
-- Core TIDAK BOLEH import dari infrastructure/presentation
-- Lihat `.kiro/steering/architecture-standards.md` untuk detail lengkap
-```
+**Template:** Lihat `steering/project-structure.md` section "CI-Readiness" untuk template lengkap coding-conventions.md.
 
 **Keuntungan:**
 - User tidak perlu panggil power setiap kali untuk mendapat guidance arsitektur
@@ -1569,137 +1414,11 @@ AI Agent **WAJIB** membuat hook files di `.kiro/hooks/` project user agar automa
 - **NEW:** `metrics-collector.json` — auto-collect metrics ke `docs/quality/metrics-log.jsonl` setiap task selesai
 - Retrospective dan Scorecard sekarang **data-driven** (baca dari metrics-log, bukan manual count)
 
-**Hook File Contents (WAJIB persis seperti ini):**
+**Hook File Contents:**
 
-#### `.kiro/hooks/architect-gate.json`
-```json
-{
-  "name": "Architect Gate",
-  "version": "1.0.0",
-  "description": "Validate spec dan design sebelum mulai task",
-  "when": {
-    "type": "preTaskExecution"
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "ROLE: Architect Agent\n\nSebelum mulai task:\n1. Baca docs/CURRENT-STATE.md — resume dari session sebelumnya\n2. Baca docs/CONTEXT-INDEX.md — apa saja artifact yang tersedia\n3. Cek apakah spec ada untuk fitur ini (docs/specs/srs/)\n4. Cek apakah design document ada (docs/design/)\n5. Jika fitur kompleks dan spec/design belum ada → buat dulu, JANGAN langsung coding\n6. Jika sudah ada → validate bahwa task sesuai arsitektur\n7. Load relevant context (ADR, learnings) untuk menghindari kesalahan yang sama"
-  }
-}
-```
+Untuk detail lengkap JSON content setiap hook, lihat `steering/hooks-registry.md` (inclusion: always — selalu di-load ke context).
 
-#### `.kiro/hooks/security-review.json`
-```json
-{
-  "name": "Security Review",
-  "version": "1.0.0",
-  "description": "Quick security scan saat file source ditulis",
-  "when": {
-    "type": "postToolUse",
-    "toolTypes": ["write"]
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "ROLE: Security Agent\n\nJika file yang baru ditulis adalah source code di src/ (bukan docs/config/test):\n1. Quick scan: input validation ada? Sensitive data tidak di-log? Auth check ada?\n2. Jika finding CRITICAL → informasikan user, JANGAN lanjut\n3. Jika clean atau non-source file → skip silently"
-  }
-}
-```
-
-#### `.kiro/hooks/observability-check.json`
-```json
-{
-  "name": "Observability Check",
-  "version": "1.0.0",
-  "description": "Remind tambah logging dan metrics di fitur baru",
-  "when": {
-    "type": "postToolUse",
-    "toolTypes": ["write"]
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "Jika file yang baru ditulis adalah use case atau repository di src/ (bukan entity/mapper/test):\n- Apakah ada structured logging (logger.info/error) di entry dan error path?\n- Apakah ada metrics (counter/histogram) untuk operasi penting?\n- Jika BELUM → tambahkan sekarang. Inject logger dan metrics via DI.\n- Jika sudah ada atau file bukan use case/repository → skip."
-  }
-}
-```
-
-#### `.kiro/hooks/qa-devops-post-task.json`
-```json
-{
-  "name": "QA + DevOps Post Task",
-  "version": "1.2.0",
-  "description": "Lint, typecheck, test, commit, push setelah task selesai",
-  "when": {
-    "type": "postTaskExecution"
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "ROLE: QA Agent → DevOps Agent\n\n**QA Phase:**\n1. npm run lint (jika error → fix dulu)\n2. npm run typecheck (jika error → fix dulu)\n3. npm run test:unit -- --coverage (semua harus pass, coverage >= 80%)\n4. Jika task docs-only → skip test, tetap lint+typecheck\n\n**DevOps Phase (hanya jika QA pass):**\n5. git add (relevant files only, BUKAN git add .)\n6. git commit (conventional format, reference issue di footer)\n7. git push ke feature branch\n8. Update docs/CURRENT-STATE.md\n9. Update docs/CONTEXT-INDEX.md jika ada artifact baru\n\nInformasikan user: Lint ✅/❌ | Typecheck ✅/❌ | Tests X/X | Coverage X% | Pushed to [branch]"
-  }
-}
-```
-
-#### `.kiro/hooks/bug-learning-capture.json`
-```json
-{
-  "name": "Bug Learning Capture",
-  "version": "1.0.0",
-  "description": "Capture learning setiap kali bug di-fix",
-  "when": {
-    "type": "postTaskExecution"
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "Cek apakah task yang baru selesai adalah BUG FIX (commit message 'fix:' atau issue type::bug).\n\nJika YA:\n1. Buat docs/learnings/BUG-[issue-number]-[short-title].md\n2. Isi: What Happened, Root Cause, Why Not Detected Earlier, Prevention actions\n3. Identifikasi: perlu update skill/test/CI?\n4. Informasikan user: 'Bug learning captured. Rekomendasi: [list]'\n\nJika BUKAN bug fix → skip."
-  }
-}
-```
-
-#### `.kiro/hooks/sprint-retrospective.json`
-```json
-{
-  "name": "Sprint Retrospective",
-  "version": "1.0.0",
-  "description": "Generate retrospective saat user trigger",
-  "when": {
-    "type": "userTriggered"
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "Generate sprint retrospective:\n1. Kumpulkan data: commits, tasks completed, coverage trend, issues reopened\n2. Buat docs/retrospectives/sprint-[N].md\n3. Isi: AI Performance, What Worked, What Didn't, Recurring Issues, Improvement Actions\n4. Buat GitLab issues untuk improvement actions (type::improvement)\n5. Update docs/CONTEXT-INDEX.md"
-  }
-}
-```
-
-#### `.kiro/hooks/quality-scorecard.json`
-```json
-{
-  "name": "Quality Scorecard",
-  "version": "1.0.0",
-  "description": "Generate AI quality scorecard",
-  "when": {
-    "type": "userTriggered"
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "Generate quality scorecard:\n1. Collect metrics: coverage, lint errors, type errors, tasks completed, rework rate\n2. Buat docs/quality/sprint-[N]-scorecard.md\n3. Calculate overall score\n4. Compare dengan sprint sebelumnya (trend)\n5. Generate action items untuk metrics yang gagal\n6. Informasikan user: overall score + top recommendations"
-  }
-}
-```
-
-#### `.kiro/hooks/health-check.json`
-```json
-{
-  "name": "Framework Health Check",
-  "version": "1.0.0",
-  "description": "Scan project compliance terhadap framework",
-  "when": {
-    "type": "userTriggered"
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "Scan project compliance:\n1. Structure: folder sesuai? (src/core, infrastructure, presentation, app)\n2. Architecture: ada import violation? (core → infra, presentation → infra)\n3. Testing: coverage >= 80%? Ada file tanpa test?\n4. Docs: CONTEXT-INDEX up-to-date? Spec outdated?\n5. CI/CD: .gitlab-ci.yml valid? ESLint config ada?\n6. Governance: conventional commits? Tech debt tracked?\n\nGenerate docs/quality/health-check-[date].md\nInformasikan user: overall health score + violations + recommendations"
-  }
-}
-```
+AI Agent WAJIB generate 9 hook files sesuai definisi di hooks-registry.md.
 
 **Cara Generate:**
 1. Buat folder `<repo_path>/.kiro/hooks/` (jika belum ada)
