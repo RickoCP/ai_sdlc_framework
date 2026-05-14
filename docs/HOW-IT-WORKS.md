@@ -80,7 +80,7 @@ Saat power diaktifkan atau session baru dimulai, AI Agent menjalankan **auto-det
 │  Cek: .kiro/ ada? docs/ ada? src/ ada?                  │
 ├─────────────────────────────────────────────────────────┤
 │  YA (minimal 1) → project existing → lanjut detect 2-4  │
-│  TIDAK → project baru → tanyakan 5 pertanyaan           │
+│  TIDAK → project baru → tanyakan 8 pertanyaan           │
 └────────────────────────┬────────────────────────────────┘
                          ▼
 ┌─────────────────────────────────────────────────────────┐
@@ -158,7 +158,7 @@ File-file ini menjadi **acuan permanen** — aktif di setiap chat session tanpa 
 | `qa-devops-post-task.json` | postTaskExecution | 🧪 QA + 🚀 DevOps + GitLab (issue → review + comment) |
 | `bug-learning-capture.json` | postTaskExecution | 📚 Learning |
 | `metrics-collector.json` | postTaskExecution | 📊 Metrics |
-| `sprint-end-auto-check.json` | postTaskExecution | 🏗️ Auto Health Check + Sprint Completion Offer |
+| `sprint-end-auto-check.json` | postTaskExecution | 🏗️ Compliance Validator + Sprint Completion Offer |
 | `sprint-retrospective.json` | userTriggered | 📚 Learning + GitLab (milestone close + wiki update) |
 | `quality-scorecard.json` | userTriggered | 📊 Metrics |
 | `health-check.json` | userTriggered | 🏗️ Architect |

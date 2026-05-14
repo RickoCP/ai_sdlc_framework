@@ -1,6 +1,6 @@
 # Enterprise AI-Native SDLC Framework — Dokumentasi Lengkap
 
-**Version:** 1.4.0  
+**Version:** 1.5.0  
 **Author:** ricko_c_putra@telkomsel.co.id  
 **Last Updated:** 2026-05-10  
 **Repository:** https://github.com/RickoCP/ai_sdlc_framework
@@ -287,6 +287,17 @@ Untuk deadline mendesak:
 
 **Aktivasi:** User bilang "aktifkan fast track mode"
 
+### Zero Touch Mode
+
+AI jalankan semuanya otomatis tanpa konfirmasi per-layer:
+- AI jalankan Layer 0-8 tanpa stop
+- AI kerjakan semua sprint issues sequential
+- AI auto-create MR saat semua task done
+- STOP di merge point (user tetap harus merge di GitLab)
+- Setelah merge → auto retro + scorecard + wiki update
+
+**Aktivasi:** Pilih "Zero Touch" di pertanyaan #7 saat inisiasi project
+
 ---
 
 ## 7. Automated Workflow & Hooks
@@ -394,7 +405,7 @@ export GITLAB_API_URL="https://gitlab.com/api/v4"
 
 ### Step 5: Mulai Gunakan
 
-Panggil power di chat, jawab 6 pertanyaan project, dan framework akan setup semuanya otomatis.
+Panggil power di chat, jawab 8 pertanyaan project, dan framework akan setup semuanya otomatis.
 
 ---
 
@@ -402,7 +413,7 @@ Panggil power di chat, jawab 6 pertanyaan project, dan framework akan setup semu
 
 ### Memulai Project Baru
 
-1. Panggil power → jawab 6 pertanyaan
+1. Panggil power → jawab 8 pertanyaan
 2. AI Agent otomatis: git init → create GitLab project → setup folder → push
 3. Mulai development dengan Layer 3 (Spec-Driven)
 
@@ -520,13 +531,13 @@ Prinsip framework (dependency rule, spec-first, quality gates) berlaku di semua 
 
 | Metric | Value |
 |--------|-------|
-| Version | 1.4.0 |
+| Version | 1.5.0 |
 | Total Steering Files | 26 |
 | Automated Layers | 11/15 (73%) |
 | Always-Included Files | 3 |
-| Kiro Hooks Defined | ~16 |
+| Kiro Hooks Defined | 9 |
 | Tech Stacks Supported | 3 (Next.js, Go, Python) |
-| Operating Modes | 3 (Enterprise, Solo, Fast Track) |
+| Operating Modes | 4 (Enterprise, Solo, Fast Track, Zero Touch) |
 | Integrated Standards | 26 |
 | MCP Servers | 2 (GitLab, Git) |
 
@@ -552,4 +563,4 @@ Prinsip framework (dependency rule, spec-first, quality gates) berlaku di semua 
 
 ---
 
-*Enterprise AI-Native SDLC Framework v1.4.0 — Built with Kiro*
+*Enterprise AI-Native SDLC Framework v1.5.0 — Built with Kiro*

@@ -72,13 +72,13 @@ Buka chat dan ketik:
 Aktifkan Enterprise AI-SDLC Framework
 ```
 
-Jika berhasil, AI Agent akan menampilkan pesan selamat datang dan 6 pertanyaan project.
+Jika berhasil, AI Agent akan menampilkan pesan selamat datang dan 8 pertanyaan project.
 
 ---
 
 ## 3. First Time Setup
 
-### Menjawab 6 Pertanyaan
+### Menjawab 8 Pertanyaan
 
 Saat pertama kali mengaktifkan power, AI Agent akan bertanya:
 
@@ -90,7 +90,9 @@ Selamat datang di Enterprise AI-Native SDLC Framework!
 3. Tech stack yang diinginkan? (contoh: Next.js, Go, Python, dll)
 4. Apakah ini project baru atau project existing?
 5. Apakah project ini punya UI? Jika ya, apakah Anda sudah punya Design System sendiri?
-6. Layer mana yang ingin dikerjakan terlebih dahulu?
+6. Apakah GitLab credentials sudah di-setup?
+7. Mode development yang diinginkan? (Enterprise / Solo / Zero Touch)
+8. Layer mana yang ingin dikerjakan terlebih dahulu?
 ```
 
 **Contoh jawaban:**
@@ -99,7 +101,10 @@ Selamat datang di Enterprise AI-Native SDLC Framework!
 2. Microservice untuk payment processing (top-up, transfer, bill payment)
 3. TypeScript + Express + PostgreSQL
 4. Project baru
-5. Mulai dari Layer 0 (Product Vision)
+5. Tidak ada UI
+6. Sudah di-setup
+7. Enterprise
+8. Mulai dari Layer 0 (Product Vision)
 ```
 
 ### Apa yang Terjadi Setelah Jawab
@@ -482,6 +487,36 @@ Fast Track otomatis nonaktif setelah:
 - Task urgent selesai
 - User bilang "kembali ke normal mode"
 - Semua fast-track debt sudah di-payback
+
+---
+
+## 10.5 Zero Touch Mode
+
+### Kapan Menggunakan
+
+- Prototype cepat
+- Proof of concept
+- Ingin AI jalankan semuanya otomatis
+
+### Cara Mengaktifkan
+
+Pilih "Zero Touch" di pertanyaan #7 saat inisiasi project.
+
+### Apa yang Terjadi
+
+- AI jalankan Layer 0-8 tanpa stop (tanpa konfirmasi per layer)
+- AI kerjakan semua sprint issues sequential
+- AI auto-create MR saat semua task done
+- STOP di merge point (user tetap harus merge di GitLab)
+- Setelah merge → auto retro + scorecard + wiki update
+
+### Yang TETAP Enforced
+
+- ✅ Lint + Typecheck + Test (coverage >= 80%)
+- ✅ Architecture compliance
+- ✅ Security checks
+- ✅ Conventional commits
+- ✅ User harus merge MR (AI tidak boleh merge)
 
 ---
 
