@@ -438,10 +438,27 @@ AI kerjakan SEMUA issues sequential (tanpa user bilang per-issue):
 
 AI Agent WAJIB:
 1. Terima detail design system dari user (colors, typography, spacing, component library)
-2. Generate `.kiro/steering/design-system.md` dengan detail tersebut (`inclusion: always`)
-3. Generate `src/presentation/styles/tokens/` berdasarkan input user
-4. Sesuaikan `docs/design/ui-ux/theming.md` dengan tokens user
-5. Sesuaikan `docs/design/ui-ux/component-library.md` dengan library yang dipilih user
+2. **Jika user mengirimkan FILE** (PDF, gambar, Figma export, JSON tokens, atau dokumen lain):
+   - **Baca dan extract** seluruh informasi design system dari file tersebut
+   - Extract: color palette, typography, spacing, border radius, shadows, breakpoints, component list
+   - Jika file adalah gambar → describe visual elements dan extract warna/layout
+   - Jika file adalah JSON/code → parse tokens langsung
+   - Jika file adalah PDF/dokumen → extract semua design specifications
+3. Generate `.kiro/steering/design-system.md` dengan **FULL extracted content** (`inclusion: always`)
+4. Generate `src/presentation/styles/tokens/` berdasarkan extracted data
+5. Sesuaikan `docs/design/ui-ux/theming.md` dengan tokens yang di-extract
+6. Sesuaikan `docs/design/ui-ux/component-library.md` dengan library/components yang di-extract
+
+**Jika user kirim file design system, extract SEMUA informasi berikut:**
+- Color palette (primary, secondary, neutral, semantic, dark/light variants)
+- Typography (font family, sizes, line heights, weights, letter spacing)
+- Spacing scale (4px, 8px, 12px, 16px, dll)
+- Border radius values
+- Shadow values (elevation levels)
+- Breakpoints (mobile, tablet, desktop)
+- Component list + variants (button sizes, input states, dll)
+- Icon set/library yang dipakai
+- Animation/transition values
 
 **Template `.kiro/steering/design-system.md` (jika user punya design system):**
 ```markdown
@@ -451,23 +468,61 @@ inclusion: always
 
 # Design System — [Project Name]
 
+## Source
+[Dari file: [nama file yang user kirim] — extracted [tanggal]]
+
 ## Color Tokens
-[Dari input user — primary, secondary, neutral, semantic]
+### Light Theme
+- Primary: [hex]
+- Secondary: [hex]
+- Neutral: [scale 50-900]
+- Semantic: success [hex], error [hex], warning [hex], info [hex]
+
+### Dark Theme
+- Primary: [hex]
+- Secondary: [hex]
+- Background: [hex]
+- Surface: [hex]
+- Text: [hex]
 
 ## Typography
-[Dari input user — font family, sizes, weights]
+- Font Family: [name]
+- Heading: [sizes H1-H6 + weights]
+- Body: [sizes + line heights]
+- Caption/Small: [size]
 
 ## Spacing
-[Dari input user — spacing scale]
+[Scale: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96]
+
+## Border Radius
+- Small: [value]
+- Medium: [value]
+- Large: [value]
+- Full: 9999px
+
+## Shadows
+- sm: [value]
+- md: [value]
+- lg: [value]
+
+## Breakpoints
+- Mobile: [value]
+- Tablet: [value]
+- Desktop: [value]
 
 ## Component Library
-[Library yang dipakai: shadcn / MUI / Ant Design / custom]
+[Library: shadcn / MUI / Ant Design / custom]
+[Component list + variants]
+
+## Icons
+[Icon set: Lucide / Heroicons / custom]
 
 ## Rules
 - Semua component WAJIB menggunakan tokens di atas
 - DILARANG hardcode warna/font/spacing
 - Jika membuat component baru → ikuti pattern library yang dipilih
 - Dark/Light theme WAJIB menggunakan token variants
+- Semua values di atas adalah SUMBER KEBENARAN — jangan deviate
 ```
 
 **Jika user TIDAK punya Design System:**
