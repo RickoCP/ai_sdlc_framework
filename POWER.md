@@ -360,14 +360,22 @@ Sebelum kita mulai, saya perlu memahami project yang akan dikerjakan:
 3. Tech stack yang diinginkan? (contoh: Next.js, Go, Python, dll)
 4. Apakah ini project baru atau project existing?
 5. Apakah project ini punya UI? Jika ya:
-   a. Apakah Anda sudah punya Design System sendiri? (color tokens, typography, component library)
-   b. Jika ya — kirimkan detail berikut agar saya integrasikan ke project:
+   a. Design System mana yang ingin dipakai?
+      - **Signal Design System** (built-in — sudah tersedia di framework ini)
+      - **Custom** — punya design system sendiri (kirimkan file/detail)
+      - **Default** — generate default design system (Atomic Design + neutral tokens)
+   b. Jika pilih **Custom** — kirimkan detail berikut:
       - Color palette (primary, secondary, neutral, semantic colors)
       - Typography (font family, sizes, weights)
       - Spacing scale
       - Component library yang dipakai (shadcn, MUI, Ant Design, custom, dll)
       - Figma/design file link (opsional)
-   c. Jika belum punya — saya akan generate default design system (Atomic Design + tokens)
+   c. Jika pilih **Signal** — saya akan gunakan `signal-design-system-complete.md` sebagai acuan:
+      - Color tokens: Primary (Red), Secondary (Navy), Valid (Green), Warning, Info, Neutral
+      - Typography: Signal font scale
+      - Spacing: Signal spacing scale
+      - Components: mengikuti Signal component patterns
+      - File `signal-design-system-complete.md` akan menjadi steering untuk semua UI development
 6. Apakah GitLab credentials sudah di-setup?
    - GITLAB_PERSONAL_ACCESS_TOKEN (dari GitLab → User Settings → Access Tokens, scope: api, read_repository, write_repository)
    - GITLAB_API_URL (contoh: https://gitlab.com/api/v4)
@@ -434,7 +442,26 @@ AI kerjakan SEMUA issues sequential (tanpa user bilang per-issue):
 5. **Jika ada error/failure** → stop, informasikan user, tunggu instruksi
 6. **User bisa interrupt kapan saja** — bilang "stop" atau "pause"
 
-**Jika user punya Design System sendiri:**
+**Jika user pilih Signal Design System:**
+
+AI Agent WAJIB:
+1. Gunakan `steering/signal-design-system-complete.md` sebagai **sumber kebenaran** untuk semua UI development
+2. Generate `.kiro/steering/design-system.md` dengan konten dari `signal-design-system-complete.md` (`inclusion: always`)
+3. Generate `src/presentation/styles/tokens/` berdasarkan Signal color/typography/spacing tokens
+4. Semua component yang dibuat HARUS menggunakan Signal CSS variables (`--signal-color-*`, `--signal-spacing-*`, dll)
+5. DILARANG menggunakan warna/font/spacing yang tidak ada di Signal Design System
+
+**Rules Signal Design System:**
+- Semua component → gunakan `--signal-color-*` variables
+- Typography → gunakan Signal font scale
+- Spacing → gunakan Signal spacing scale
+- Dark/Light theme → gunakan Signal theme tokens
+- Jika component baru dibutuhkan → ikuti Signal component patterns
+- `signal-design-system-complete.md` adalah **single source of truth** untuk UI
+
+---
+
+**Jika user pilih Custom (punya Design System sendiri):**
 
 AI Agent WAJIB:
 1. Terima detail design system dari user (colors, typography, spacing, component library)
