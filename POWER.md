@@ -1305,41 +1305,55 @@ AI Agent **WAJIB** membuat file steering di `.kiro/steering/` project user agar 
 
 | File Target (di project user) | Cara Generate | Inclusion |
 |-------------------------------|--------------|-----------|
-| `.kiro/steering/architecture-standards.md` | Generate compact version (rules only, tanpa contoh code panjang) | `always` |
-| `.kiro/steering/test-writing-patterns.md` | Generate compact version (rules + checklist, tanpa full examples) | `always` |
+| `.kiro/steering/architecture-standards.md` | **Generate FULL content** (100% isi dari power steering) | `always` |
+| `.kiro/steering/test-writing-patterns.md` | **Generate FULL content** (100% isi dari power steering) | `always` |
 | `.kiro/steering/coding-conventions.md` | Generate dari template di bawah | `always` |
-
-**⚠️ PENTING — Kenapa Generate, Bukan Copy:**
-- AI Agent TIDAK bisa copy file dari power workspace ke project workspace
-- Yang dilakukan: generate file BARU berdasarkan knowledge dari steering power
-- File yang di-generate adalah **compact reference** — rules dan checklist tanpa contoh code panjang
-- Contoh code lengkap tetap tersedia via power steering (saat power aktif)
 
 **Cara generate (AI Agent WAJIB ikuti):**
 
-1. **`architecture-standards.md`** — Generate versi ringkas yang berisi:
+1. **`architecture-standards.md`** — Generate **100% FULL content** yang berisi:
    - Front-matter: `inclusion: always`
-   - Dependency Rule (diagram + tabel)
-   - Layer structure (folder tree)
-   - Tanggung jawab per layer (boleh/dilarang — ringkas)
-   - Aturan dependency (tabel strict)
-   - Data flow
-   - DI rules (factory function, registration, lifetime — ringkas)
-   - Naming convention (tabel)
-   - Anti-pattern list (tanpa contoh code panjang)
+   - Overview + Tujuan Arsitektur
+   - Prinsip Utama (Dependency Rule, Separation of Concerns, DI via Awilix, Protocol-based Abstraction, Framework as Detail, Composition Root)
+   - Struktur Layer LENGKAP (folder tree src/core, infrastructure, presentation, app)
+   - Tanggung Jawab Layer (CORE, INFRASTRUCTURE, PRESENTATION, APP — boleh/dilarang)
+   - Server-First Rendering + Atomic Design rules
+   - Aturan Dependency (tabel strict)
+   - Data Flow + Aturan Mapping Data (DTO → Entity → ViewModel → UI)
+   - DI section LENGKAP (struktur, factory function pattern, registration pattern, lifetime rules, resolve pattern)
+   - DI di Presentation Layer
+   - DI dan Clean Architecture relationship
+   - Naming Convention (tabel lengkap)
+   - Anti-Pattern (Architecture + DI) dengan contoh code ❌/✅
+   - DI untuk Testing
+   - Workflow Membuat Fitur Baru (8 steps)
+   - Container Bootstrapping
    - Enforcement rules
-   - **JANGAN copy seluruh file power** — buat ringkasan ~100-150 lines
+   - Best Practices (Arsitektur + DI)
+   - Kesimpulan
+   - Integration dengan Framework
+   
+   **GENERATE SELURUH ISI** — bukan ringkasan. File ini adalah sumber kebenaran arsitektur di project user. Jika terlalu besar untuk 1 operasi, gunakan multiple write operations (fs_write + fs_append).
 
-2. **`test-writing-patterns.md`** — Generate versi ringkas yang berisi:
+2. **`test-writing-patterns.md`** — Generate **100% FULL content** yang berisi:
    - Front-matter: `inclusion: always`
-   - Test pyramid (unit/integration/e2e ratio)
-   - Per-layer checklist (apa yang HARUS ditest per layer)
-   - DI-friendly testing rules (direct injection, bukan container)
-   - Anti-pattern list
-   - Coverage rules (80% minimum, 95% untuk auth/payment)
-   - Vitest config essentials (isolate, retry:0, clearMocks)
-   - Naming convention
-   - **JANGAN copy seluruh file power** — buat ringkasan ~80-120 lines
+   - Overview + Peran Dokumen
+   - Test Pyramid Strategy (70% unit, 20% integration, 10% E2E)
+   - Per-Layer Test Patterns LENGKAP dengan contoh code TypeScript:
+     - Use Case tests (mock repository, happy/error/edge)
+     - Repository tests (mock HTTP, mapping, error handling)
+     - ViewModel tests (mock use case, state changes)
+     - Mapper tests (field mapping, fallback, abnormal data)
+     - Middleware tests (auth flow, redirect, safe fallback)
+   - DI-Friendly Testing Patterns (direct injection, fixtures, container override)
+   - Anti-Pattern Testing (5 items dengan contoh ❌/✅)
+   - Test Naming Convention
+   - Coverage Rules (80% minimum, 95% untuk auth/payment)
+   - Vitest Configuration Best Practices (setup file, config, QueryClient, Zustand reset)
+   - Integration dengan Framework
+   - Enforcement rules
+   
+   **GENERATE SELURUH ISI** — termasuk contoh code. File ini adalah panduan testing lengkap di project user.
 
 3. **`coding-conventions.md`** — Generate dari template di bawah
 
