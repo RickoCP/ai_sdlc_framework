@@ -136,16 +136,16 @@ Setelah setup selesai, power ini menghasilkan file-file berikut di project user:
 
 | File | Fungsi | Inclusion |
 |------|--------|-----------|
-| `architecture-standards.md` | Clean Architecture + DI rules (compact version) | always |
-| `test-writing-patterns.md` | Test patterns + checklist (compact version) | always |
+| `architecture-standards.md` | Clean Architecture + DI rules (FULL content) | always |
+| `test-writing-patterns.md` | Test patterns per-layer (FULL content with code examples) | always |
 | `coding-conventions.md` | Commit, naming, lint rules | always |
 
-File-file ini adalah **compact reference** yang di-generate (bukan copy dari power). Berisi rules dan checklist tanpa contoh code panjang. Contoh code lengkap tetap tersedia via power steering saat power aktif.
+File-file ini adalah **full content** yang di-generate berdasarkan knowledge dari power steering. Berisi seluruh rules, patterns, dan contoh code — menjadi single source of truth di project user.
 
-**Kenapa compact, bukan full copy:**
+**Kenapa generate (bukan copy):**
 - AI Agent tidak bisa copy file antar workspace (power ≠ project)
-- Compact version (~100-150 lines) lebih efisien untuk context window
-- Full version tetap tersedia saat power aktif (loaded dari power steering)
+- AI generate dari knowledge yang sudah di-load ke context
+- Jika terlalu besar untuk 1 operasi → gunakan multiple writes (fs_write + fs_append)
 
 File-file ini menjadi **acuan permanen** — aktif di setiap chat session tanpa perlu memanggil power lagi.
 
@@ -530,10 +530,12 @@ Framework ini otomatis mengelola work items, issue board, milestone, dan wiki di
     ├── create_issue_note: implementation summary
     │   (Comment otomatis: branch, tests, coverage)
     │
-[MR merged — GitLab native]
+[MR merged — setelah user merge di GitLab]
     │
-    └── Issue auto-closed via "Closes #N" di commit message
-        (Issue berpindah ke "Done" di board)
+    ├── update_issue: state_event → "close" + labels → status::done
+    │   (Issue state = closed + label = done)
+    │
+    └── Issue berpindah ke "Done" di board
 ```
 
 ### Milestone Management (Sprint Retrospective Hook)
