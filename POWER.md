@@ -912,15 +912,44 @@ Setelah sprint selesai (MR merged), AI Agent **WAJIB** melakukan update berikut 
 | Wiki "Changelog" | `create_or_update_wiki_page` | Sprint [N]: features delivered, issues closed, carry-over |
 | Wiki "API-Documentation" | `create_or_update_wiki_page` | Endpoint baru (jika ada) |
 | Wiki "Architecture-Decisions" | `create_or_update_wiki_page` | ADR baru (jika ada) |
-| Semua sprint issues | `update_issue` | Label → `status::done` (atau carry-over) |
+| **CLOSE semua sprint issues** | `update_issue` | **state_event: "close"** + Label → `status::done` |
 | Milestone | `edit_milestone` | Close (jika semua done) atau update description |
 | Improvement issues | `create_issue` | Dari retrospective action items |
 
+**⚠️ CRITICAL — Close Issue vs Update Label:**
+
+Label `status::done` dan state `closed` adalah **2 hal BERBEDA** di GitLab:
+- Label `status::done` = visual indicator di board (TIDAK close issue)
+- State `closed` = actual issue state (issue benar-benar selesai)
+
+**AI Agent WAJIB melakukan KEDUANYA:**
+```
+# WAJIB: Update label DAN close issue
+Tool: update_issue
+Arguments: {
+  "project_id": "<project-id>",
+  "issue_iid": "<issue-number>",
+  "labels": ["status::done", ...other labels],
+  "state_event": "close"    ← INI YANG SERING TERLEWAT!
+}
+```
+
+**DILARANG:**
+- ❌ Hanya update label tanpa close issue
+- ❌ Biarkan issue state "opened" meskipun sudah `status::done`
+- ❌ Mengandalkan "Closes #N" di commit saja (hanya bekerja saat MR merged, bukan per-task)
+
+**WAJIB:**
+- ✅ Setiap task selesai + pushed → update label `status::review`
+- ✅ Setelah MR merged → **close issue** (`state_event: "close"`) + label `status::done`
+- ✅ Verify: issue state = "closed" (bukan hanya label berubah)
+
 **Rules:**
 - Wiki update WAJIB — bukan opsional
-- Issue status update WAJIB — board harus reflect reality
+- Issue **CLOSE** WAJIB — bukan hanya label update
 - Milestone close/carry-over WAJIB — jangan biarkan milestone open tanpa alasan
 - Jika GitLab MCP gagal → retry 2x → informasikan user untuk manual update
+- **Setelah close issues → verify** bahwa state benar-benar "closed"
 
 ---
 
