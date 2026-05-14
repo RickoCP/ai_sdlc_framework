@@ -167,27 +167,92 @@ File-file ini menjadi **acuan permanen** — aktif di setiap chat session tanpa 
 
 ```
 docs/
-├── CONTEXT-INDEX.md          ← Peta semua artifact
-├── CURRENT-STATE.md          ← State terakhir (resume point)
-├── product/
-│   └── vision.md
-├── requirements/
+├── CONTEXT-INDEX.md                    ← Peta navigasi semua artifact project
+├── CURRENT-STATE.md                    ← Save/resume point (sprint, task, branch, progress)
+│
+├── product/                            ← Layer 0: Product Vision
+│   ├── vision.md                       ← Problem statement, target user, value proposition
+│   ├── roadmap.md                      ← Phase/milestone timeline
+│   ├── business-goals.md              ← KPI, revenue model, business objectives
+│   ├── success-metrics.md             ← Measurable criteria untuk validasi keberhasilan
+│   └── ai-opportunities.md            ← Di mana AI bisa accelerate development
+│
+├── requirements/                       ← Layer 1-2: Requirements
 │   ├── extracted/
+│   │   ├── user-stories.md            ← User stories (As a... I want... So that...)
+│   │   ├── functional-requirements.md ← Functional requirements terstruktur
+│   │   └── non-functional-requirements.md ← Performance, security, scalability constraints
 │   └── validation/
-├── specs/
+│       ├── validation-report-[date].md ← Hasil validasi (pass/block)
+│       ├── ambiguity-report.md        ← Requirement yang ambigu + saran perbaikan
+│       ├── conflict-analysis.md       ← Requirement yang bertentangan + resolusi
+│       └── risk-analysis.md           ← Risk matrix (probability × impact)
+│
+├── specs/                              ← Layer 3: Specifications
+│   ├── brd/
+│   │   ├── business-flow.md           ← Business process flow
+│   │   └── stakeholder-matrix.md      ← Stakeholder mapping + influence
+│   ├── prd/
+│   │   ├── user-stories.md            ← Detailed user stories + priority
+│   │   ├── acceptance-criteria.md     ← AC per story (Given/When/Then)
+│   │   └── feature-matrix.md         ← Feature list + status + priority
 │   └── srs/
-├── design/
+│       ├── [feature]-spec.md          ← Per-feature specification
+│       ├── architecture.md            ← Architecture overview
+│       ├── sequence-diagram.md        ← Flow diagrams (Mermaid)
+│       ├── api-contract.md            ← Endpoint, request/response, errors
+│       ├── state-flow.md              ← State machine diagrams
+│       ├── failure-scenario.md        ← What can fail + recovery
+│       └── data-model.md             ← Entity relationships + schema
+│
+├── design/                             ← Layer 4: Design System
 │   ├── system/
+│   │   ├── high-level-architecture.md ← C4 Level 1-2, tech stack, communication
+│   │   ├── sequence-diagram.md        ← Detailed sequence flows
+│   │   ├── deployment.md             ← Environments, infra, scaling
+│   │   ├── c4-model.md               ← Context + Container diagrams
+│   │   └── event-flow.md             ← Event-driven flow (jika applicable)
 │   ├── technical/
-│   └── security/
-├── adr/                      ← Architecture Decision Records
-├── learnings/                ← Bug learnings
-├── tech-debt/                ← Tech debt tracking
-├── retrospectives/           ← Sprint retrospectives
-└── quality/
-    ├── metrics-log.jsonl     ← Raw metrics (append-only)
-    ├── sprint-N-scorecard.md ← Quality scorecard
-    └── health-check-*.md     ← Health check reports
+│   │   ├── clean-architecture.md      ← Layer diagram, dependency rule
+│   │   ├── folder-structure.md        ← Complete src/ tree
+│   │   ├── error-handling.md          ← Error hierarchy, DomainResult, HTTP mapping
+│   │   ├── naming-convention.md       ← Files, classes, functions, DI keys
+│   │   └── testing-pattern.md         ← Test pyramid, per-layer strategy
+│   ├── security/
+│   │   ├── threat-model.md            ← STRIDE analysis, risk matrix
+│   │   ├── trust-boundary.md          ← Boundary diagram, trust levels
+│   │   ├── attack-surface.md          ← Attack vectors + exposure
+│   │   └── mitigation-plan.md         ← Mitigation per threat
+│   └── ui-ux/ (jika ada UI)
+│       ├── wireframe.md               ← Screen list, user flow, layout
+│       ├── component-library.md       ← Atomic Design (atoms/molecules/organisms)
+│       ├── accessibility.md           ← WCAG 2.1 AA checklist
+│       ├── i18n-strategy.md           ← Languages, key convention, library
+│       ├── theming.md                 ← Dark/light tokens, detection, persistence
+│       └── design-token.md            ← Full token reference (colors, spacing, typography)
+│
+├── governance/                         ← Layer 5: AI Governance
+│   ├── ai-policy.md                   ← AI usage policy + constraints
+│   ├── approved-tools.md              ← Approved libraries + tools
+│   ├── security-policy.md             ← Security standards + compliance
+│   └── code-review-policy.md          ← Review checklist + approval rules
+│
+├── adr/                                ← Layer 14: Architecture Decision Records
+│   └── ADR-[N]-[title].md            ← Per keputusan arsitektur (Context, Decision, Consequences)
+│
+├── learnings/                          ← Layer 14: Bug Learnings (auto-generated)
+│   └── BUG-[N]-[title].md            ← What happened, root cause, prevention
+│
+├── tech-debt/                          ← Layer 14: Tech Debt Tracking
+│   └── TD-[N]-[title].md             ← Debt description, severity, payback plan
+│
+├── retrospectives/                     ← Layer 14: Sprint Retrospectives (auto-generated)
+│   └── sprint-[N].md                 ← AI performance, what worked/didn't, improvements
+│
+└── quality/                            ← Layer 14: Quality Metrics
+    ├── metrics-log.jsonl              ← Raw metrics per task (append-only, auto-collected)
+    ├── sprint-[N]-scorecard.md        ← Quality scorecard (code quality, AI effectiveness, governance)
+    └── health-check-[date].md         ← Framework compliance scan report
 ```
 
 ---
