@@ -605,7 +605,7 @@ AI Agent **WAJIB** mengecek kelengkapan dokumen setelah menyelesaikan setiap lay
 | **5 — Governance** | `docs/governance/ai-policy.md` + `approved-tools.md` + `security-policy.md` + `code-review-policy.md` | ✅ semua harus ada |
 | **6 — Skills** | `.kiro/skills/create-api.md` + `create-usecase.md` + `create-repository.md` + `create-component.md` + `create-test.md` + `create-migration.md` | ✅ semua harus ada (6 files) |
 | **7 — Team Extension** | `.kiro/steering/team/[domain]-team.md` (minimal 1 per domain project) | ✅ harus ada |
-| **8 — Issue-Driven** | GitLab: issues + milestone + labels + board + issue templates (Feature, Task, Bug) + MR templates | ✅ semua harus ada |
+| **8 — Issue-Driven** | GitLab: issues + milestone + labels + board + issue templates (Feature, Task, Bug) + MR templates + **Wiki pages (Home, Changelog, API-Documentation, Architecture-Decisions)** | ✅ semua harus ada |
 | **10 — Context** | `docs/CONTEXT-INDEX.md` + `docs/CURRENT-STATE.md` | ✅ semua harus ada |
 | **12 — Quality Gates** | `.gitlab-ci.yml` + `.eslintrc.json`/`eslint.config.mjs` + `tsconfig.json` + `.prettierrc` + `vitest.config.ts` + `commitlint.config.js` | ✅ semua harus ada |
 | **14 — Learning** | `docs/learnings/` folder + `docs/retrospectives/` folder + `docs/adr/` folder + `docs/tech-debt/` folder + `docs/quality/metrics-log.jsonl` | ✅ semua harus ada |
@@ -982,10 +982,16 @@ Setiap sprint yang dijalankan **WAJIB** mengikuti workflow lengkap framework ini
 
 ```
 [SPRINT PLANNING]
-1. Buat/update milestone di GitLab
+1. Buat/update milestone di GitLab (title, start_date, due_date, description)
 2. Breakdown fitur → issues (Epic → Feature → Task)
 3. Assign issues ke milestone
-4. Buat branch dari develop (atau main di Solo Mode)
+4. Buat labels jika ada domain baru
+5. **Buat/update GitLab Wiki pages (WAJIB):**
+   - "Home": project overview, tech stack, team, links (jika belum ada)
+   - "Changelog": tambah section Sprint [N] (kosong, akan diisi saat sprint end)
+   - "API-Documentation": (jika belum ada, buat page kosong)
+   - "Architecture-Decisions": (jika belum ada, buat page kosong)
+6. Buat branch dari develop (atau main di Solo Mode)
 
 [PER TASK — WAJIB untuk setiap task]
 5. 🏗️ Architect Gate: load context + validate spec/design
