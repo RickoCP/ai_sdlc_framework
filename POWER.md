@@ -715,10 +715,31 @@ Saat user bilang salah satu dari frasa berikut, AI Agent WAJIB menjalankan Sprin
    - `npm run test:unit -- --coverage` → HARUS all pass, coverage >= 80%
    - Jika SALAH SATU gagal → FIX DULU, JANGAN buat MR
 2. Push semua perubahan yang belum di-push
-3. Create Merge Request (feature → develop)
+    ↓
+━━━ 🔒 CODE REVIEW OFFER (WAJIB TANYAKAN) ━━━
+3. **SEBELUM buat MR, WAJIB tanyakan user:**
+   ```
+   "Semua task selesai dan tests pass. Sebelum saya buat MR:
+   
+   Apakah Anda mau saya lakukan code review terlebih dahulu?
+   - 'Ya' → Saya review: architecture compliance, security, best practices
+   - 'Tidak' → Langsung buat MR
+   
+   (Review akan mencakup: dependency rule, DI usage, observability, 
+    error handling, naming convention, test quality)"
+   ```
+   → Jika user bilang "ya" / "review dulu":
+     - Jalankan AI Review (Security Agent + Architect Agent)
+     - Tampilkan findings
+     - Fix jika ada issue
+     - Setelah clean → lanjut buat MR
+   → Jika user bilang "tidak" / "langsung MR":
+     - Lanjut buat MR tanpa review tambahan
+    ↓
+4. Create Merge Request (feature → develop)
    - JANGAN auto-merge — WAJIB user approval di GitLab
-3. Update semua sprint issues: status::review
-4. Update milestone description: sprint progress summary
+5. Update semua sprint issues: status::review
+6. Update milestone description: sprint progress summary
     ↓
 Informasikan user:
   "MR dibuat: [URL]. Silakan review dan merge di GitLab.
