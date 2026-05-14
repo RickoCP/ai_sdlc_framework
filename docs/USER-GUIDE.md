@@ -89,7 +89,7 @@ Selamat datang di Enterprise AI-Native SDLC Framework!
 2. Deskripsi singkat project (apa yang ingin diselesaikan)?
 3. Tech stack yang diinginkan? (contoh: Next.js, Go, Python, dll)
 4. Apakah ini project baru atau project existing?
-5. Apakah project ini punya UI? Jika ya, apakah Anda sudah punya Design System sendiri?
+5. Apakah project ini punya UI? Design System: Signal (built-in) / Custom / Default?
 6. Apakah GitLab credentials sudah di-setup?
 7. Mode development yang diinginkan? (Enterprise / Solo / Zero Touch)
 8. Layer mana yang ingin dikerjakan terlebih dahulu?
@@ -183,7 +183,7 @@ Anda tidak perlu manual pindahkan issue di board. Framework otomatis:
 |-------|--------------|
 | Task dimulai | Issue → `status::in-progress` (pindah ke kolom "In Progress") |
 | Task selesai + pushed | Issue → `status::review` + comment (pindah ke "Review") |
-| MR merged | Issue auto-close (pindah ke "Done") |
+| MR merged | Issue **closed** (`state_event: "close"` + label `status::done`) |
 | Sprint selesai | Milestone closed/carry-over + wiki Changelog updated |
 
 ---
@@ -220,7 +220,7 @@ Anda tidak perlu manual pindahkan issue di board. Framework otomatis:
 | Anda Bilang | AI Agent Lakukan |
 |-------------|-----------------|
 | "Plan sprint [N]" | BA breakdown → Architect tasks → create GitLab issues |
-| "Sprint selesai" | Push all → create MR → generate retro + scorecard |
+| "Sprint selesai" | Lint+test → push → code review offer → MR ke develop → tunggu user merge → retro + scorecard |
 | "Buat milestone sprint [N]" | Create GitLab milestone + issues |
 
 ### Mode Switching
