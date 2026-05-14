@@ -456,8 +456,10 @@ AI Agent WAJIB:
 - Typography → gunakan Signal font scale
 - Spacing → gunakan Signal spacing scale
 - Dark/Light theme → gunakan Signal theme tokens
-- Jika component baru dibutuhkan → ikuti Signal component patterns
+- **Atomic Design TETAP WAJIB** — Signal tokens dipakai di dalam struktur atoms/molecules/organisms
+- Jika component baru dibutuhkan → ikuti Signal component patterns + Atomic Design hierarchy
 - `signal-design-system-complete.md` adalah **single source of truth** untuk UI
+- Struktur folder tetap: `src/presentation/components/{atoms,molecules,organisms}/`
 
 ---
 
