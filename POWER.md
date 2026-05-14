@@ -654,8 +654,13 @@ Saat user bilang salah satu dari frasa berikut, AI Agent WAJIB menjalankan Sprin
 [User: "sprint selesai"]
     ↓
 ━━━ 🚀 DEVOPS AGENT ━━━
-1. Push semua perubahan yang belum di-push
-2. Create Merge Request (feature → develop)
+1. **LOCAL VALIDATION (WAJIB SEBELUM MR — BLOCKING):**
+   - `npm run lint` → HARUS 0 errors
+   - `npm run typecheck` → HARUS 0 errors
+   - `npm run test:unit -- --coverage` → HARUS all pass, coverage >= 80%
+   - Jika SALAH SATU gagal → FIX DULU, JANGAN buat MR
+2. Push semua perubahan yang belum di-push
+3. Create Merge Request (feature → develop)
    - JANGAN auto-merge — WAJIB user approval di GitLab
 3. Update semua sprint issues: status::review
 4. Update milestone description: sprint progress summary
