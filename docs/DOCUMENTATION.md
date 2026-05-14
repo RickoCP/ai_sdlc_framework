@@ -128,83 +128,143 @@ Layer 14 [AUTOMATED]  Continuous Learning — bug capture + retro + ADR
 
 ### Layer 0 — Product Vision
 **Tujuan:** Menentukan arah produk, business value, dan roadmap.  
-**Output:** `docs/product/vision.md`, `docs/product/roadmap.md`  
+**Output (SEMUA WAJIB):**
+- `docs/product/vision.md`
+- `docs/product/roadmap.md`
+- `docs/product/business-goals.md`
+- `docs/product/success-metrics.md`
+- `docs/product/ai-opportunities.md`
+
 **Automation:** Manual (keputusan bisnis)
 
 ### Layer 1 — Requirement Intake
 **Tujuan:** AI membaca berbagai input source (PRD, meeting notes, user feedback) dan mengekstrak requirements terstruktur.  
-**Output:** `docs/requirements/extracted/*.md`  
+**Output (SEMUA WAJIB):**
+- `docs/requirements/extracted/user-stories.md`
+- `docs/requirements/extracted/functional-requirements.md`
+- `docs/requirements/extracted/non-functional-requirements.md`
+
 **Automation:** Manual (input terlalu bervariasi)
 
 ### Layer 2 — Requirement Validation
 **Tujuan:** Validasi requirements sebelum eksekusi — cek ambiguity, completeness, conflicts, feasibility.  
-**Output:** `docs/requirements/validation/validation-report.md`  
+**Output (SEMUA WAJIB):**
+- `docs/requirements/validation/validation-report-[date].md`
+- `docs/requirements/validation/ambiguity-report.md`
+- `docs/requirements/validation/conflict-analysis.md`
+- `docs/requirements/validation/risk-analysis.md`
+
 **Automation:** ✅ Hook `fileCreated` pada `docs/requirements/**` — auto-validate  
 **Gate:** BLOCK jika ada critical issue
 
 ### Layer 3 — Spec-Driven Development
 **Tujuan:** Idea → Specification → Validation → Architecture → Tasks → Code  
-**Output:** `docs/specs/srs/[feature]-spec.md`  
+**Output (SEMUA WAJIB):**
+- `docs/specs/brd/business-flow.md` + `stakeholder-matrix.md`
+- `docs/specs/prd/user-stories.md` + `acceptance-criteria.md` + `feature-matrix.md`
+- `docs/specs/srs/[feature]-spec.md` + `architecture.md` + `sequence-diagram.md` + `api-contract.md` + `state-flow.md` + `failure-scenario.md` + `data-model.md`
+
 **Automation:** ✅ Hook `preTaskExecution` — enforce spec-first untuk fitur kompleks  
 **Gate:** BLOCK coding tanpa spec (fitur kompleks)
 
 ### Layer 4 — Design System
 **Tujuan:** System Design, Technical Design, UI/UX Design, Security Design  
-**Output:** `docs/design/[type]/[feature].md`  
+**Output (SEMUA WAJIB):**
+- System: `high-level-architecture.md` + `sequence-diagram.md` + `deployment.md` + `c4-model.md` + `event-flow.md`
+- Technical: `clean-architecture.md` + `folder-structure.md` + `error-handling.md` + `naming-convention.md` + `testing-pattern.md`
+- Security: `threat-model.md` + `trust-boundary.md` + `attack-surface.md` + `mitigation-plan.md`
+- UI/UX (jika ada UI): `wireframe.md` + `component-library.md` + `accessibility.md` + `i18n-strategy.md` + `theming.md` + `design-token.md`
+
 **Automation:** ✅ Hook `postTaskExecution` — validate code vs design document  
 **Gate:** Informasikan deviasi, suggest update
 
 ### Layer 5 — AI Governance
 **Tujuan:** Mencegah hallucination dan AI chaos melalui policy, standards, compliance.  
-**Output:** `docs/governance/ai-policy.md`, approved tools, prompt standards  
+**Output (SEMUA WAJIB):**
+- `docs/governance/ai-policy.md`
+- `docs/governance/approved-tools.md`
+- `docs/governance/security-policy.md`
+- `docs/governance/code-review-policy.md`
+
 **Automation:** Partial — enforced via CI/CD pipeline
 
 ### Layer 6 — AI Engineering Skills
 **Tujuan:** Reusable workflow dan standards (create-api, create-usecase, create-test, dll).  
-**Output:** `.kiro/skills/*.md`  
+**Output (SEMUA WAJIB — 6 files):**
+- `.kiro/skills/create-api.md`
+- `.kiro/skills/create-usecase.md`
+- `.kiro/skills/create-repository.md`
+- `.kiro/skills/create-component.md`
+- `.kiro/skills/create-test.md`
+- `.kiro/skills/create-migration.md`
+
 **Automation:** Partial — auto-loaded via fileMatch patterns
 
 ### Layer 7 — Team Extension Skills
 **Tujuan:** Global + team-specific standards yang extend Layer 6.  
-**Output:** `.kiro/steering/team-*.md`  
+**Output (WAJIB minimal 1 per domain):**
+- `.kiro/steering/team/[domain]-team.md`
+
 **Automation:** Partial — auto-loaded via fileMatch patterns
 
 ### Layer 8 — Issue-Driven Development
 **Tujuan:** 1 issue = 1 bounded context. Mengurangi hallucination dan context overflow.  
-**Output:** GitLab Issues (Epic → Feature → Task), branches, MRs  
+**Output (SEMUA WAJIB):**
+- GitLab: Issues (Epic → Feature → Task) + Milestone + Labels + Board
+- GitLab Wiki: Home, Changelog, API-Documentation, Architecture-Decisions
+- `.gitlab/issue_templates/Feature.md` + `Task.md` + `Bug.md`
+- `.gitlab/merge_request_templates/Default.md`
+
 **Automation:** ✅ Full GitLab integration — branch per issue, auto-push, MR creation
 
 ### Layer 9 — AI Agent Orchestration
 **Tujuan:** Multi-agent workflow — Backend Agent, Frontend Agent, DevOps Agent, QA Agent.  
-**Output:** Orchestrated task execution  
-**Automation:** Conceptual (tergantung evolusi Kiro multi-agent)
+**Output:** Orchestrated task execution (via hooks)  
+**Automation:** ✅ Hook chains — role-based prompting + sub-agent delegation
 
 ### Layer 10 — Continuous Context
 **Tujuan:** Artifact dari setiap layer menjadi context untuk layer berikutnya. AI tidak kehilangan memory.  
-**Output:** `docs/CONTEXT-INDEX.md`, `docs/CURRENT-STATE.md`  
+**Output (SEMUA WAJIB):**
+- `docs/CONTEXT-INDEX.md`
+- `docs/CURRENT-STATE.md`
+
 **Automation:** ✅ Hook `preTaskExecution` — auto-load context + maintain index
 
 ### Layer 11 — AI Review & Validation
 **Tujuan:** AI sebagai reviewer — cek architecture, security, performance, accessibility.  
-**Output:** Review feedback, compliance report  
+**Output:** Review feedback (inline), compliance report  
 **Automation:** ✅ Post-task validation — architecture + security + design compliance
 
 ### Layer 12 — Automated Quality Gates
 **Tujuan:** GitLab CI/CD pipeline yang block merge jika quality tidak terpenuhi.  
-**Output:** Pipeline results, coverage reports  
+**Output (SEMUA WAJIB):**
+- `.gitlab-ci.yml`
+- `.eslintrc.json` / `eslint.config.mjs`
+- `tsconfig.json`
+- `.prettierrc`
+- `vitest.config.ts`
+- `commitlint.config.js`
+
 **Automation:** ✅ Full CI/CD — Lint → Typecheck → Test → Coverage → Security → Build → Deploy  
 **Gate:** Coverage < 80% = BLOCK merge
 
 ### Layer 13 — Observability & Feedback
 **Tujuan:** Mengukur system health, AI performance, engineering quality.  
-**Output:** Logs, metrics, traces, alerts, dashboards  
+**Output:** Logging + metrics di source code (use case, repository, handler)  
 **Automation:** ✅ Hook `postToolUse` — remind observability saat fitur baru  
 **Phased:** Day 1 (logger + Sentry) → Sprint 1 (metrics) → Sprint 2+ (tracing + alerts)
 
 ### Layer 14 — Continuous Learning
 **Tujuan:** Belajar dari production — bugs, performance, review patterns, AI effectiveness.  
-**Output:** `docs/learnings/*.md`, `docs/retrospectives/*.md`, `docs/adr/*.md`  
-**Automation:** ✅ 3 hooks — Bug Learning Capture, Sprint Retro Generator, ADR Reminder
+**Output (SEMUA WAJIB — auto-generated):**
+- `docs/learnings/BUG-[N]-[title].md` (per bug fix)
+- `docs/retrospectives/sprint-[N].md` (per sprint)
+- `docs/adr/ADR-[N]-[title].md` (per keputusan arsitektur)
+- `docs/tech-debt/TD-[N]-[title].md` (per debt detected)
+- `docs/quality/metrics-log.jsonl` (auto-collected per task)
+- `docs/quality/sprint-[N]-scorecard.md` (per sprint)
+
+**Automation:** ✅ Hooks — Bug Learning Capture, Sprint Retro Generator, Metrics Collector, Compliance Validator
 
 ---
 
