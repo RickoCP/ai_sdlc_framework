@@ -111,8 +111,9 @@ Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agen
     → Cek: apakah ada .kiro/ folder?
     → Cek: apakah ada docs/ folder?
     → Cek: apakah ada src/ folder?
-    → Jika YA (minimal 1 ada) → ini project existing, jalankan detect 2-4
+    → Jika YA (minimal 1 ada) → ini project existing, jalankan detect 2-5
     → Jika TIDAK → ini project baru, lanjut ke "Tanyakan Project"
+      **TAPI setelah user jawab pertanyaan dan project folder dibuat → WAJIB kembali jalankan detect 2-5**
     ↓
 [AUTO-DETECT 2: Apakah .kiro/hooks/ sudah ada dan lengkap?]
     → Cek: apakah folder .kiro/hooks/ ada?
@@ -123,7 +124,7 @@ Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agen
     ↓
 [AUTO-DETECT 3: Apakah .kiro/steering/ sudah ada dan lengkap?]
     → Cek: apakah folder .kiro/steering/ ada?
-    → Jika TIDAK ADA → GENERATE 3 steering files (architecture-standards, test-writing-patterns, coding-conventions) — generate compact version, BUKAN copy dari power
+    → Jika TIDAK ADA → GENERATE 3 steering files (architecture-standards, test-writing-patterns, coding-conventions) — generate FULL content
     → Jika ADA → cek apakah lengkap (3 files minimum)?
     → Jika kurang → generate yang missing
     ↓
@@ -138,6 +139,28 @@ Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agen
     ↓
 [Lanjut ke workflow normal]
 ```
+
+**⚠️ CRITICAL — Untuk Project BARU:**
+
+Auto-detect step 2-5 WAJIB dijalankan **SEGERA SETELAH folder project dibuat** (setelah `git init` atau setelah user jawab pertanyaan). JANGAN tunggu sampai Layer 8 selesai.
+
+**Urutan untuk project baru:**
+```
+1. User jawab 8 pertanyaan
+2. AI buat folder project (git init, mkdir .kiro, docs, src)
+3. ⚠️ LANGSUNG jalankan auto-detect 2-5:
+   → Generate .kiro/hooks/ (9 files)
+   → Generate .kiro/steering/ (3 files)
+   → Generate docs/CURRENT-STATE.md
+   → Generate .kiro/settings/mcp.json
+4. Baru lanjut ke Layer 0
+```
+
+**JANGAN:**
+- ❌ Tunggu sampai Layer 8 untuk generate hooks
+- ❌ Tunggu sampai sprint untuk generate MCP config
+- ❌ Skip generate karena "nanti saja"
+- ❌ Hanya generate untuk project existing
 
 **Hook Files yang WAJIB Ada (9 files):**
 
@@ -1552,54 +1575,3 @@ AI Agent WAJIB melakukan push otomatis pada kondisi berikut:
 - Coverage check di-skip HANYA untuk task docs-only atau config-only
 
 Commit message WAJIB mengikuti Conventional Commits. Lihat steering file `git-workflow-automation.md` untuk format lengkap.
-
----
-
-## Changelog
-
-### v1.4.0 (2026-05-10)
-
-**New Features:**
-- ✅ **Project Memory** (`project-memory.md`, always-included) — Context Index + Current State untuk resume antar session
-- ✅ **Fast Track Mode** (`fast-track-mode.md`) — Escape hatch formal untuk deadline pressure dengan debt tracking
-- ✅ **AI Quality Scorecard** — Mengukur AI output quality per sprint (code quality, effectiveness, governance, debt)
-- ✅ **Dependency & Impact Analysis** — Auto-detect impacted files saat core/ berubah
-- ✅ **Framework Health Check** — Scan project compliance terhadap framework standards
-- ✅ **Layer 2 Automation** — Requirement validation gate (auto-validate saat file dibuat)
-- ✅ **Layer 3 Automation** — Spec-first enforcement (block coding tanpa spec)
-- ✅ **Layer 4 Automation** — Design compliance check (validate code vs design)
-- ✅ **Layer 10 Automation** — Context loading + Context Index auto-maintained
-- ✅ **Layer 13 Automation** — Observability checklist + hook + phased approach
-- ✅ **Layer 14 Automation** — Bug learning capture + sprint retro + ADR reminder
-
-**Improvements:**
-- 🔧 13/15 layers sekarang terintegrasi ke workflow (9 fully + 4 partial, dari 5/15)
-- 🔧 Total 25 steering files (dari 21)
-- 🔧 8 Kiro hooks baru didefinisikan
-
-### v1.3.0 (2026-05-10)
-
-**New Features:**
-- ✅ **Solo Mode** — Simplified workflow untuk solo developer (tanpa develop branch, tanpa MR approval, tanpa milestone formal)
-- ✅ **Test Writing Patterns** (`test-writing-patterns.md`) — Pattern testing per-layer dengan contoh konkret TypeScript
-- ✅ **Tech Stack Profiles** (`tech-stack-profiles.md`) — Adaptasi framework ke Go dan Python (FastAPI)
-- ✅ **Error Recovery Flows** — 6 recovery scenario untuk stuck-state (MCP crash, push gagal, partial sprint)
-
-**Improvements:**
-- 🔧 Fix Git MCP working directory — `repo_path` (absolute path) wajib di setiap call
-- 🔧 Fix CI `coverage-check` — gunakan `needs` + artifacts, hapus dependency `bc`, validasi 4 metrik
-- 🔧 Add Windows long path fix — `esbuild-wasm` override di package.json
-- 🔧 Add mandatory local validation (lint + typecheck + test) sebelum push
-- 🔧 Architecture-standards.md sebagai always-included steering file
-- 🔧 Post-task hook v1.2.0 — full validation pipeline (lint → typecheck → test → push)
-
-**Breaking Changes:**
-- ❌ `architecture-and-di.md` dihapus (merged ke `architecture-standards.md`)
-- ❌ `quickstart.md` dihapus (merged ke `project-structure.md`)
-
-### v1.2.0 (2026-05-09)
-
-- Initial public release
-- 15 layer framework
-- GitLab + Git MCP integration
-- 21 steering files
