@@ -148,7 +148,7 @@ AI-Native:    Human + AI Agents
 └─────────────────────────────────────────────────────┘
 ```
 
-**Key:** 11 dari 15 layer terintegrasi ke workflow otomatis (73%)
+**Key:** 13 dari 15 layer terintegrasi ke workflow (9 fully automated + 4 partial). Hanya Layer 0 dan 1 yang sepenuhnya manual.
 
 **Visual:** Tower/pyramid diagram dengan 15 layer berwarna berbeda
 
@@ -933,9 +933,9 @@ User jawab 8 pertanyaan → AI jalankan Layer 0-8 tanpa stop
 │                                                 │
 ├─────────────────────────────────────────────────┤
 │                                                 │
-│   15        7         3          11/15          │
+│   15        7         3          13/15          │
 │  Layers     AI        Tech       Automated      │
-│  Framework  Agents    Stacks     Layers (73%)   │
+│  Framework  Agents    Stacks     Layers (87%)   │
 │                                                 │
 ├─────────────────────────────────────────────────┤
 │                                                 │
@@ -951,7 +951,7 @@ User jawab 8 pertanyaan → AI jalankan Layer 0-8 tanpa stop
 - 9 hooks = automated workflow tanpa manual trigger
 - 70+ mandatory documents = full traceability
 - 4 modes = flexibility untuk berbagai konteks
-- 11/15 automated layers = minimal manual intervention
+- 13/15 automated layers (9 fully + 4 partial) = minimal manual intervention
 - 7 AI agents = specialized roles, not generic
 
 **Visual:** Big number cards / infographic style

@@ -1544,7 +1544,7 @@ Commit message WAJIB mengikuti Conventional Commits. Lihat steering file `git-wo
 - ✅ **Layer 14 Automation** — Bug learning capture + sprint retro + ADR reminder
 
 **Improvements:**
-- 🔧 11/15 layers sekarang terintegrasi ke workflow (dari 5/15)
+- 🔧 13/15 layers sekarang terintegrasi ke workflow (9 fully + 4 partial, dari 5/15)
 - 🔧 Total 25 steering files (dari 21)
 - 🔧 8 Kiro hooks baru didefinisikan
 

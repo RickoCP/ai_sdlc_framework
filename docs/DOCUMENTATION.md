@@ -112,7 +112,7 @@ Layer 5  [PARTIAL]    AI Governance — enforced via CI/CD
 Layer 6  [PARTIAL]    AI Skills — auto-loaded via fileMatch
 Layer 7  [PARTIAL]    Team Extension — auto-loaded via fileMatch
 Layer 8  [AUTOMATED]  Issue-Driven Dev — full GitLab integration
-Layer 9  [MANUAL]     Agent Orchestration — conceptual
+Layer 9  [PARTIAL]    Agent Orchestration — hook chains + role-based prompting
 Layer 10 [AUTOMATED]  Continuous Context — auto-load + Context Index
 Layer 11 [AUTOMATED]  AI Review — post-task validation
 Layer 12 [AUTOMATED]  Quality Gates — CI/CD pipeline blocking
@@ -120,7 +120,7 @@ Layer 13 [AUTOMATED]  Observability — checklist + hook
 Layer 14 [AUTOMATED]  Continuous Learning — bug capture + retro + ADR
 ```
 
-**11 dari 15 layer terintegrasi ke workflow otomatis.**
+**13 dari 15 layer terintegrasi ke workflow (9 fully automated + 4 partial). Hanya 2 layer yang sepenuhnya manual.**
 
 ---
 
@@ -593,7 +593,7 @@ Prinsip framework (dependency rule, spec-first, quality gates) berlaku di semua 
 |--------|-------|
 | Version | 1.5.0 |
 | Total Steering Files | 27 |
-| Automated Layers | 11/15 (73%) |
+| Automated Layers | 13/15 (9 fully + 4 partial) |
 | Always-Included Files | 4 |
 | Kiro Hooks Defined | 9 |
 | Tech Stacks Supported | 3 (Next.js, Go, Python) |
