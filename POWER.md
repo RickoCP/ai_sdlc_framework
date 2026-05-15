@@ -980,7 +980,7 @@ Saat user ingin menambahkan issue baru, sprint baru, atau fitur baru — AI Agen
     ↓
 3. Buat GitLab Issue:
    → Title, description, acceptance criteria
-   → Labels: type::feat/fix/chore, priority::*, domain::*
+   → Labels: type::feat/fix/chore, priority::*, domain::*, **sprint::[N]**
    → Assign ke milestone aktif
     ↓
 4. Buat branch dari develop (atau main di Solo Mode):
@@ -1038,7 +1038,8 @@ Saat user ingin menambahkan issue baru, sprint baru, atau fitur baru — AI Agen
 **Rules:**
 1. **SELALU buat GitLab issue** — tidak ada task tanpa issue (traceability)
 2. **SELALU assign ke milestone** — tidak ada issue orphan
-3. **SELALU ikuti per-task workflow** — tidak ada shortcut
+3. **SELALU tambahkan label `sprint::[N]`** — setiap issue harus jelas masuk sprint berapa
+4. **SELALU ikuti per-task workflow** — tidak ada shortcut
 4. **SELALU update CURRENT-STATE.md** — state harus reflect reality
 5. **Sprint baru HARUS close sprint lama dulu** — tidak boleh overlap tanpa carry-over
 6. **Hotfix tetap ikuti workflow** — hanya branch strategy yang berbeda (dari main, bukan develop)
