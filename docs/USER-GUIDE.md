@@ -91,7 +91,7 @@ Selamat datang di Enterprise AI-Native SDLC Framework!
 4. Apakah ini project baru atau project existing?
 5. Apakah project ini punya UI? Design System: Signal (built-in) / Custom / Default?
 6. Apakah GitLab credentials sudah di-setup?
-7. Mode development yang diinginkan? (Enterprise / Solo / Zero Touch)
+7. Mode development yang diinginkan? (Enterprise [default] / Solo / Zero Touch)
 8. Layer mana yang ingin dikerjakan terlebih dahulu?
 ```
 
@@ -128,7 +128,8 @@ Untuk **project existing**, AI Agent akan:
 2. ✅ Generate hooks yang missing (self-heal)
 3. ✅ Generate steering yang missing
 4. ✅ Buat CURRENT-STATE.md jika belum ada
-5. ✅ Resume dari state terakhir
+5. ✅ Generate/update MCP config (autoApprove) jika belum ada
+6. ✅ Resume dari state terakhir
 
 ---
 
@@ -220,7 +221,7 @@ Anda tidak perlu manual pindahkan issue di board. Framework otomatis:
 | Anda Bilang | AI Agent Lakukan |
 |-------------|-----------------|
 | "Plan sprint [N]" | BA breakdown → Architect tasks → create GitLab issues |
-| "Sprint selesai" | Lint+test → push → code review offer → MR ke develop → tunggu user merge → retro + scorecard |
+| "Sprint selesai" | Lint+test → push → code review offer → MR ke develop → tunggu user merge → retro + scorecard + health check + wiki update |
 | "Buat milestone sprint [N]" | Create GitLab milestone + issues |
 
 ### Mode Switching
