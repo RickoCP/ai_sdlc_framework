@@ -121,33 +121,63 @@ docs/design/technical/
 
 ```
 src/
-├── domain/           # Enterprise Business Rules
-│   ├── entities/     # Business entities
-│   ├── value-objects/# Value objects
-│   └── errors/      # Domain errors
-├── application/      # Application Business Rules
-│   ├── use-cases/   # Use case implementations
-│   ├── ports/       # Interface definitions
-│   └── dto/         # Data transfer objects
-├── infrastructure/   # Frameworks & Drivers
-│   ├── database/    # Database implementations
-│   ├── http/        # HTTP clients
-│   ├── queue/       # Message queue
-│   └── cache/       # Cache implementations
-└── presentation/     # Interface Adapters
-    ├── controllers/ # Request handlers
-    ├── middleware/  # Middleware
-    └── validators/  # Input validation
+├── core/                               # LAYER 1: Business Logic (paling dalam)
+│   ├── domains/
+│   │   └── [domain]/
+│   │       ├── entities/               # Domain entities / value objects
+│   │       ├── repositories/           # Repository interface ONLY
+│   │       ├── usecases/               # Business logic utama
+│   │       ├── errors/                 # Domain error
+│   │       └── mappers/                # Mapping logic
+│   │
+│   ├── protocols/                      # Interface global (http, storage, dll)
+│   └── utils/                          # Pure utilities (no external deps)
+│
+├── infrastructure/                     # LAYER 2: Implementation
+│   ├── di/
+│   │   ├── container.ts               # Root container (Awilix)
+│   │   └── registry/                   # Registration per category
+│   ├── networking/                     # HTTP adapter (axios/fetch)
+│   ├── repositories/                   # Repository implementation
+│   │   └── [domain]/
+│   ├── storage/                        # localStorage/cookie adapter
+│   ├── logging/                        # Logger + metrics
+│   └── stateManagement/                # Zustand (shared app state)
+│
+├── presentation/                       # LAYER 3: UI
+│   ├── features/
+│   │   └── [featureName]/
+│   │       ├── screens/                # Page-level UI
+│   │       ├── components/             # Feature components
+│   │       ├── viewModel/              # UI state orchestration
+│   │       └── validation/             # Form validation
+│   │
+│   ├── components/                     # Shared components (Atomic Design)
+│   │   ├── atoms/
+│   │   ├── molecules/
+│   │   └── organisms/
+│   │
+│   ├── hooks/
+│   ├── providers/
+│   └── locales/                        # i18n translations
+│
+└── app/                                # Next.js App Router (composition layer)
+    ├── layout.tsx
+    ├── page.tsx
+    └── [route]/
+        └── page.tsx
 ```
 
 ## Dependency Rule
 - Inner layers TIDAK BOLEH depend ke outer layers
-- Domain layer TIDAK BOLEH import dari infrastructure
-- Use case depend ke ports (interfaces), bukan implementations
+- Core layer TIDAK BOLEH import dari infrastructure/presentation
+- Use case depend ke repository interface, bukan implementation
+- Semua dependency di-resolve melalui DI container (Awilix)
 
 ## Dependency Injection
-- Framework: [InversifyJS / tsyringe / manual]
-- Registration: Centralized di composition root
+- Framework: **Awilix** (asFunction, singleton/transient)
+- Registration: Centralized di `src/infrastructure/di/`
+- Pattern: Factory function dengan object injection
 ```
 
 ### Template: error-handling.md
