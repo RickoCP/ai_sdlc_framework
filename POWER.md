@@ -606,6 +606,32 @@ Layer 0-8 **WAJIB dijalankan sequential**. AI Agent **DILARANG** menawarkan skip
 Layer 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → [Sprint dimulai]
 ```
 
+**⚠️ MODE PERSISTENCE (WAJIB CEK SETIAP LAYER):**
+
+AI Agent **WAJIB** mengecek mode yang dipilih user **SEBELUM mengerjakan setiap layer**. Mode yang dipilih di pertanyaan #7 saat inisiasi TIDAK BOLEH berubah tanpa user eksplisit minta.
+
+```
+[Sebelum mulai Layer N]
+    ↓
+[CEK: Mode apa yang dipilih user?]
+    → Baca dari docs/CURRENT-STATE.md field "Mode"
+    → Jika CURRENT-STATE belum ada → default Enterprise
+    → GUNAKAN mode tersebut untuk layer ini
+    ↓
+[DILARANG:]
+    ❌ Mengubah mode tanpa user minta
+    ❌ Assume Solo karena "project kecil" atau "1 developer"
+    ❌ Switch ke mode lain di tengah layer execution
+    ❌ Mengabaikan mode yang sudah dipilih
+```
+
+**AI Agent WAJIB simpan mode di `docs/CURRENT-STATE.md`:**
+```markdown
+## Mode
+- **Mode:** Enterprise (dipilih saat inisiasi)
+- **Diubah:** Tidak (atau: diubah ke Solo pada [tanggal] atas permintaan user)
+```
+
 **Rules:**
 1. **DILARANG skip layer manapun** dari 0-8 — setiap layer menghasilkan artifact yang dibutuhkan layer berikutnya
 2. **DILARANG menawarkan "mau skip ke Layer X?"** — ini bukan opsional
