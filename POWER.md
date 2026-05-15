@@ -976,6 +976,9 @@ Setiap sprint yang dijalankan **WAJIB** mengikuti workflow lengkap framework ini
 **DILARANG:**
 - ❌ Skip Architect Gate (langsung coding tanpa cek spec)
 - ❌ Skip QA (push tanpa lint/typecheck/test)
+- ❌ **Push atau Create MR jika test coverage < 80%** — FIX DULU, tambah test
+- ❌ **Push atau Create MR jika ada test yang fail** — FIX DULU
+- ❌ **Push atau Create MR jika lint/typecheck error** — FIX DULU
 - ❌ Skip issue update (push tanpa update GitLab)
 - ❌ Skip wiki update setelah sprint
 - ❌ Skip metrics collection
