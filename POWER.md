@@ -8,6 +8,23 @@ author: "ricko_c_putra@telkomsel.co.id"
 
 # Enterprise AI-Native SDLC Framework
 
+## ⚠️ CRITICAL RULES — BACA INI DULU (AI Agent WAJIB Patuh)
+
+**10 rules terpenting yang TIDAK BOLEH dilanggar:**
+
+1. **DEFAULT MODE: Enterprise.** DILARANG assume Solo. Cek mode dari CURRENT-STATE.md sebelum SETIAP layer.
+2. **SEBELUM PUSH/MR:** Jalankan `npm run lint` + `npm run typecheck` + `npm run test:unit -- --coverage`. Semua HARUS pass, coverage >= 80%. **Gagal = BLOCK. FIX DULU.**
+3. **MR TARGET:** `feature/*` → `develop` (BUKAN main). Solo Mode saja: `feature/*` → `main`.
+4. **MERGE:** HANYA oleh user di GitLab. AI Agent **DILARANG** merge sendiri.
+5. **SETIAP TASK SELESAI:** Update GitLab issue (label `status::review` + comment) + collect metrics. Setelah MR merged: **close issue** (`state_event: "close"`).
+6. **SPRINT END:** Tawarkan retro + scorecard + health check + wiki update. WAJIB update milestone + wiki Changelog.
+7. **SETELAH PROJECT FOLDER DIBUAT:** LANGSUNG generate `.kiro/hooks/` (9 files) + `.kiro/steering/` (3 files) + `.kiro/settings/mcp.json` + `docs/CURRENT-STATE.md`. **JANGAN tunggu Layer 8.**
+8. **LAYER 0-8:** Sequential, DILARANG skip. Cek document completeness setiap layer selesai. Semua docs WAJIB (tidak ada opsional).
+9. **SPRINT PLANNING:** WAJIB buat milestone (`create_milestone`) + wiki pages (`create_or_update_wiki_page`). Verify response. JANGAN lanjut tanpa milestone + wiki.
+10. **CODE REVIEW:** Tawarkan AI review SEBELUM buat MR. Jika user setuju → review architecture + security.
+
+---
+
 ## Overview
 
 Framework ini merupakan gabungan dari:
@@ -70,33 +87,9 @@ Framework ini terdiri dari 15 layer yang saling terhubung:
 
 ## Available Steering Files
 
-Setiap layer memiliki steering file tersendiri untuk panduan detail:
+27 steering files tersedia. Lihat `docs/DOCUMENTATION.md` section 5 untuk list lengkap.
 
-- **layer-0-product-vision.md** - Menentukan arah produk, business value, dan roadmap
-- **layer-1-requirement-intake.md** - AI sebagai Business Analyst Agent
-- **layer-2-requirement-validation.md** - Validasi requirement sebelum eksekusi
-- **layer-3-spec-driven-development.md** - Specification-first approach
-- **layer-4-design-system.md** - System, Technical, UI/UX, dan Security Design
-- **layer-5-ai-governance.md** - Policy, standards, dan compliance
-- **layer-6-ai-skills.md** - Reusable engineering skills
-- **layer-7-team-extension.md** - Team-specific standards dan extensions
-- **layer-8-issue-driven-dev.md** - Issue-driven development dengan GitLab
-- **layer-9-agent-orchestration.md** - Multi-agent workflow
-- **layer-10-continuous-context.md** - Context accumulation strategy
-- **layer-11-ai-review.md** - AI review dan validation
-- **layer-12-quality-gates.md** - GitLab CI/CD pipeline dan quality gates
-- **layer-13-observability.md** - Monitoring, metrics, dan feedback loop
-- **layer-14-continuous-learning.md** - Continuous improvement dari production
-- **gitlab-cicd-setup.md** - Setup lengkap GitLab CI/CD untuk framework ini
-- **project-structure.md** - Struktur folder project, naming conventions, dan quickstart guide
-- **git-workflow-automation.md** - Git init, remote setup, commit convention, auto-push, branch strategy, dan MR automation
-- **requirement-traceability.md** - End-to-end flow dari PRD User Story hingga Merge dengan traceability matrix
-- **architecture-standards.md** - **(ALWAYS INCLUDED)** Clean Architecture + DDD + Dependency Injection (Awilix) — acuan arsitektur WAJIB untuk semua layer
-- **test-writing-patterns.md** - **(ALWAYS INCLUDED)** Pattern testing per-layer dengan contoh konkret (Use Case, Repository, ViewModel, Mapper, Middleware)
-- **project-memory.md** - **(ALWAYS INCLUDED)** Context Index + Current State — memastikan AI selalu tahu state project antar session
-- **presentation-material.md** - Generate materi presentasi project (UI/UX, Design, Construction, Quality, Deployment, Security)
-- **tech-stack-profiles.md** - Adaptasi framework ke multi-stack: Next.js, Go, Python (FastAPI)
-- **fast-track-mode.md** - Fast Track Mode, AI Quality Scorecard, Dependency Analysis, Framework Health Check
+**Always-included (4 files):** `architecture-standards.md`, `test-writing-patterns.md`, `project-memory.md`, `hooks-registry.md`
 
 ## Agent Workflow Rules
 
@@ -1245,117 +1238,15 @@ Sedangkan AI + SDLC + Governance + Specifications + Observability akan menghasil
 
 ## Integrated Standards
 
-Power ini sudah mengintegrasikan konten dari 19 engineering steering files:
+27 engineering standards terintegrasi. Lihat `docs/DOCUMENTATION.md` section 5 untuk mapping lengkap.
 
-| # | Steering | Terintegrasi di |
-|---|----------|-----------------|
-| 01 | Project Architecture | layer-4-design-system.md |
-| 02 | Code Pattern | layer-6-ai-skills.md |
-| 03 | Configuration Convention | layer-5-ai-governance.md |
-| 04 | Testing Pattern | layer-12-quality-gates.md |
-| 05 | Security Guideline | layer-4-design-system.md |
-| 06 | DI Pattern | layer-6-ai-skills.md |
-| 07 | Review Checklist | layer-11-ai-review.md |
-| 08 | Observability | layer-13-observability.md |
-| 09 | Performance | layer-12-quality-gates.md |
-| 10 | Release & CI/CD | layer-12-quality-gates.md, gitlab-cicd-setup.md |
-| 11 | BFF Pattern | layer-6-ai-skills.md |
-| 12 | Error Handling | layer-4-design-system.md |
-| 13 | API Contract | layer-3-spec-driven-development.md |
-| 14 | Specs Workflow | layer-3-spec-driven-development.md |
-| 15 | ADR | layer-14-continuous-learning.md |
-| 16 | Technical Debt | layer-14-continuous-learning.md |
-| 17 | Incident Management | layer-13-observability.md |
-| 18 | Architecture Evolution | layer-14-continuous-learning.md |
-| 19 | CX API Playbook | layer-6-ai-skills.md |
-| 20 | Commit Convention | git-workflow-automation.md |
-| 21 | Git Workflow Automation | git-workflow-automation.md |
-| 22 | Clean Architecture + DI Pattern | architecture-standards.md |
-| 23 | Test Writing Patterns | test-writing-patterns.md |
-| 24 | Tech Stack Profiles | tech-stack-profiles.md |
-| 25 | Project Memory & Resume | project-memory.md |
-| 26 | Fast Track Mode & Quality Scorecard | fast-track-mode.md |
+## Getting Started & MCP Setup
 
-## Getting Started
-
-Baca steering file `project-structure.md` untuk panduan cepat memulai framework ini di project Anda.
-
----
-
-## MCP Servers
-
-Power ini menggunakan 2 MCP server:
-
-### 1. GitLab MCP (`@zereight/mcp-gitlab`)
-
-Menyediakan tools untuk:
-- **create_project** - Membuat repository GitLab baru
-- **create_issue** - Membuat issues (Epic, Feature, Task)
-- **create_merge_request** - Membuat Merge Request
-- **create_branch** - Membuat branch baru
-- **push_files** - Push files ke repository
-- **create_or_update_file** - Buat/update file di repository
-- **get_file_contents** - Baca file dari repository
-- **search_repositories** - Cari project
-- Dan banyak lagi (pipelines, wiki, releases, milestones, labels)
-
-### 2. Git MCP (`@cyanheads/git-mcp-server`)
-
-Menyediakan tools untuk:
-- **git_init** - Inisialisasi repository Git baru
-- **git_clone** - Clone repository
-- **git_commit** - Commit changes
-- **git_push** - Push ke remote
-- **git_pull** - Pull dari remote
-- **git_branch** - Manage branches
-- **git_status** - Cek status
-- **git_log** - Lihat history
-- **git_diff** - Lihat perubahan
-
-## MCP Config Placeholders
-
-**PENTING:** Power ini membaca credentials dari **system environment variable** menggunakan syntax `${VARIABLE_NAME}`.
-
-### Setup Cepat
-
-1. **Set environment variables di OS:**
-
-   - **Windows (permanent):**
-     ```powershell
-     [Environment]::SetEnvironmentVariable("GITLAB_PERSONAL_ACCESS_TOKEN", "glpat-xxx", "User")
-     [Environment]::SetEnvironmentVariable("GITLAB_API_URL", "https://gitlab.com/api/v4", "User")
-     ```
-   - **Linux/Mac:** Tambahkan di `~/.bashrc` atau `~/.zshrc`:
-     ```bash
-     export GITLAB_PERSONAL_ACCESS_TOKEN="glpat-xxxxxxxxxxxx"
-     export GITLAB_API_URL="https://gitlab.com/api/v4"
-     ```
-
-2. **Approve env vars di Kiro:**
-   - Buka Kiro Settings (Ctrl+,)
-   - Cari **"Mcp Approved Env Vars"**
-   - Tambahkan: `GITLAB_PERSONAL_ACCESS_TOKEN`, `GITLAB_API_URL`
-   - Atau approve langsung dari popup security warning saat pertama kali
-
-3. **Restart Kiro** agar environment variables terbaca oleh MCP servers.
-
-4. Opsional: Buat `.env` di root project sebagai dokumentasi (JANGAN commit!)
-
-### Variable yang Dibutuhkan
-
-- **`GITLAB_PERSONAL_ACCESS_TOKEN`**: GitLab Personal Access Token
-  - Scope: `api`, `read_repository`, `write_repository`
-  - Buat di: GitLab → User Settings → Access Tokens
-
-- **`GITLAB_API_URL`**: URL API GitLab instance
-  - gitlab.com: `https://gitlab.com/api/v4`
-  - Self-hosted: `https://your-gitlab-domain.com/api/v4`
-
-**Keuntungan pendekatan ini:**
-- Tidak perlu edit file power
-- Setiap anggota tim pakai token masing-masing
-- Token tidak tersimpan di repository
-- Power bisa di-share tanpa risiko credential leak
+- Lihat `docs/USER-GUIDE.md` untuk panduan instalasi dan setup lengkap
+- Lihat `docs/DOCUMENTATION.md` section 5 untuk integrated standards (27 items)
+- MCP Servers: GitLab (`@zereight/mcp-gitlab`) + Git (`@cyanheads/git-mcp-server`)
+- Credentials: set via system environment variables (`${GITLAB_PERSONAL_ACCESS_TOKEN}`, `${GITLAB_API_URL}`)
+- Setup: Windows `[Environment]::SetEnvironmentVariable(...)` / Linux `export ...` → restart Kiro
 
 ## Automated Project Setup
 
