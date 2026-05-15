@@ -322,6 +322,8 @@ Sebelum kita mulai, saya perlu memahami project yang akan dikerjakan:
    → Setelah set, restart Kiro.
    
    Jika SUDAH: lanjut.
+   
+   **→ LANGSUNG generate `.kiro/settings/mcp.json` dengan autoApprove list** (lihat Step 4.6 di bawah). JANGAN tunggu sampai akhir setup.
 
 7. Mode development yang diinginkan?
    a. **Enterprise** (default) — konfirmasi setiap layer, full ceremony, kontrol penuh
@@ -569,7 +571,7 @@ AI Agent **WAJIB** mengecek kelengkapan dokumen setelah menyelesaikan setiap lay
 | **5 — Governance** | `docs/governance/ai-policy.md` + `approved-tools.md` + `security-policy.md` + `code-review-policy.md` | ✅ semua harus ada |
 | **6 — Skills** | `.kiro/skills/create-api.md` + `create-usecase.md` + `create-repository.md` + `create-component.md` + `create-test.md` + `create-migration.md` | ✅ semua harus ada (6 files) |
 | **7 — Team Extension** | `.kiro/steering/team/[domain]-team.md` (minimal 1 per domain project) | ✅ harus ada |
-| **8 — Issue-Driven** | GitLab: issues + milestone + labels + board + issue templates (Feature, Task, Bug) + MR templates + **Wiki pages (Home, Changelog, API-Documentation, Architecture-Decisions)** | ✅ semua harus ada |
+| **8 — Issue-Driven** | GitLab: issues + milestone + labels + board + issue templates (Feature, Task, Bug) + MR templates + **Wiki pages (Home, Changelog, API-Documentation, Architecture-Decisions)** + **`.kiro/settings/mcp.json` dengan autoApprove** | ✅ semua harus ada |
 | **10 — Context** | `docs/CONTEXT-INDEX.md` + `docs/CURRENT-STATE.md` | ✅ semua harus ada |
 | **12 — Quality Gates** | `.gitlab-ci.yml` + `.eslintrc.json`/`eslint.config.mjs` + `tsconfig.json` + `.prettierrc` + `vitest.config.ts` + `commitlint.config.js` | ✅ semua harus ada |
 | **14 — Learning** | `docs/learnings/` folder + `docs/retrospectives/` folder + `docs/adr/` folder + `docs/tech-debt/` folder + `docs/quality/metrics-log.jsonl` | ✅ semua harus ada |
