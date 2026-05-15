@@ -939,15 +939,25 @@ Setiap sprint yang dijalankan **WAJIB** mengikuti workflow lengkap framework ini
 ```
 [SPRINT PLANNING]
 1. Buat/update milestone di GitLab (title, start_date, due_date, description)
+   Tool: create_milestone { project_id, title: "Sprint [N]", start_date, due_date }
+   **VERIFIKASI: milestone berhasil dibuat (cek response)**
 2. Breakdown fitur → issues (Epic → Feature → Task)
-3. Assign issues ke milestone
+3. Assign issues ke milestone + label sprint::[N]
 4. Buat labels jika ada domain baru
 5. **Buat/update GitLab Wiki pages (WAJIB):**
+   Tool: create_or_update_wiki_page { project_id, title, content }
    - "Home": project overview, tech stack, team, links (jika belum ada)
    - "Changelog": tambah section Sprint [N] (kosong, akan diisi saat sprint end)
    - "API-Documentation": (jika belum ada, buat page kosong)
    - "Architecture-Decisions": (jika belum ada, buat page kosong)
+   **VERIFIKASI: semua 4 wiki pages berhasil dibuat (cek response)**
 6. Buat branch dari develop (atau main di Solo Mode)
+
+**⚠️ JIKA MILESTONE ATAU WIKI GAGAL DIBUAT:**
+- Retry 2x
+- Jika masih gagal → cek: apakah MCP config ada? Token valid? API URL benar?
+- Informasikan user: "Milestone/Wiki gagal dibuat. Cek GitLab credentials."
+- JANGAN lanjut ke sprint execution tanpa milestone + wiki
 
 [PER TASK — WAJIB untuk setiap task]
 5. 🏗️ Architect Gate: load context + validate spec/design
