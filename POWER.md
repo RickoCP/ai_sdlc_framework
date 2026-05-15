@@ -571,7 +571,7 @@ AI Agent **WAJIB** mengecek kelengkapan dokumen setelah menyelesaikan setiap lay
 | **5 — Governance** | `docs/governance/ai-policy.md` + `approved-tools.md` + `security-policy.md` + `code-review-policy.md` | ✅ semua harus ada |
 | **6 — Skills** | `.kiro/skills/create-api.md` + `create-usecase.md` + `create-repository.md` + `create-component.md` + `create-test.md` + `create-migration.md` | ✅ semua harus ada (6 files) |
 | **7 — Team Extension** | `.kiro/steering/team/[domain]-team.md` (minimal 1 per domain project) | ✅ harus ada |
-| **8 — Issue-Driven** | GitLab: issues + milestone + labels + board + issue templates (Feature, Task, Bug) + MR templates + **Wiki pages (Home, Changelog, API-Documentation, Architecture-Decisions)** + **`.kiro/settings/mcp.json` dengan autoApprove** | ✅ semua harus ada |
+| **8 — Issue-Driven** | GitLab: issues + milestone + labels + board + issue templates (Feature, Task, Bug) + MR templates + **Wiki pages (Home, Changelog, API-Documentation, Architecture-Decisions)** + **`.kiro/settings/mcp.json` dengan autoApprove** + **`.kiro/hooks/` (9 files)** | ✅ semua harus ada |
 | **10 — Context** | `docs/CONTEXT-INDEX.md` + `docs/CURRENT-STATE.md` | ✅ semua harus ada |
 | **12 — Quality Gates** | `.gitlab-ci.yml` + `.eslintrc.json`/`eslint.config.mjs` + `tsconfig.json` + `.prettierrc` + `vitest.config.ts` + `commitlint.config.js` | ✅ semua harus ada |
 | **14 — Learning** | `docs/learnings/` folder + `docs/retrospectives/` folder + `docs/adr/` folder + `docs/tech-debt/` folder + `docs/quality/metrics-log.jsonl` | ✅ semua harus ada |
