@@ -3,8 +3,8 @@
 ## CI/CD Pipeline Flow
 
 ```
-Lint → Typecheck → Unit Test → Coverage → Build → Security Scan
-→ Performance Check → Preview Deploy → E2E Test → Merge
+Lint → Typecheck → Unit Test → Coverage → Security Scan → SonarQube
+→ Build → Preview Deploy → E2E Test → Merge
 ```
 
 ## Tujuan
@@ -277,6 +277,89 @@ license-scan:
   allow_failure: true
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+
+sonarqube-analysis:
+  stage: security
+  image: 
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - |
+      sonar-scanner \
+        -Dsonar.projectKey=${CI_PROJECT_PATH_SLUG} \
+        -Dsonar.projectName="${CI_PROJECT_NAME}" \
+        -Dsonar.sources=src/ \
+        -Dsonar.tests=tests/ \
+        -Dsonar.test.inclusions=**/*.test.ts,**/*.spec.ts \
+        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+        -Dsonar.coverage.exclusions=**/*.test.ts,**/*.spec.ts,**/index.ts \
+        -Dsonar.qualitygate.wait=true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+  allow_failure: false
+```
+
+**⚠️ SonarQube Setup (WAJIB untuk Enterprise Mode):**
+
+**Prerequisites:**
+1. SonarQube server tersedia (SonarCloud atau self-hosted)
+2. Set GitLab CI/CD Variables:
+   - `SONAR_HOST_URL`: URL SonarQube server (contoh: `https://sonarcloud.io`)
+   - `SONAR_TOKEN`: Token autentikasi SonarQube
+
+**File `sonar-project.properties` (di root project):**
+```properties
+sonar.projectKey=${CI_PROJECT_PATH_SLUG}
+sonar.organization=your-org
+
+# Source
+sonar.sources=src/
+sonar.tests=tests/
+sonar.test.inclusions=**/*.test.ts,**/*.spec.ts
+
+# Coverage
+sonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+# Exclusions
+sonar.coverage.exclusions=**/*.test.ts,**/*.spec.ts,**/index.ts,**/*.d.ts
+sonar.exclusions=node_modules/**,coverage/**,.next/**,dist/**
+
+# Quality Gate
+sonar.qualitygate.wait=true
+```
+
+**Quality Gate Thresholds (SonarQube):**
+
+| Metric | Threshold | Action |
+|--------|-----------|--------|
+| Coverage | >= 80% | Block merge |
+| Duplicated Lines | < 3% | Block merge |
+| Maintainability Rating | A | Block merge |
+| Reliability Rating | A | Block merge |
+| Security Rating | A | Block merge |
+| Security Hotspots Reviewed | 100% | Block merge |
+| Bugs | 0 (new code) | Block merge |
+| Vulnerabilities | 0 (new code) | Block merge |
+| Code Smells | < 10 (new code) | Warning |
+
+**Vitest Coverage untuk SonarQube:**
+
+Pastikan `vitest.config.ts` generate `lcov` report:
+```typescript
+coverage: {
+  provider: 'v8',
+  reporter: ['text', 'json', 'json-summary', 'html', 'cobertura', 'lcov'],
+  // 'lcov' → generates coverage/lcov.info (WAJIB untuk SonarQube)
+}
 ```
 
 ### Build Stage (`.gitlab/ci/build.yml`)
@@ -424,6 +507,7 @@ npx vercel link
 | Security (medium) | Report only | Warning |
 | Build | Success | Block merge |
 | E2E | All pass | Block merge |
+| SonarQube Quality Gate | Pass | Block merge |
 | Performance | < 3s response | Warning |
 
 ## GitLab MR Settings
