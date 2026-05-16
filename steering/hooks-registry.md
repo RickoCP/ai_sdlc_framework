@@ -16,7 +16,7 @@ Dokumen ini mendefinisikan **semua hook files** yang WAJIB di-generate di `.kiro
 
 | File | Trigger | Fungsi | Version |
 |------|---------|--------|---------|
-| `architect-gate.json` | preTaskExecution | Validate spec + design + update issue status::in-progress | 1.1.0 |
+| `architect-gate.json` | preTaskExecution | WAJIB baca requirements + wireframe + spec + design SEBELUM eksekusi | 1.2.0 |
 | `code-quality-scan.json` | postToolUse (write) | Security + Observability (merged, smart-filtered) | 2.0.0 |
 | `qa-devops-post-task.json` | postTaskExecution | Lint + test + push + WAJIB update issue/board/milestone/wiki | 2.1.0 |
 | `bug-learning-capture.json` | postTaskExecution | Capture learning saat bug fix | 1.0.0 |
@@ -65,14 +65,14 @@ Dokumen ini mendefinisikan **semua hook files** yang WAJIB di-generate di `.kiro
 ```json
 {
   "name": "Architect Gate",
-  "version": "1.1.0",
-  "description": "Validate spec/design + update GitLab issue status sebelum mulai task",
+  "version": "1.2.0",
+  "description": "WAJIB baca requirements + wireframe + spec + design SEBELUM eksekusi task",
   "when": {
     "type": "preTaskExecution"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "ROLE: Architect Agent\n\nSebelum mulai task:\n1. Baca docs/CURRENT-STATE.md — resume dari session sebelumnya\n2. Baca docs/CONTEXT-INDEX.md — apa saja artifact yang tersedia\n3. Cek apakah spec ada untuk fitur ini (docs/specs/srs/)\n4. Cek apakah design document ada (docs/design/)\n5. Jika fitur kompleks dan spec/design belum ada → buat dulu, JANGAN langsung coding\n6. Jika sudah ada → validate bahwa task sesuai arsitektur\n7. Load relevant context (ADR, learnings) untuk menghindari kesalahan yang sama\n\n**GITLAB PROJECT MANAGEMENT:**\n8. Jika task terkait GitLab issue → update issue label: status::in-progress\n   Tool: update_issue (GitLab MCP)\n   Arguments: { project_id, issue_iid, labels: ['status::in-progress', ...existing labels] }\n9. Jika milestone aktif → pastikan issue ter-assign ke milestone\n\nInformasikan user: 'Task dimulai. Issue #[N] status: in-progress.'"
+    "prompt": "ROLE: Architect Agent\n\n**WAJIB BACA CONTEXT SEBELUM EKSEKUSI (urutan penting):**\n\n1. Baca docs/CURRENT-STATE.md — resume dari session sebelumnya, cek mode (Enterprise/Solo/Zero Touch)\n2. Baca docs/CONTEXT-INDEX.md — apa saja artifact yang tersedia\n3. **Baca docs/requirements/** — user stories, functional requirements, non-functional requirements\n4. **Baca docs/specs/srs/[feature]-spec.md** — specification untuk fitur yang akan dikerjakan\n5. **Baca docs/design/ui-ux/wireframe.md** — wireframe/layout yang harus diikuti (jika ada UI)\n6. **Baca docs/design/ui-ux/component-library.md** — komponen yang harus dipakai\n7. Baca docs/design/system/ dan docs/design/technical/ — architecture decisions\n8. Baca docs/adr/ — keputusan arsitektur yang tidak boleh dilanggar\n9. Baca docs/learnings/ — bug patterns yang harus dihindari\n\n**VALIDATE:**\n10. Apakah spec ada? Jika TIDAK dan fitur kompleks → buat dulu, JANGAN coding\n11. Apakah wireframe ada? Jika ada UI task → WAJIB ikuti wireframe persis\n12. Apakah design sesuai arsitektur? Validate dependency rule\n\n**JIKA ADA WIREFRAME:**\n- UI yang dihasilkan HARUS sesuai wireframe (layout, komponen, flow)\n- DILARANG membuat UI yang berbeda dari wireframe tanpa konfirmasi user\n- Jika wireframe ambigu → tanyakan user sebelum implement\n\n**GITLAB PROJECT MANAGEMENT:**\n13. Jika task terkait GitLab issue → update issue label: status::in-progress\n    Tool: update_issue { project_id, issue_iid, labels: ['status::in-progress', ...] }\n14. Jika milestone aktif → pastikan issue ter-assign ke milestone\n\nInformasikan user: 'Task dimulai. Context loaded: [list docs yang dibaca]. Issue #[N] status: in-progress.'"
   }
 }
 ```
