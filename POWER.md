@@ -199,6 +199,16 @@ User bisa bertanya **kapan saja** untuk mendapat guidance tentang apa yang harus
 "di mana saya sekarang"
 ```
 
+**Trigger untuk Manual Setup (jika auto-detect gagal):**
+```
+"setup framework"
+"generate hooks"
+"generate steering"
+"generate MCP config"
+"setup lengkap"
+```
+→ AI Agent WAJIB jalankan: generate `.kiro/hooks/` (9 files) + `.kiro/steering/` (3 files) + `.kiro/settings/mcp.json` + `docs/CURRENT-STATE.md`
+
 **AI Agent WAJIB merespons dengan format:**
 
 ```
