@@ -722,9 +722,33 @@ Mau jalankan semua, sebagian, atau skip?"
 1. **LOCAL VALIDATION (BLOCKING):** lint + typecheck + test (coverage >= 80%). Jika gagal → fix dulu.
 2. **Push** semua perubahan yang belum di-push.
 3. **CODE REVIEW OFFER:** Tanyakan user apakah mau AI review sebelum MR (architecture, security, best practices).
-4. **Create MR** (feature → develop). JANGAN auto-merge.
+4. **Create MR** (feature → develop). JANGAN auto-merge. **Description WAJIB formatted markdown** (lihat template di bawah).
 5. **Update issues** (status::review) + milestone description.
 6. **Informasikan user:** MR URL + instruksi merge di GitLab.
+
+**⚠️ MR Description Format (WAJIB — jangan kirim sebagai 1 baris):**
+
+Saat memanggil `create_merge_request`, field `description` HARUS menggunakan **proper markdown** dengan newlines yang benar. JANGAN gunakan `\n` literal.
+
+```
+Tool: create_merge_request
+Arguments: {
+  "project_id": "<id>",
+  "source_branch": "feature/issue-N-description",
+  "target_branch": "develop",
+  "title": "feat: Sprint [N] — [Feature Name]",
+  "description": "## Summary\n\n[1-2 kalimat apa yang dibangun]\n\n## Related Issues\n\nCloses #[N], #[N]\n\n## Local Validation\n\n- ✅ Lint: 0 errors\n- ✅ Typecheck: 0 errors\n- ✅ Tests: [N]/[N] pass\n- ✅ Coverage: [X%]\n\n## Changes\n\n- [Perubahan utama 1]\n- [Perubahan utama 2]\n- [Perubahan utama 3]\n\n## Acceptance Criteria\n\n| AC | Description | Status |\n|-----|-------------|--------|\n| AC-001 | [desc] | ✅ |\n| AC-002 | [desc] | ✅ |\n\n## Checklist\n\n- [x] Architecture compliance\n- [x] Tests written\n- [x] Coverage >= 80%\n- [x] No security findings\n- [x] Observability added\n- [x] Conventional commits"
+}
+```
+
+**JANGAN seperti ini (SALAH):**
+```
+description: "Summary\n\nAdd language switcher...\n\n## Related Issue\n\nCloses #33..."
+```
+↑ Ini menghasilkan `\n` literal di GitLab, bukan newline.
+
+**HARUS seperti ini (BENAR):**
+Gunakan actual newline characters dalam string, atau pastikan GitLab MCP tool meng-interpret `\n` sebagai newline.
 7. **Setelah user bilang "sudah merged"** → Tawarkan Sprint Completion Package:
    - 📚 Retrospective (docs/retrospectives/sprint-[N].md)
    - 📊 Scorecard (docs/quality/sprint-[N]-scorecard.md)
