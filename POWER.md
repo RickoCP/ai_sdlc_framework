@@ -1103,9 +1103,15 @@ Saat user ingin menambahkan issue baru, sprint baru, atau fitur baru — AI Agen
 2. **SELALU assign ke milestone** — tidak ada issue orphan
 3. **SELALU tambahkan label `sprint::[N]`** — setiap issue harus jelas masuk sprint berapa
 4. **SELALU ikuti per-task workflow** — tidak ada shortcut
-4. **SELALU update CURRENT-STATE.md** — state harus reflect reality
-5. **Sprint baru HARUS close sprint lama dulu** — tidak boleh overlap tanpa carry-over
-6. **Hotfix tetap ikuti workflow** — hanya branch strategy yang berbeda (dari main, bukan develop)
+5. **SELALU update CURRENT-STATE.md** — state harus reflect reality
+6. **SELALU update docs yang berkaitan** saat task/sprint baru dibuat:
+   - `docs/CURRENT-STATE.md` → update current sprint + task list
+   - `docs/CONTEXT-INDEX.md` → tambah spec/design baru jika ada
+   - `docs/specs/srs/[feature]-spec.md` → buat jika fitur baru kompleks
+   - `docs/design/` → update jika ada perubahan arsitektur
+   - GitLab Wiki "Changelog" → update jika sprint baru dimulai
+7. **Sprint baru HARUS close sprint lama dulu** — tidak boleh overlap tanpa carry-over
+8. **Hotfix tetap ikuti workflow** — hanya branch strategy yang berbeda (dari main, bukan develop)
 
 ---
 
