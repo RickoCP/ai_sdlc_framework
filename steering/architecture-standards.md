@@ -110,7 +110,7 @@ src/
 │
 ├── infrastructure/                     # LAYER 2: Implementation
 │   ├── di/
-│   │   ├── container.ts               # Root container
+│   │   ├── container.ts               # Root container (Awilix)
 │   │   └── registry/
 │   │       ├── moduleContainer.ts      # Shared modules/protocol implementation
 │   │       ├── repositoryContainer.ts  # Repository implementation registration
@@ -124,9 +124,9 @@ src/
 │   │   └── [domain]/
 │   ├── storage/                        # localStorage/cookie adapter
 │   ├── devices/                        # Device adapter
-│   ├── logging/                        # Analytics/logger
+│   ├── logging/                        # Logger + metrics
 │   ├── stateManagement/                # Zustand (shared app state)
-│   └── utils/
+│   └── utils/                          # Infrastructure utilities
 │
 ├── presentation/                       # LAYER 3: UI
 │   ├── features/
@@ -144,6 +144,7 @@ src/
 │   │
 │   ├── hooks/
 │   ├── providers/
+│   └── locales/                        # i18n translations
 │   ├── locales/
 │   └── utils/
 │

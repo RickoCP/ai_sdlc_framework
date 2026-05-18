@@ -128,7 +128,7 @@ src/
 │   │       ├── repositories/           # Repository interface ONLY
 │   │       ├── usecases/               # Business logic utama
 │   │       ├── errors/                 # Domain error
-│   │       └── mappers/                # Mapping logic
+│   │       └── mappers/                # Mapping logic (optional)
 │   │
 │   ├── protocols/                      # Interface global (http, storage, dll)
 │   └── utils/                          # Pure utilities (no external deps)
@@ -136,13 +136,21 @@ src/
 ├── infrastructure/                     # LAYER 2: Implementation
 │   ├── di/
 │   │   ├── container.ts               # Root container (Awilix)
-│   │   └── registry/                   # Registration per category
+│   │   └── registry/
+│   │       ├── moduleContainer.ts      # Shared modules/protocol implementation
+│   │       ├── repositoryContainer.ts  # Repository implementation registration
+│   │       ├── useCasesContainer.ts    # Use case registration
+│   │       ├── viewModelContainer.ts   # ViewModel registration
+│   │       ├── loggingContainer.ts     # Logger/analytics registration
+│   │       └── index.ts               # Orchestration register semua module
 │   ├── networking/                     # HTTP adapter (axios/fetch)
 │   ├── repositories/                   # Repository implementation
 │   │   └── [domain]/
 │   ├── storage/                        # localStorage/cookie adapter
+│   ├── devices/                        # Device adapter
 │   ├── logging/                        # Logger + metrics
-│   └── stateManagement/                # Zustand (shared app state)
+│   ├── stateManagement/                # Zustand (shared app state)
+│   └── utils/                          # Infrastructure utilities
 │
 ├── presentation/                       # LAYER 3: UI
 │   ├── features/
@@ -150,6 +158,7 @@ src/
 │   │       ├── screens/                # Page-level UI
 │   │       ├── components/             # Feature components
 │   │       ├── viewModel/              # UI state orchestration
+│   │       ├── mappers/                # View data mapping
 │   │       └── validation/             # Form validation
 │   │
 │   ├── components/                     # Shared components (Atomic Design)
