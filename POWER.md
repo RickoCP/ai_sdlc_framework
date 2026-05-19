@@ -18,7 +18,7 @@ author: "ricko_c_putra@telkomsel.co.id"
 4. **MERGE:** HANYA oleh user di GitLab. AI Agent **DILARANG** merge sendiri.
 5. **SETIAP TASK SELESAI:** Update GitLab issue (label `status::review` + comment) + collect metrics. Setelah MR merged: **close issue** (`state_event: "close"`).
 6. **SPRINT END:** Tawarkan retro + scorecard + health check + wiki update. WAJIB update milestone + wiki Changelog.
-7. **SETELAH PROJECT FOLDER DIBUAT:** LANGSUNG generate `.kiro/hooks/` (8 files) + `.kiro/steering/` (3 files) + `.kiro/settings/mcp.json` + `docs/CURRENT-STATE.md`. **JANGAN tunggu Layer 8.**
+7. **SETELAH PROJECT FOLDER DIBUAT:** LANGSUNG generate `.kiro/hooks/` (8 files) + `.kiro/steering/` (4 files: architecture-standards, test-writing-patterns, coding-conventions, task-execution-flow) + `.kiro/settings/mcp.json` + `docs/CURRENT-STATE.md`. **JANGAN tunggu Layer 8.**
 8. **LAYER 0-8:** Sequential, DILARANG skip. Cek document completeness setiap layer selesai. Semua docs WAJIB (tidak ada opsional).
 9. **SPRINT PLANNING:** WAJIB buat milestone (`create_milestone`) + wiki pages (`create_or_update_wiki_page`). Verify response. JANGAN lanjut tanpa milestone + wiki.
 10. **CODE REVIEW:** Tawarkan AI review SEBELUM buat MR. Jika user setuju → review architecture + security.
