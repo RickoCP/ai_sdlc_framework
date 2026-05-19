@@ -14,12 +14,11 @@ Panduan WAJIB untuk memastikan semua hooks (pre-task dan post-task) dijalankan d
 |---|------|-------|-------------|
 | 1 | **spec-context-loader** | `promptSubmit` | Saat user minta buat spec (requirements/design/tasks) |
 | 2 | **pre-task-pipeline** | `preTaskExecution` | Setiap task dimulai |
-| 3 | **code-quality-scan** | `postToolUse` [write] | Setiap file ditulis (skip docs/config/test) |
-| 4 | **post-task-pipeline** | `postTaskExecution` | Setiap task selesai |
-| 5 | **sprint-completion** | `postTaskExecution` | Bug fix task + task terakhir sprint |
-| 6 | **health-check** | `userTriggered` | Manual trigger |
-| 7 | **quality-scorecard** | `userTriggered` | Manual trigger |
-| 8 | **sprint-retrospective** | `userTriggered` | Manual trigger |
+| 3 | **post-task-pipeline** | `postTaskExecution` | Setiap task selesai |
+| 4 | **sprint-completion** | `postTaskExecution` | Bug fix task + task terakhir sprint |
+| 5 | **health-check** | `userTriggered` | Manual trigger |
+| 6 | **quality-scorecard** | `userTriggered` | Manual trigger |
+| 7 | **sprint-retrospective** | `userTriggered` | Manual trigger |
 
 ---
 
@@ -59,12 +58,6 @@ Panduan WAJIB untuk memastikan semua hooks (pre-task dan post-task) dijalankan d
 │       │                                                              │
 │       ▼                                                              │
 │  [Implementation by subagent]                                        │
-│       │                                                              │
-│       │  ┌─────────────────────┐                                    │
-│       ├──│ code-quality-scan   │ ← postToolUse [write]              │
-│       │  │ (per file write)    │                                    │
-│       │  │ Security + Arch     │                                    │
-│       │  └─────────────────────┘                                    │
 │       │                                                              │
 │       ▼                                                              │
 │  [Task N completes]                                                  │
@@ -141,16 +134,6 @@ SEBELUM memulai implementasi task apapun:
 | 3a | Create branch + milestone + wiki | ❌ Task pertama saja |
 | 3b | Checkout branch + assign milestone | ✅ Task lainnya |
 
-### Code Quality Scan (postToolUse [write])
-
-SELAMA implementasi berlangsung:
-
-1. Hook ter-trigger setiap kali file ditulis (fs_write, str_replace)
-2. Skip jika file adalah: docs/, config files, test files, entity interfaces
-3. Cek: security (secrets, XSS), architecture (dependency rule), observability (error handling)
-4. Jika ada issue → informasikan dan fix
-5. Jika clean → lanjut tanpa output (silent pass)
-
 ### Post-Task Pipeline (postTaskExecution)
 
 SETELAH task selesai (status → `completed`):
@@ -197,7 +180,7 @@ User dapat trigger kapan saja via Agent Hooks panel:
 
 ```
 [Set in_progress] → [PRE-TASK PIPELINE] → [Dispatch to subagent]
-→ [code-quality-scan per write] → [Subagent completes]
+→ [Subagent completes]
 → [Set completed] → [POST-TASK PIPELINE] → [SPRINT-COMPLETION]
 → [Next wave]
 ```
@@ -209,12 +192,11 @@ User dapat trigger kapan saja via Agent Hooks panel:
 2. Set all to in_progress
 3. Run PRE-TASK pipeline (once for batch)
 4. Dispatch all subagents in parallel
-5. [code-quality-scan fires per file write during implementation]
-6. Wait for all to complete
-7. Set all to completed
-8. Run POST-TASK pipeline (once for batch)
-9. Run SPRINT-COMPLETION (once for batch)
-10. Proceed to wave N+1
+5. Wait for all to complete
+6. Set all to completed
+7. Run POST-TASK pipeline (once for batch)
+8. Run SPRINT-COMPLETION (once for batch)
+9. Proceed to wave N+1
 ```
 
 ### Sprint First Task (Special)
@@ -263,5 +245,4 @@ Saat membuat atau update content di GitLab (issue, wiki, MR, milestone, comment)
 - Agent DILARANG skip post-task pipeline untuk "efisiensi"
 - Agent DILARANG skip sprint-completion setelah post-task-pipeline
 - Jika hook gagal, catat error dan lanjut — jangan silent fail
-- code-quality-scan boleh silent pass (tanpa output) jika clean
 - Manual hooks (health-check, scorecard, retro) hanya jalan saat user trigger

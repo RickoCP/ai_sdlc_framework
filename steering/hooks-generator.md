@@ -19,8 +19,6 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 │                                                              │
 │  preTaskExecution ──→ [pre-task-pipeline]                    │
 │                                                              │
-│  postToolUse (write) ──→ [code-quality-scan]                │
-│                                                              │
 │  postTaskExecution ──→ [post-task-pipeline]                  │
 │                       ──→ [sprint-completion]                │
 │                                                              │
@@ -31,15 +29,14 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Total: 8 Hooks
+## Total: 7 Hooks
 
 | # | ID | Event | Kondisi Aktif |
 |---|-----|-------|---------------|
 | 1 | spec-context-loader | promptSubmit | Saat user minta buat spec (requirements/design/tasks) |
 | 2 | pre-task-pipeline | preTaskExecution | Setiap task dimulai |
-| 3 | code-quality-scan | postToolUse [write] | Setiap file ditulis |
-| 4 | post-task-pipeline | postTaskExecution | Setiap task selesai |
-| 5 | sprint-completion | postTaskExecution | Bug fix task + task terakhir sprint |
+| 3 | post-task-pipeline | postTaskExecution | Setiap task selesai |
+| 4 | sprint-completion | postTaskExecution | Bug fix task + task terakhir sprint |
 | 6 | health-check | userTriggered | Manual |
 | 7 | quality-scorecard | userTriggered | Manual |
 | 8 | sprint-retrospective | userTriggered | Manual |
@@ -90,30 +87,9 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ---
 
-## Hook 3: Code Quality Scan
-
-**File:** `.kiro/hooks/code-quality-scan.kiro.hook`
-
-```json
-{
-  "enabled": true,
-  "name": "Code Quality Scan",
-  "version": "1.5.0",
-  "description": "Security + Observability scan pada setiap file write (smart-filtered)",
-  "when": {
-    "type": "postToolUse",
-    "toolTypes": ["write"]
-  },
-  "then": {
-    "type": "askAgent",
-    "prompt": "SETELAH menulis file, lakukan quality scan CEPAT (skip jika file adalah docs/config/test/entity):\n1. SECURITY: Cek hardcoded secrets, SQL injection, XSS vulnerability, unsafe eval\n2. OBSERVABILITY: Cek apakah error handling ada logging, apakah function penting punya metrics\n3. ARCHITECTURE: Cek apakah import sesuai dependency rule (core tidak import infrastructure)\n4. Jika ada issue → informasikan dan fix\n5. Jika clean → lanjut tanpa output"
-  }
-}
-```
-
 ---
 
-## Hook 4: Post-Task Pipeline
+## Hook 3: Post-Task Pipeline
 
 **File:** `.kiro/hooks/post-task-pipeline.kiro.hook`
 
@@ -135,7 +111,7 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ---
 
-## Hook 5: Sprint Completion
+## Hook 4: Sprint Completion
 
 **File:** `.kiro/hooks/sprint-completion.kiro.hook`
 
@@ -157,7 +133,7 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ---
 
-## Hook 6: Framework Health Check
+## Hook 5: Framework Health Check
 
 **File:** `.kiro/hooks/health-check.kiro.hook`
 
@@ -179,7 +155,7 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ---
 
-## Hook 7: Quality Scorecard
+## Hook 6: Quality Scorecard
 
 **File:** `.kiro/hooks/quality-scorecard.kiro.hook`
 
@@ -201,7 +177,7 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ---
 
-## Hook 8: Sprint Retrospective
+## Hook 7: Sprint Retrospective
 
 **File:** `.kiro/hooks/sprint-retrospective.kiro.hook`
 
