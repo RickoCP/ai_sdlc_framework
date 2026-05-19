@@ -159,14 +159,14 @@ Auto-detect step 2-5 WAJIB dijalankan **SEGERA SETELAH folder project dibuat** (
 
 | File | Cek Keberadaan |
 |------|---------------|
-| `.kiro/hooks/spec-context-loader.json` | ✅ harus ada (promptSubmit) |
-| `.kiro/hooks/pre-task-pipeline.json` | ✅ harus ada (preTaskExecution) |
-| `.kiro/hooks/code-quality-scan.json` | ✅ harus ada (postToolUse write) |
-| `.kiro/hooks/post-task-pipeline.json` | ✅ harus ada (postTaskExecution) |
-| `.kiro/hooks/sprint-completion.json` | ✅ harus ada (postTaskExecution) |
-| `.kiro/hooks/health-check.json` | ✅ harus ada (userTriggered) |
-| `.kiro/hooks/quality-scorecard.json` | ✅ harus ada (userTriggered) |
-| `.kiro/hooks/sprint-retrospective.json` | ✅ harus ada (userTriggered) |
+| `.kiro/hooks/spec-context-loader.kiro.hook` | ✅ harus ada (promptSubmit) |
+| `.kiro/hooks/pre-task-pipeline.kiro.hook` | ✅ harus ada (preTaskExecution) |
+| `.kiro/hooks/code-quality-scan.kiro.hook` | ✅ harus ada (postToolUse write) |
+| `.kiro/hooks/post-task-pipeline.kiro.hook` | ✅ harus ada (postTaskExecution) |
+| `.kiro/hooks/sprint-completion.kiro.hook` | ✅ harus ada (postTaskExecution) |
+| `.kiro/hooks/health-check.kiro.hook` | ✅ harus ada (userTriggered) |
+| `.kiro/hooks/quality-scorecard.kiro.hook` | ✅ harus ada (userTriggered) |
+| `.kiro/hooks/sprint-retrospective.kiro.hook` | ✅ harus ada (userTriggered) |
 
 **Rules:**
 - Auto-detect WAJIB jalan di awal SETIAP session (bukan hanya project baru)
@@ -1392,15 +1392,15 @@ AI Agent **WAJIB** membuat hook files di `.kiro/hooks/` project user agar automa
 
 | File Target | Trigger | Fungsi |
 |-------------|---------|--------|
-| `.kiro/hooks/architect-gate.json` | preTaskExecution | Validate spec + design sebelum coding |
-| `.kiro/hooks/code-quality-scan.json` | postToolUse (write) | Security + Observability (merged, smart-filtered) |
-| `.kiro/hooks/qa-devops-post-task.json` | postTaskExecution | Lint + test + push setelah task |
-| `.kiro/hooks/bug-learning-capture.json` | postTaskExecution | Capture learning saat bug fix |
-| `.kiro/hooks/metrics-collector.json` | postTaskExecution | Auto-collect AI quality metrics |
-| `.kiro/hooks/sprint-end-auto-check.json` | postTaskExecution | Auto health check + offer retro saat sprint task terakhir |
-| `.kiro/hooks/sprint-retrospective.json` | userTriggered | Generate retrospective (data-driven) |
-| `.kiro/hooks/quality-scorecard.json` | userTriggered | Generate scorecard dari metrics |
-| `.kiro/hooks/health-check.json` | userTriggered | Framework compliance scan |
+| `.kiro/hooks/architect-gate.kiro.hook` | preTaskExecution | Validate spec + design sebelum coding |
+| `.kiro/hooks/code-quality-scan.kiro.hook` | postToolUse (write) | Security + Observability (merged, smart-filtered) |
+| `.kiro/hooks/qa-devops-post-task.kiro.hook` | postTaskExecution | Lint + test + push setelah task |
+| `.kiro/hooks/bug-learning-capture.kiro.hook` | postTaskExecution | Capture learning saat bug fix |
+| `.kiro/hooks/metrics-collector.kiro.hook` | postTaskExecution | Auto-collect AI quality metrics |
+| `.kiro/hooks/sprint-end-auto-check.kiro.hook` | postTaskExecution | Auto health check + offer retro saat sprint task terakhir |
+| `.kiro/hooks/sprint-retrospective.kiro.hook` | userTriggered | Generate retrospective (data-driven) |
+| `.kiro/hooks/quality-scorecard.kiro.hook` | userTriggered | Generate scorecard dari metrics |
+| `.kiro/hooks/health-check.kiro.hook` | userTriggered | Framework compliance scan |
 
 **Untuk detail lengkap setiap hook file (JSON content, smart filtering logic, metrics system), lihat `steering/hooks-generator.md`.**
 

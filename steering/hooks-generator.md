@@ -48,10 +48,11 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ## Hook 1: Spec Context Loader
 
-**File:** `.kiro/hooks/spec-context-loader.json`
+**File:** `.kiro/hooks/spec-context-loader.kiro.hook`
 
 ```json
 {
+  "enabled": true,
   "name": "Spec Context Loader",
   "version": "1.0.0",
   "description": "Unified context loader untuk spec creation — auto-detect phase (requirements/design/tasks) dan load dokumen referensi yang sesuai",
@@ -69,10 +70,11 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ## Hook 2: Pre-Task Pipeline
 
-**File:** `.kiro/hooks/pre-task-pipeline.json`
+**File:** `.kiro/hooks/pre-task-pipeline.kiro.hook`
 
 ```json
 {
+  "enabled": true,
   "name": "Pre-Task Pipeline",
   "version": "2.3.0",
   "description": "CURRENT-STATE check + Architect gate + GitLab issue create + Branch + Milestone + Wiki sprint plan (task pertama) — unified pre-task hook",
@@ -90,10 +92,11 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ## Hook 3: Code Quality Scan
 
-**File:** `.kiro/hooks/code-quality-scan.json`
+**File:** `.kiro/hooks/code-quality-scan.kiro.hook`
 
 ```json
 {
+  "enabled": true,
   "name": "Code Quality Scan",
   "version": "1.5.0",
   "description": "Security + Observability scan pada setiap file write (smart-filtered)",
@@ -112,10 +115,11 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ## Hook 4: Post-Task Pipeline
 
-**File:** `.kiro/hooks/post-task-pipeline.json`
+**File:** `.kiro/hooks/post-task-pipeline.kiro.hook`
 
 ```json
 {
+  "enabled": true,
   "name": "Post-Task Pipeline",
   "version": "2.1.0",
   "description": "QA (lint/test/typecheck) + git push + close GitLab issue + collect metrics + update CURRENT-STATE — unified post-task hook",
@@ -133,10 +137,11 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ## Hook 5: Sprint Completion
 
-**File:** `.kiro/hooks/sprint-completion.json`
+**File:** `.kiro/hooks/sprint-completion.kiro.hook`
 
 ```json
 {
+  "enabled": true,
   "name": "Sprint Completion",
   "version": "2.1.0",
   "description": "Bug learning capture (setiap bug fix) + Sprint end health check + close milestone + Wiki summary (task terakhir)",
@@ -154,10 +159,11 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ## Hook 6: Framework Health Check
 
-**File:** `.kiro/hooks/health-check.json`
+**File:** `.kiro/hooks/health-check.kiro.hook`
 
 ```json
 {
+  "enabled": true,
   "name": "Framework Health Check",
   "version": "1.0.0",
   "description": "Framework compliance scan",
@@ -175,10 +181,11 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ## Hook 7: Quality Scorecard
 
-**File:** `.kiro/hooks/quality-scorecard.json`
+**File:** `.kiro/hooks/quality-scorecard.kiro.hook`
 
 ```json
 {
+  "enabled": true,
   "name": "Quality Scorecard",
   "version": "1.5.0",
   "description": "Generate scorecard dari metrics-log",
@@ -196,10 +203,11 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 
 ## Hook 8: Sprint Retrospective
 
-**File:** `.kiro/hooks/sprint-retrospective.json`
+**File:** `.kiro/hooks/sprint-retrospective.kiro.hook`
 
 ```json
 {
+  "enabled": true,
   "name": "Sprint Retrospective",
   "version": "1.5.0",
   "description": "Generate retrospective data-driven dari metrics",
