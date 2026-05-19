@@ -18,7 +18,7 @@ author: "ricko_c_putra@telkomsel.co.id"
 4. **MERGE:** HANYA oleh user di GitLab. AI Agent **DILARANG** merge sendiri.
 5. **SETIAP TASK SELESAI:** Update GitLab issue (label `status::review` + comment) + collect metrics. Setelah MR merged: **close issue** (`state_event: "close"`).
 6. **SPRINT END:** Tawarkan retro + scorecard + health check + wiki update. WAJIB update milestone + wiki Changelog.
-7. **SETELAH PROJECT FOLDER DIBUAT:** LANGSUNG generate `.kiro/hooks/` (7 files) + `.kiro/steering/` (4 files: architecture-standards, test-writing-patterns, coding-conventions, task-execution-flow) + `.kiro/settings/mcp.json` + `docs/CURRENT-STATE.md`. **JANGAN tunggu Layer 8.**
+7. **SETELAH PROJECT FOLDER DIBUAT:** LANGSUNG generate `.kiro/hooks/` (8 files) + `.kiro/steering/` (4 files: architecture-standards, test-writing-patterns, coding-conventions, task-execution-flow) + `.kiro/settings/mcp.json` + `docs/CURRENT-STATE.md`. **JANGAN tunggu Layer 8.**
 8. **LAYER 0-8:** Sequential, DILARANG skip. Cek document completeness setiap layer selesai. Semua docs WAJIB (tidak ada opsional).
 9. **SPRINT PLANNING:** WAJIB buat milestone (`create_milestone`) + wiki pages (`create_or_update_wiki_page`). Verify response. JANGAN lanjut tanpa milestone + wiki.
 10. **CODE REVIEW:** Tawarkan AI review SEBELUM buat MR. Jika user setuju → review architecture + security.
@@ -110,8 +110,8 @@ Saat power ini diaktifkan atau AI Agent mulai bekerja di sebuah project, AI Agen
     ↓
 [AUTO-DETECT 2: Apakah .kiro/hooks/ sudah ada dan lengkap?]
     → Cek: apakah folder .kiro/hooks/ ada?
-    → Jika TIDAK ADA → GENERATE semua 7 hook files otomatis
-    → Jika ADA → cek apakah lengkap (7 files)?
+    → Jika TIDAK ADA → GENERATE semua 8 hook files otomatis
+    → Jika ADA → cek apakah lengkap (8 files)?
     → Jika kurang → generate yang missing
     → Informasikan user: "Hooks framework sudah di-setup/updated."
     ↓
@@ -142,7 +142,7 @@ Auto-detect step 2-5 WAJIB dijalankan **SEGERA SETELAH folder project dibuat** (
 1. User jawab 8 pertanyaan
 2. AI buat folder project (git init, mkdir .kiro, docs, src)
 3. ⚠️ LANGSUNG jalankan auto-detect 2-5:
-   → Generate .kiro/hooks/ (7 files)
+   → Generate .kiro/hooks/ (8 files)
    → Generate .kiro/steering/ (3 files)
    → Generate docs/CURRENT-STATE.md
    → Generate .kiro/settings/mcp.json
@@ -155,7 +155,7 @@ Auto-detect step 2-5 WAJIB dijalankan **SEGERA SETELAH folder project dibuat** (
 - ❌ Skip generate karena "nanti saja"
 - ❌ Hanya generate untuk project existing
 
-**Hook Files yang WAJIB Ada (7 files) — sesuai `hooks-generator.md`:**
+**Hook Files yang WAJIB Ada (8 files) — sesuai `hooks-generator.md`:**
 
 | File | Cek Keberadaan |
 |------|---------------|
@@ -166,6 +166,7 @@ Auto-detect step 2-5 WAJIB dijalankan **SEGERA SETELAH folder project dibuat** (
 | `.kiro/hooks/health-check.kiro.hook` | ✅ harus ada (userTriggered) |
 | `.kiro/hooks/quality-scorecard.kiro.hook` | ✅ harus ada (userTriggered) |
 | `.kiro/hooks/sprint-retrospective.kiro.hook` | ✅ harus ada (userTriggered) |
+| `.kiro/hooks/context-state-sync.kiro.hook` | ✅ harus ada (fileCreated) |
 
 **Rules:**
 - Auto-detect WAJIB jalan di awal SETIAP session (bukan hanya project baru)
@@ -205,7 +206,7 @@ User bisa bertanya **kapan saja** untuk mendapat guidance tentang apa yang harus
 "generate MCP config"
 "setup lengkap"
 ```
-→ AI Agent WAJIB jalankan: generate `.kiro/hooks/` (7 files) + `.kiro/steering/` (3 files) + `.kiro/settings/mcp.json` + `docs/CURRENT-STATE.md`
+→ AI Agent WAJIB jalankan: generate `.kiro/hooks/` (8 files) + `.kiro/steering/` (3 files) + `.kiro/settings/mcp.json` + `docs/CURRENT-STATE.md`
 
 **AI Agent WAJIB merespons dengan format:**
 
@@ -595,7 +596,7 @@ AI Agent **WAJIB** mengecek kelengkapan dokumen setelah menyelesaikan setiap lay
 | **5 — Governance** | `docs/governance/ai-policy.md` + `approved-tools.md` + `security-policy.md` + `code-review-policy.md` | ✅ semua harus ada |
 | **6 — Skills** | `.kiro/skills/create-api.md` + `create-usecase.md` + `create-repository.md` + `create-component.md` + `create-test.md` + `create-migration.md` | ✅ semua harus ada (6 files) |
 | **7 — Team Extension** | `.kiro/steering/team/[domain]-team.md` (minimal 1 per domain project) | ✅ harus ada |
-| **8 — Issue-Driven** | GitLab: issues + milestone + labels + board + issue templates (Feature, Task, Bug) + MR templates + **Wiki pages (Home, Changelog, API-Documentation, Architecture-Decisions)** + **`.kiro/settings/mcp.json` dengan autoApprove** + **`.kiro/hooks/` (7 files)** | ✅ semua harus ada |
+| **8 — Issue-Driven** | GitLab: issues + milestone + labels + board + issue templates (Feature, Task, Bug) + MR templates + **Wiki pages (Home, Changelog, API-Documentation, Architecture-Decisions)** + **`.kiro/settings/mcp.json` dengan autoApprove** + **`.kiro/hooks/` (8 files)** | ✅ semua harus ada |
 | **10 — Context** | `docs/CONTEXT-INDEX.md` + `docs/CURRENT-STATE.md` | ✅ semua harus ada |
 | **12 — Quality Gates** | `.gitlab-ci.yml` + `.eslintrc.json`/`eslint.config.mjs` + `tsconfig.json` + `.prettierrc` + `vitest.config.ts` + `commitlint.config.js` | ✅ semua harus ada |
 | **14 — Learning** | `docs/learnings/` folder + `docs/retrospectives/` folder + `docs/adr/` folder + `docs/tech-debt/` folder + `docs/quality/metrics-log.jsonl` | ✅ semua harus ada |
@@ -1412,7 +1413,7 @@ AI Agent **WAJIB** membuat hook files di `.kiro/hooks/` project user agar automa
 
 Untuk detail lengkap JSON content setiap hook, lihat `steering/hooks-generator.md` (inclusion: always — selalu di-load ke context).
 
-AI Agent WAJIB generate 7 hook files sesuai definisi di hooks-generator.md.
+AI Agent WAJIB generate 8 hook files sesuai definisi di hooks-generator.md.
 
 **Cara Generate:**
 1. Buat folder `<repo_path>/.kiro/hooks/` (jika belum ada)

@@ -29,7 +29,7 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Total: 7 Hooks
+## Total: 8 Hooks
 
 | # | ID | Event | Kondisi Aktif |
 |---|-----|-------|---------------|
@@ -40,6 +40,7 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
 | 6 | health-check | userTriggered | Manual |
 | 7 | quality-scorecard | userTriggered | Manual |
 | 8 | sprint-retrospective | userTriggered | Manual |
+| 9 | context-state-sync | fileCreated | Saat file baru dibuat di docs/, src/, .kiro/ |
 
 ---
 
@@ -193,6 +194,29 @@ Steering ini berisi **blueprint lengkap** untuk men-generate semua agent hooks y
   "then": {
     "type": "askAgent",
     "prompt": "━━━ 📚 LEARNING AGENT ━━━\nGenerate Sprint Retrospective (data-driven):\n\n1. Baca docs/quality/metrics-log.jsonl untuk sprint aktif\n2. Hitung: total tasks, avg coverage, total rework, duration\n3. Generate docs/retrospectives/sprint-[N].md:\n   - Sprint Summary (dates, goals, delivery)\n   - Metrics Overview\n   - What Went Well\n   - What Didn't Go Well\n   - Action Items\n   - Learnings\n4. Update GitLab wiki 'Changelog' (proper markdown)\n5. Informasikan user hasilnya"
+  }
+}
+```
+
+---
+
+## Hook 8: Context & State Sync
+
+**File:** `.kiro/hooks/context-state-sync.kiro.hook`
+
+```json
+{
+  "enabled": true,
+  "name": "Context & State Sync",
+  "version": "1.0.0",
+  "description": "Update CONTEXT-INDEX.md saat file baru dibuat di docs/ atau src/, dan pastikan CURRENT-STATE.md selalu reflect reality",
+  "when": {
+    "type": "fileCreated",
+    "patterns": ["docs/**/*.md", "src/**/*.ts", "src/**/*.tsx", ".kiro/skills/*.md", ".kiro/steering/**/*.md"]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "File baru dibuat. Lakukan sync:\n\n1. CONTEXT-INDEX: Baca docs/CONTEXT-INDEX.md. Jika file yang baru dibuat BELUM ada di index → tambahkan ke section yang sesuai dengan status ✅ Created.\n\n2. CURRENT-STATE: Jika file baru ini terkait task aktif → pastikan CURRENT-STATE.md mencerminkan progress terbaru.\n\n3. Jika file adalah docs/ → tambahkan ke CONTEXT-INDEX.\n   Jika file adalah src/ → SKIP (source code tidak perlu di-index).\n   Jika file adalah .kiro/skills/ atau .kiro/steering/ → tambahkan ke section Project Setup di CONTEXT-INDEX.\n\nLakukan update secara SILENT (tanpa output ke user kecuali ada masalah)."
   }
 }
 ```
