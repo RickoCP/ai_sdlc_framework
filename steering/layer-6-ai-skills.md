@@ -1,3 +1,9 @@
+---
+inclusion: auto
+name: "Layer 6 - AI Engineering Skills"
+description: "Panduan membuat reusable AI skills (create-api, create-usecase, create-repository, create-component, create-test)"
+---
+
 # Layer 6 — AI Engineering Skills
 
 ## Konsep

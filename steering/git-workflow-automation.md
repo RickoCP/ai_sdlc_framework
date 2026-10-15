@@ -1,3 +1,9 @@
+---
+inclusion: always
+name: "Git Workflow Automation"
+description: "Panduan git init, remote setup, commit convention, auto-push, branch strategy, dan MR creation"
+---
+
 # Git Workflow & Commit Convention
 
 ## Overview

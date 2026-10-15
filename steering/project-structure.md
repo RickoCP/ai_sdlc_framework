@@ -1,3 +1,9 @@
+---
+inclusion: always
+name: "Project Structure"
+description: "Panduan struktur folder project, naming conventions, dan quickstart setup"
+---
+
 # Project Structure & Quickstart
 
 ## Quickstart — Memulai Framework

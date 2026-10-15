@@ -1,3 +1,9 @@
+---
+inclusion: auto
+name: "Layer 5 - AI Governance"
+description: "Framework AI Governance untuk mencegah hallucination, inconsistent architecture, security vulnerability, dan AI chaos"
+---
+
 # Layer 5 — AI Governance Framework
 
 ## Tujuan

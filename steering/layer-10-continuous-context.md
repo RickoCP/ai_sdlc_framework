@@ -1,3 +1,9 @@
+---
+inclusion: always
+name: "Layer 10 - Continuous Context"
+description: "Continuous Context Accumulation - artifact dari setiap stage menjadi context untuk stage berikutnya"
+---
+
 # Layer 10 — Continuous Context Accumulation
 
 ## Prinsip

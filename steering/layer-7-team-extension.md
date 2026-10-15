@@ -1,3 +1,9 @@
+---
+inclusion: auto
+name: "Layer 7 - Team Extension Skills"
+description: "Panduan untuk menambahkan team-specific skills dan domain knowledge di atas global standards"
+---
+
 # Layer 7 — Team Extension Skills
 
 ## Konsep

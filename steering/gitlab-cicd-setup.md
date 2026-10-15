@@ -1,3 +1,9 @@
+---
+inclusion: auto
+name: "GitLab CI/CD Setup"
+description: "Panduan setup infrastruktur GitLab CI/CD - settings, runner, templates, branch protection"
+---
+
 # GitLab CI/CD Setup Guide
 
 ## Overview

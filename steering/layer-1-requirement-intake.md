@@ -1,3 +1,9 @@
+---
+inclusion: auto
+name: "Layer 1 - Requirement Intake"
+description: "Panduan untuk mengekstrak requirements dari berbagai sumber input (PDF, meeting notes, user feedback)"
+---
+
 # Layer 1 — Requirement Intake
 
 ## Tujuan

@@ -1,3 +1,9 @@
+---
+inclusion: manual
+name: "Presentation Material"
+description: "Panduan membuat materi presentasi project - architecture, engineering, quality metrics"
+---
+
 # Presentation Material Generation
 
 ## Overview

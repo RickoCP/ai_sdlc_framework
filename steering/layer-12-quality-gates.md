@@ -1,3 +1,9 @@
+---
+inclusion: always
+name: "Layer 12 - Quality Gates"
+description: "Automated Quality Gates - GitLab CI/CD Pipeline untuk lint, typecheck, test, coverage, security"
+---
+
 # Layer 12 — Automated Quality Gates
 
 ## CI/CD Pipeline Flow

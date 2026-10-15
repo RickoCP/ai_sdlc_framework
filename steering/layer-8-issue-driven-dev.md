@@ -1,3 +1,9 @@
+---
+inclusion: auto
+name: "Layer 8 - Issue-Driven Development"
+description: "Panduan Issue-Driven Development: 1 issue = 1 bounded context untuk mengurangi hallucination dan context overflow"
+---
+
 # Layer 8 — Issue-Driven Development
 
 ## Prinsip

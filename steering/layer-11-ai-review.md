@@ -1,3 +1,9 @@
+---
+inclusion: always
+name: "Layer 11 - AI Review"
+description: "AI Review & Validation - AI sebagai reviewer untuk architecture, security, performance, accessibility"
+---
+
 # Layer 11 — AI Review & Validation
 
 ## Konsep

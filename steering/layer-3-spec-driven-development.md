@@ -1,3 +1,9 @@
+---
+inclusion: auto
+name: "Layer 3 - Spec-Driven Development"
+description: "Panduan Spec-Driven Development: Idea → Specification → Validation → Architecture → Tasks → Code"
+---
+
 # Layer 3 — Spec-Driven Development (SDD)
 
 ## Prinsip

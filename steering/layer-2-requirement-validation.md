@@ -1,3 +1,9 @@
+---
+inclusion: auto
+name: "Layer 2 - Requirement Validation"
+description: "Panduan validasi requirements sebelum eksekusi - cek ambiguity, completeness, conflicts, feasibility"
+---
+
 # Layer 2 — Requirement Validation
 
 ## Prinsip Utama

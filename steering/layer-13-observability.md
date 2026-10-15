@@ -1,3 +1,9 @@
+---
+inclusion: always
+name: "Layer 13 - Observability"
+description: "Observability & Feedback Loop - mengukur system health, AI performance, engineering quality"
+---
+
 # Layer 13 — Observability & Feedback Loop
 
 ## Tujuan

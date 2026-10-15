@@ -1,3 +1,9 @@
+---
+inclusion: auto
+name: "Layer 0 - Product Vision"
+description: "Panduan untuk menentukan arah produk, business value, roadmap, target user, dan AI opportunities"
+---
+
 # Layer 0 — Product Vision
 
 ## Tujuan

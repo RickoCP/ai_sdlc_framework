@@ -1,3 +1,9 @@
+---
+inclusion: auto
+name: "Layer 4 - Design System"
+description: "Panduan untuk System Design, Technical Design, UI/UX Design, dan Security Design"
+---
+
 # Layer 4 — Design System
 
 ## Overview

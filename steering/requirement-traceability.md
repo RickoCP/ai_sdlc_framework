@@ -1,3 +1,9 @@
+---
+inclusion: auto
+name: "Requirement Traceability"
+description: "End-to-end flow dari PRD User Story hingga Merge - memastikan implementasi sesuai requirements"
+---
+
 # Requirement Traceability & Implementation Flow
 
 ## Overview

@@ -1,3 +1,9 @@
+---
+inclusion: always
+name: "Layer 14 - Continuous Learning"
+description: "Continuous Learning System - belajar dari production bugs, performance, review patterns, AI effectiveness"
+---
+
 # Layer 14 — Continuous Learning System
 
 ## Prinsip

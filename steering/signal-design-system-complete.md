@@ -1,3 +1,9 @@
+---
+inclusion: manual
+name: "Signal Design System"
+description: "Complete reference untuk Signal Design System - color tokens, typography, spacing, components"
+---
+
 # Signal Design System — Complete Reference
 
 ## Foundation

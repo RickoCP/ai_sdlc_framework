@@ -1,3 +1,9 @@
+---
+inclusion: always
+name: "Layer 9 - Agent Orchestration"
+description: "Multi-agent orchestration: Role-Based Prompting, Sub-Agent Delegation, Hook Chains"
+---
+
 # Layer 9 — AI Agent Orchestration (Practical Implementation)
 
 ## Overview

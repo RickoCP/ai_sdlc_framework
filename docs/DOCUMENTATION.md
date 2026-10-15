@@ -282,40 +282,41 @@ Layer 14 [AUTOMATED]  Continuous Learning — bug capture + retro + ADR
 | `architecture-standards.md` | Clean Architecture + DDD + Awilix DI — acuan arsitektur WAJIB |
 | `test-writing-patterns.md` | Pattern testing per-layer dengan contoh TypeScript |
 | `project-memory.md` | Context Index + Current State untuk resume antar session |
-| `hooks-registry.md` | Definisi lengkap 9 hook files (JSON content, smart filtering, metrics) |
-
-### Layer Files (15 files)
-
-| File | Layer |
-|------|-------|
-| `layer-0-product-vision.md` | Product Vision |
-| `layer-1-requirement-intake.md` | Requirement Intake |
-| `layer-2-requirement-validation.md` | Requirement Validation |
-| `layer-3-spec-driven-development.md` | Spec-Driven Development |
-| `layer-4-design-system.md` | Design System |
-| `layer-5-ai-governance.md` | AI Governance |
-| `layer-6-ai-skills.md` | AI Engineering Skills |
-| `layer-7-team-extension.md` | Team Extension |
-| `layer-8-issue-driven-dev.md` | Issue-Driven Development |
-| `layer-9-agent-orchestration.md` | Agent Orchestration |
-| `layer-10-continuous-context.md` | Continuous Context |
-| `layer-11-ai-review.md` | AI Review |
-| `layer-12-quality-gates.md` | Quality Gates |
-| `layer-13-observability.md` | Observability |
-| `layer-14-continuous-learning.md` | Continuous Learning |
-
-### Operational Files (8 files)
-
-| File | Fungsi |
-|------|--------|
+| `hooks-generator.md` | Definisi lengkap 8 hook files (JSON content, smart filtering, metrics) |
+| `task-execution-flow.md` | Panduan hook compliance saat eksekusi spec tasks |
 | `git-workflow-automation.md` | Git init, commit convention, auto-push, branch strategy, MR |
-| `gitlab-cicd-setup.md` | Setup lengkap GitLab CI/CD |
 | `project-structure.md` | Folder structure, naming, quickstart |
-| `requirement-traceability.md` | PRD → Code → Test traceability |
-| `presentation-material.md` | Generate materi presentasi |
-| `tech-stack-profiles.md` | Adaptasi ke Go, Python (FastAPI) |
-| `fast-track-mode.md` | Fast Track, Quality Scorecard, Health Check |
-| `signal-design-system-complete.md` | Signal Design System (built-in option untuk UI) |
+| `layer-9-agent-orchestration.md` | Multi-agent orchestration: role-based prompting, sub-agent delegation |
+| `layer-10-continuous-context.md` | Context accumulation — artifact sebagai context untuk stage berikutnya |
+| `layer-11-ai-review.md` | AI sebagai reviewer untuk architecture, security, performance |
+| `layer-12-quality-gates.md` | GitLab CI/CD Pipeline untuk lint, typecheck, test, coverage |
+| `layer-13-observability.md` | Observability & Feedback Loop |
+| `layer-14-continuous-learning.md` | Continuous Learning System |
+
+### Layer Files — Auto Inclusion (9 files)
+
+| File | Layer | Inclusion |
+|------|-------|-----------|
+| `layer-0-product-vision.md` | Product Vision | auto |
+| `layer-1-requirement-intake.md` | Requirement Intake | auto |
+| `layer-2-requirement-validation.md` | Requirement Validation | auto |
+| `layer-3-spec-driven-development.md` | Spec-Driven Development | auto |
+| `layer-4-design-system.md` | Design System | auto |
+| `layer-5-ai-governance.md` | AI Governance | auto |
+| `layer-6-ai-skills.md` | AI Engineering Skills | auto |
+| `layer-7-team-extension.md` | Team Extension | auto |
+| `layer-8-issue-driven-dev.md` | Issue-Driven Development | auto |
+
+### Operational Files — Manual/Auto (6 files)
+
+| File | Fungsi | Inclusion |
+|------|--------|-----------|
+| `gitlab-cicd-setup.md` | Setup lengkap GitLab CI/CD | auto |
+| `requirement-traceability.md` | PRD → Code → Test traceability | auto |
+| `tech-stack-profiles.md` | Adaptasi ke Go, Python (FastAPI) | manual |
+| `fast-track-mode.md` | Fast Track, Quality Scorecard, Health Check | manual |
+| `presentation-material.md` | Generate materi presentasi | manual |
+| `signal-design-system-complete.md` | Signal Design System (built-in option untuk UI) | manual |
 
 ---
 
@@ -591,10 +592,12 @@ Prinsip framework (dependency rule, spec-first, quality gates) berlaku di semua 
 
 | Metric | Value |
 |--------|-------|
-| Version | 1.5.0 |
-| Total Steering Files | 27 |
+| Version | 1.5.1 |
+| Total Steering Files | 28 |
 | Automated Layers | 13/15 (9 fully + 4 partial) |
-| Always-Included Files | 4 |
+| Always-Included Files | 13 |
+| Auto-Inclusion Files | 11 |
+| Manual-Inclusion Files | 4 |
 | Kiro Hooks Defined | 9 |
 | Tech Stacks Supported | 3 (Next.js, Go, Python) |
 | Operating Modes | 4 (Enterprise, Solo, Fast Track, Zero Touch) |
